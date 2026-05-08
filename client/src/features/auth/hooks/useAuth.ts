@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { authService } from "../services/authService";
-import { setUser, logoutAction } from "../store/authSlice";
+import { setCredentials, logout as logoutAction } from "../store/authSlice";
 import { useNavigate } from "react-router-dom";
 import type { LoginRequest, RegisterUserRequest } from "../types/authTypes";
 
@@ -18,7 +18,7 @@ export const useAuth = () => {
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
 
-        dispatch(setUser(response.data.user));
+        dispatch(setCredentials(response.data.user));
 
         navigate("/dashboard");
       }
@@ -38,6 +38,7 @@ export const useAuth = () => {
 
   const logout = () => {
     dispatch(logoutAction());
+
     navigate("/login");
   };
 

@@ -153,6 +153,71 @@ namespace Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Permissions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933a1"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Görüntüleme yetkisi.",
+                            Name = "users.view"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933a2"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Ekleme yetkisi.",
+                            Name = "users.create"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933a3"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Düzenleme yetkisi.",
+                            Name = "users.edit"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933a4"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Silme yetkisi.",
+                            Name = "users.delete"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933b1"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Rolleri görme.",
+                            Name = "roles.view"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933b2"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Rol ekleme.",
+                            Name = "roles.create"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933b3"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Rol düzenleme.",
+                            Name = "roles.edit"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933b4"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Rol silme.",
+                            Name = "roles.delete"
+                        },
+                        new
+                        {
+                            Id = new Guid("f1a18277-3e1e-4058-b593-577e485933c1"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Logları görme.",
+                            Name = "activities.view"
+                        });
                 });
 
             modelBuilder.Entity("Api.Features.RolePermissions.RolePermission", b =>
@@ -184,6 +249,92 @@ namespace Api.Migrations
                         .IsUnique();
 
                     b.ToTable("RolePermissions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a1"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a2"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000003"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a3"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a4"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000005"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933b1"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000006"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933b2"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000007"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933b3"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000008"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933b4"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000009"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933c1"),
+                            RoleId = new Guid("d6088277-3e1e-4058-8593-577e4859339a")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000010"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a1"),
+                            RoleId = new Guid("c4188277-3e1e-4058-b593-577e4859339b")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000011"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a3"),
+                            RoleId = new Guid("c4188277-3e1e-4058-b593-577e4859339b")
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000012"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PermissionId = new Guid("f1a18277-3e1e-4058-b593-577e485933a1"),
+                            RoleId = new Guid("b1288277-3e1e-4058-b593-577e4859339c")
+                        });
                 });
 
             modelBuilder.Entity("Api.Features.Roles.Role", b =>
@@ -220,6 +371,32 @@ namespace Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d6088277-3e1e-4058-8593-577e4859339a"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Tüm sistem üzerinde tam yetki.",
+                            Label = "Sistem Yöneticisi",
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("c4188277-3e1e-4058-b593-577e4859339b"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "İçerik yönetimi ve kullanıcı görüntüleme yetkisi.",
+                            Label = "Editör",
+                            Name = "Editor"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1288277-3e1e-4058-b593-577e4859339c"),
+                            CreatedDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Sadece görüntüleme yetkisi olan kısıtlı rol.",
+                            Label = "Gözlemci",
+                            Name = "Viewer"
+                        });
                 });
 
             modelBuilder.Entity("Api.Features.UserRoles.UserRole", b =>

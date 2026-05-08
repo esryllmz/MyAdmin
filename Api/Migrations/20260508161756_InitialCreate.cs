@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Api.Migrations
 {
     /// <inheritdoc />
@@ -166,6 +168,51 @@ namespace Api.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Permissions",
+                columns: new[] { "Id", "CreatedDate", "Description", "Name", "UpdatedDate" },
+                values: new object[,]
+                {
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933a1"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Görüntüleme yetkisi.", "users.view", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933a2"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Ekleme yetkisi.", "users.create", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933a3"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Düzenleme yetkisi.", "users.edit", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933a4"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Silme yetkisi.", "users.delete", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933b1"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Rolleri görme.", "roles.view", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933b2"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Rol ekleme.", "roles.create", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933b3"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Rol düzenleme.", "roles.edit", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933b4"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Rol silme.", "roles.delete", null },
+                    { new Guid("f1a18277-3e1e-4058-b593-577e485933c1"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Logları görme.", "activities.view", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "CreatedDate", "Description", "Label", "Name", "UpdatedDate" },
+                values: new object[,]
+                {
+                    { new Guid("b1288277-3e1e-4058-b593-577e4859339c"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Sadece görüntüleme yetkisi olan kısıtlı rol.", "Gözlemci", "Viewer", null },
+                    { new Guid("c4188277-3e1e-4058-b593-577e4859339b"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "İçerik yönetimi ve kullanıcı görüntüleme yetkisi.", "Editör", "Editor", null },
+                    { new Guid("d6088277-3e1e-4058-8593-577e4859339a"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tüm sistem üzerinde tam yetki.", "Sistem Yöneticisi", "Admin", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "RolePermissions",
+                columns: new[] { "Id", "CreatedDate", "PermissionId", "RoleId", "UpdatedDate" },
+                values: new object[,]
+                {
+                    { new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a1"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a2"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000003"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a3"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a4"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000005"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933b1"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000006"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933b2"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000007"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933b3"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000008"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933b4"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000009"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933c1"), new Guid("d6088277-3e1e-4058-8593-577e4859339a"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000010"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a1"), new Guid("c4188277-3e1e-4058-b593-577e4859339b"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000011"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a3"), new Guid("c4188277-3e1e-4058-b593-577e4859339b"), null },
+                    { new Guid("00000000-0000-0000-0000-000000000012"), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new Guid("f1a18277-3e1e-4058-b593-577e485933a1"), new Guid("b1288277-3e1e-4058-b593-577e4859339c"), null }
                 });
 
             migrationBuilder.CreateIndex(

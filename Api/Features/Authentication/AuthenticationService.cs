@@ -92,7 +92,7 @@ public class AuthenticationService(
     User createdUser = _mapper.RegisterToEntity(request);
 
     var defaultRole = await _roleRepository.GetAsync(
-      r => r.Name == "User",
+      r => r.Name == "Viewer",
       cancellationToken: cancellationToken);
 
     if (defaultRole != null)
@@ -105,7 +105,7 @@ public class AuthenticationService(
     }
     else
     {
-      _logger.LogError("Sistem hatası: 'User' rolü veritabanında bulunamadı!");
+      _logger.LogError("Sistem hatası: 'Viewer' rolü veritabanında bulunamadı!");
 
       throw new BusinessException("Sistem yapılandırma hatası: Varsayılan rol bulunamadı.");
     }
