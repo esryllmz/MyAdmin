@@ -484,11 +484,6 @@ $RECYCLE.BIN/
 # Local development settings
 **/appsettings.Development.json
 
-# SQLite files
-*.db
-*.db-shm
-*.db-wal
-
 # Serilog Logs
 Logs/
 log-*.txt

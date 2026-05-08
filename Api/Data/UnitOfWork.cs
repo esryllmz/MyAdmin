@@ -19,5 +19,4 @@ public class UnitOfWork(BaseDbContext _context) : IUnitOfWork
   {
     return await _context.Database.BeginTransactionAsync(cancellationToken);
   }
-
 }

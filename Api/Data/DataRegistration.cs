@@ -8,7 +8,12 @@ public static class DataRegistration
 {
   public static IServiceCollection AddDataDependencies(this IServiceCollection services, IConfiguration configuration)
   {
-    services.AddDbContext<BaseDbContext>(options => options.UseSqlite(configuration.GetConnectionString("SqliteConnection")));
+    var connectionString = configuration.GetConnectionString("SqlConnection");
+
+    services.AddDbContext<BaseDbContext>(options =>
+    {
+      options.UseSqlServer(connectionString);
+    });
 
     services.AddScoped<IUnitOfWork, UnitOfWork>();
 

@@ -23,7 +23,7 @@ export default {
         "outline-variant": "#c3c6d7",
       },
       fontFamily: {
-        // Tasarım sisteminde belirtilen Inter fontu[cite: 3]
+        // Tasarım sisteminde belirtilen Inter fontu
         sans: ["Inter", "sans-serif"],
         headline: ["Inter", "sans-serif"],
         body: ["Inter", "sans-serif"],
@@ -32,10 +32,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "0.75rem", // Tasarım sistemindeki kart köşe yuvarlaklığı[cite: 3]
+        xl: "0.75rem", // Tasarım sistemindeki kart köşe yuvarlaklığı
       },
       letterSpacing: {
-        // Editoryal başlıklar için negatif letter-spacing[cite: 3]
+        // Editoryal başlıklar için negatif letter-spacing
         tight: "-0.02em",
       }
     },

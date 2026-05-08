@@ -17,7 +17,7 @@ public class UserBusinessRules(
 
     if (user == null)
     {
-      _logger.LogWarning("Kullanıcı bulunamadı. Aranan ID: {UserId}", id);
+      _logger.LogWarning("Kullanıcı bulunamadı. ID: {UserId}", id);
 
       throw new NotFoundException($"{id} numaralı kullanıcı bulunamadı.");
     }
@@ -43,7 +43,7 @@ public class UserBusinessRules(
 
     if (exists)
     {
-      _logger.LogWarning("E-posta adresi zaten kullanımda: {Email}, Kullanıcı ID: {UserId}", email, id ?? Guid.Empty);
+      _logger.LogWarning("E-posta zaten kullanımda: {Email}", email);
 
       throw new BusinessException("Bu eposta adresi zaten kullanımda.");
     }
@@ -55,7 +55,7 @@ public class UserBusinessRules(
 
     if (exists)
     {
-      _logger.LogWarning("Kullanıcı adı zaten alınmış: {Username}, Kullanıcı ID: {UserId}", username, id ?? Guid.Empty);
+      _logger.LogWarning("Kullanıcı adı alınmış: {Username}", username);
 
       throw new BusinessException("Bu kullanıcı adı zaten alınmış.");
     }

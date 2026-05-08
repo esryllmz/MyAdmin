@@ -13,8 +13,10 @@ export const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: (response) => {
+
       if (response.success && response.data) {
         localStorage.setItem("accessToken", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
 
         dispatch(setUser(response.data.user));
 
@@ -27,6 +29,7 @@ export const useAuth = () => {
   const registerMutation = useMutation({
     mutationFn: (data: RegisterUserRequest) => authService.register(data),
     onSuccess: (response) => {
+
       if (response.success) {
         navigate("/login");
       }

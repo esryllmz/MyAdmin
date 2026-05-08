@@ -29,9 +29,12 @@ export const apiClient = async <T>(
     let response = await fetch(`${BASE_URL}${endpoint}`, config);
 
     if (response.status === 401 && !endpoint.includes("/authentication/refresh-token")) {
+      const refreshToken = localStorage.getItem("refreshToken");
+
       const refreshResponse = await fetch(`${BASE_URL}/authentication/refresh-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(refreshToken),
         credentials: "include",
       });
 
@@ -40,12 +43,13 @@ export const apiClient = async <T>(
 
         if (refreshResult.data) {
           localStorage.setItem("accessToken", refreshResult.data.accessToken);
+          localStorage.setItem("refreshToken", refreshResult.data.refreshToken);
           headers["Authorization"] = `Bearer ${refreshResult.data.accessToken}`;
           response = await fetch(`${BASE_URL}${endpoint}`, { ...config, headers });
         }
       } else {
         handleLogout();
-        throw new Error("Oturum süresi doldu, lütfen tekrar giriş yapın.");
+        throw new Error("Oturum süresi doldu.");
       }
     }
 
