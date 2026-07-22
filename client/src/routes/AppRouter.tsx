@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
+import ForgotPasswordPage from '@/features/auth/pages/ForgotPasswordPage';
 import ProtectedRoute from './ProtectedRoute';
 import LandingPage from '../features/landing/pages/LandingPage';
 import DashboardPage from '@/features/dashboard/pages/DashboardPage';
@@ -15,6 +16,8 @@ export const AppRouter = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      {/* Aşama 3 Düzeltmesi: Forgot Password route eklendi */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       <Route
         element={
