@@ -4,6 +4,24 @@ import type { TokenResponseDto } from "@/features/auth/types/authTypes";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5029/api";
 
+// Refresh Token Race Condition Mekanizması (Aşama 2 Düzeltmesi)
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token!);
+    }
+  });
+  failedQueue = [];
+};
+
 export const apiClient = async <T>(
   endpoint: string,
   options: RequestInit = {}
@@ -27,68 +45,71 @@ export const apiClient = async <T>(
   try {
     let response = await fetch(`${BASE_URL}${endpoint}`, config);
 
-    // --- 401 & Refresh Token Yönetimi ---
+    // --- 401 & Refresh Token Yönetimi (Race Condition Korumalı) ---
     if (response.status === 401 && !endpoint.includes("/authentication/refresh-token")) {
       const refreshToken = localStorage.getItem("refreshToken");
 
-      const refreshResponse = await fetch(`${BASE_URL}/authentication/refresh-token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(refreshToken),
-        credentials: "include",
-      });
+      if (isRefreshing) {
+        // Zaten token yenileniyorsa, kuyruğa al
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((newToken) => {
+          const newHeaders = {
+            ...config.headers,
+            "Authorization": `Bearer ${newToken}`,
+          };
+          return fetch(`${BASE_URL}${endpoint}`, { ...config, headers: newHeaders })
+            .then(async (res) => {
+              const text = await res.text();
+              return parseResponse<T>(text, res.status);
+            });
+        }).catch((err) => {
+          handleLogout();
+          throw err;
+        });
+      }
 
-      if (refreshResponse.ok) {
-        // Güvenli parse: Refresh token yanıtı da boş gelebilir
-        const refreshText = await refreshResponse.text();
-        const refreshResult: ApiResponse<TokenResponseDto> = refreshText ? JSON.parse(refreshText) : {};
+      isRefreshing = true;
 
-        if (refreshResult.data) {
-          localStorage.setItem("accessToken", refreshResult.data.accessToken);
-          localStorage.setItem("refreshToken", refreshResult.data.refreshToken);
-          headers["Authorization"] = `Bearer ${refreshResult.data.accessToken}`;
-          response = await fetch(`${BASE_URL}${endpoint}`, { ...config, headers });
+      try {
+        const refreshResponse = await fetch(`${BASE_URL}/authentication/refresh-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(refreshToken),
+          credentials: "include",
+        });
+
+        if (refreshResponse.ok) {
+          const refreshText = await refreshResponse.text();
+          const refreshResult: ApiResponse<TokenResponseDto> = refreshText ? JSON.parse(refreshText) : {};
+
+          if (refreshResult.data) {
+            localStorage.setItem("accessToken", refreshResult.data.accessToken);
+            localStorage.setItem("refreshToken", refreshResult.data.refreshToken);
+            
+            // Kuyruktaki tüm istekleri işle
+            processQueue(null, refreshResult.data.accessToken);
+
+            // Orijinal isteği yeni token ile tekrar yap
+            const newHeaders = {
+              ...config.headers,
+              "Authorization": `Bearer ${refreshResult.data.accessToken}`,
+            };
+            response = await fetch(`${BASE_URL}${endpoint}`, { ...config, headers: newHeaders });
+          }
+        } else {
+          processQueue(new Error("Oturum süresi doldu."), null);
+          handleLogout();
+          throw new Error("Oturum süresi doldu.");
         }
-      } else {
-        handleLogout();
-        throw new Error("Oturum süresi doldu.");
+      } finally {
+        isRefreshing = false;
       }
     }
 
     // --- Güvenli Yanıt İşleme ---
     const responseText = await response.text();
-    let result: ApiResponse<T>;
-
-    try {
-      result = responseText
-        ? JSON.parse(responseText)
-        : {
-          success: response.ok,
-          message: response.ok ? "" : "Sunucudan içerik dönmedi.",
-          data: null as T,
-          statusCode: response.status
-        };
-    } catch {
-      result = {
-        success: false,
-        message: "Sunucu yanıtı okunamadı (Geçersiz format).",
-        data: null as T,
-        statusCode: response.status
-      };
-    }
-
-    // --- Hata ve Bildirim Yönetimi ---
-    if (!response.ok) {
-      handleApiError(result);
-
-      throw result;
-    }
-
-    if (options.method && options.method !== "GET" && result.message) {
-      toast.success(result.message);
-    }
-
-    return result;
+    return parseResponse<T>(responseText, response.status);
 
   } catch (error: unknown) {
     const isApiResponse = (err: unknown): err is ApiResponse<T> => {
@@ -100,24 +121,52 @@ export const apiClient = async <T>(
       );
     };
 
-    // Eğer fırlatılan hata zaten bizim ApiResponse formatımızdaysa throw result
     if (isApiResponse(error)) {
-
       if (!error.success) {
         throw error;
       }
     }
 
-    // Beklenmedik ağ hataları veya manuel Errorlar
     const errorMessage = error instanceof Error ? error.message : "Sunucuya bağlanılamadı.";
     toast.error(errorMessage);
     throw error;
   }
 };
 
+const parseResponse = <T>(responseText: string, statusCode: number): ApiResponse<T> => {
+  let result: ApiResponse<T>;
+
+  try {
+    result = responseText
+      ? JSON.parse(responseText)
+      : {
+          success: statusCode >= 200 && statusCode < 300,
+          message: statusCode >= 200 && statusCode < 300 ? "" : "Sunucudan içerik dönmedi.",
+          data: null as T,
+          statusCode: statusCode
+        };
+  } catch {
+    result = {
+      success: false,
+      message: "Sunucu yanıtı okunamadı (Geçersiz format).",
+      data: null as T,
+      statusCode: statusCode
+    };
+  }
+
+  // Hata durumunda toast göster
+  if (!result.success && statusCode >= 400) {
+    handleApiError(result);
+    throw result;
+  }
+
+  return result;
+};
+
 const handleLogout = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
   window.location.href = "/login";
 };
 

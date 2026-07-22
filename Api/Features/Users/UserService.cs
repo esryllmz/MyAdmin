@@ -66,7 +66,7 @@ public class UserService(
         Success = false,
         Message = "Kullanıcı bulunamadı",
         Data = null,
-        StatusCode = 200
+        StatusCode = 404
       };
     }
 
@@ -127,7 +127,7 @@ public class UserService(
     if (!string.IsNullOrEmpty(imagePathToDelete))
     {
       _logger.LogInformation("Kullanıcı silindiği için profil fotoğrafı temizleniyor. Dosya: {ImagePath}", imagePathToDelete);
-      FileHelper.DeleteImageFromDisk(imagePathToDelete);
+      FileHelper.DeleteImageFromDisk(imagePathToDelete, _logger);
     }
 
     _logger.LogInformation("Kullanıcı başarıyla silindi. ID: {UserId}", id);
@@ -184,7 +184,7 @@ public class UserService(
       existingUser.ProfileImageUrl,
       "profiles",
       request.Username,
-      cancellationToken);
+      cancellationToken, _logger);
 
     _userRepository.Update(existingUser);
     await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,4 @@
-﻿using Api.Core.Exceptions;
+using Api.Core.Exceptions;
 using System.Text.RegularExpressions;
 
 namespace Api.Core.Helpers;
@@ -48,7 +48,8 @@ public static class FileHelper
     return $"/images/{subFolder}/{fileName}";
   }
 
-  public static void DeleteImageFromDisk(string? relativePath)
+  // Aşama 2 Düzeltmesi: ILogger parametresi eklendi ve silent catch düzeltildi
+  public static void DeleteImageFromDisk(string? relativePath, ILogger? logger = null)
   {
     if (string.IsNullOrEmpty(relativePath))
     {
@@ -64,9 +65,11 @@ public static class FileHelper
         File.Delete(fullPath);
       }
     }
-    catch
+    catch (Exception ex)
     {
-      // We catch but don't throw here. If a file deletion fails, we don't want to crash the whole update process.
+      // Hata loglanıyor, sessiz catch değil
+      logger?.LogError(ex, "Görsel diskten silinirken bir hata oluştu. Dosya yolu: {ImagePath}", fullPath);
+      // Hatayı atmıyoruz çünkü profil güncellemesi başarılı olsa da resim silinmese, işlem başarısız görülmesini istemiyoruz
     }
   }
 
@@ -75,7 +78,8 @@ public static class FileHelper
     string? oldRelativePath,
     string subFolder,
     string name,
-    CancellationToken cancellationToken)
+    CancellationToken cancellationToken,
+    ILogger? logger = null)
   {
     if (file == null || file.Length == 0)
     {
@@ -86,7 +90,7 @@ public static class FileHelper
 
     string newPath = await SaveImageToDisk(file, subFolder, name, cancellationToken);
 
-    DeleteImageFromDisk(oldRelativePath);
+    DeleteImageFromDisk(oldRelativePath, logger);
 
     return newPath;
   }
