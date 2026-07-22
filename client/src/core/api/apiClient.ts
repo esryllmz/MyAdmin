@@ -4,7 +4,6 @@ import type { TokenResponseDto } from "@/features/auth/types/authTypes";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5029/api";
 
-// Refresh Token Race Condition Mekanizması (Aşama 2 Düzeltmesi)
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -109,7 +108,7 @@ export const apiClient = async <T>(
 
     // --- Güvenli Yanıt İşleme ---
     const responseText = await response.text();
-    return parseResponse<T>(responseText, response.status);
+    return parseResponse<T>(responseText, response.status, options.method as string);
 
   } catch (error: unknown) {
     const isApiResponse = (err: unknown): err is ApiResponse<T> => {
@@ -133,7 +132,7 @@ export const apiClient = async <T>(
   }
 };
 
-const parseResponse = <T>(responseText: string, statusCode: number): ApiResponse<T> => {
+const parseResponse = <T>(responseText: string, statusCode: number, method?: string): ApiResponse<T> => {
   let result: ApiResponse<T>;
 
   try {
@@ -154,10 +153,13 @@ const parseResponse = <T>(responseText: string, statusCode: number): ApiResponse
     };
   }
 
-  // Hata durumunda toast göster
   if (!result.success && statusCode >= 400) {
     handleApiError(result);
     throw result;
+  }
+
+  if (method && method !== "GET" && result.message) {
+    toast.success(result.message);
   }
 
   return result;

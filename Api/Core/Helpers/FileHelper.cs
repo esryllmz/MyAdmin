@@ -48,7 +48,6 @@ public static class FileHelper
     return $"/images/{subFolder}/{fileName}";
   }
 
-  // Aşama 2 Düzeltmesi: ILogger parametresi eklendi ve silent catch düzeltildi
   public static void DeleteImageFromDisk(string? relativePath, ILogger? logger = null)
   {
     if (string.IsNullOrEmpty(relativePath))
@@ -67,9 +66,7 @@ public static class FileHelper
     }
     catch (Exception ex)
     {
-      // Hata loglanıyor, sessiz catch değil
       logger?.LogError(ex, "Görsel diskten silinirken bir hata oluştu. Dosya yolu: {ImagePath}", fullPath);
-      // Hatayı atmıyoruz çünkü profil güncellemesi başarılı olsa da resim silinmese, işlem başarısız görülmesini istemiyoruz
     }
   }
 

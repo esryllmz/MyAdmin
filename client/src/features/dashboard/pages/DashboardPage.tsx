@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { StatCard } from '../components/StatCard';
 import { ActivityTable } from '../components/ActivityTable';
 import { InboxSummary } from '../components/InboxSummary';
@@ -71,7 +72,7 @@ const DashboardPage = () => {
       exportToCsv(exportData, 'dashboard-stats');
     } catch (error) {
       console.error('Export hatası:', error);
-      alert('Dışa aktarma sırasında hata oluştu');
+      toast.error('Dışa aktarma sırasında hata oluştu');
     } finally {
       setIsExporting(false);
     }

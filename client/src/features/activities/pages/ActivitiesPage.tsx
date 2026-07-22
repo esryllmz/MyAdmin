@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { ActivityFilter } from '../components/ActivityFilter';
 import { ActivityTable } from '../components/ActivityTable';
 import { ActivityDetail } from '../components/ActivityDetail';
@@ -37,13 +38,13 @@ const ActivitiesPage = () => {
     try {
       setIsExporting(true);
       if (!activities || activities.length === 0) {
-        alert('Dışa aktarılacak aktivite yok');
+        toast.warning('Dışa aktarılacak aktivite yok');
         return;
       }
       exportToCsv(activities, 'activities');
     } catch (error) {
       console.error('CSV export hatası:', error);
-      alert('Dışa aktarma sırasında hata oluştu');
+      toast.error('Dışa aktarma sırasında hata oluştu');
     } finally {
       setIsExporting(false);
     }

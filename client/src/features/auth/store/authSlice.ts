@@ -2,11 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { UserResponseDto } from "@/features/users/types/userTypes";
 
-// Aşama 2 Düzeltmesi: isLoading alanı eklendi
 interface AuthState {
   user: UserResponseDto | null;
   isAuthenticated: boolean;
-  isLoading: boolean; // Hydration (localStorage'dan yükleme) tamamlanıp tamamlanmadığını takip eder
+  isLoading: boolean;
 }
 
 const storedUser = localStorage.getItem("user");
@@ -15,7 +14,7 @@ const token = localStorage.getItem("accessToken");
 const initialState: AuthState = {
   user: storedUser ? JSON.parse(storedUser) : null,
   isAuthenticated: !!token,
-  isLoading: true, // İlk yüklemede true, ProtectedRoute sayfayı bekletir
+  isLoading: false,
 };
 
 const authSlice = createSlice({
@@ -25,7 +24,7 @@ const authSlice = createSlice({
     setCredentials: (state, action: PayloadAction<UserResponseDto>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
-      state.isLoading = false; // Yükleme tamamlandı
+      state.isLoading = false;
       localStorage.setItem("user", JSON.stringify(action.payload));
     },
     updateUserInfo: (state, action: PayloadAction<{ username: string; profileImageUrl?: string }>) => {
@@ -46,12 +45,8 @@ const authSlice = createSlice({
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
     },
-    // Aşama 2 Düzeltmesi: Hydration tamamlandığında çağrılacak action
-    initializeAuth: (state) => {
-      state.isLoading = false;
-    },
   },
 });
 
-export const { setCredentials, logout, updateUserInfo, initializeAuth } = authSlice.actions;
+export const { setCredentials, logout, updateUserInfo } = authSlice.actions;
 export default authSlice.reducer;
