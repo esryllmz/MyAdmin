@@ -1,9 +1,10 @@
-﻿using Api.Core.Controllers;
+using Api.Core.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Features.Roles;
 
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 [ApiController]
 public class RolesController(IRoleService _roleService) : CustomBaseController

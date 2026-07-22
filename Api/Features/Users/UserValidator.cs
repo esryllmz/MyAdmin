@@ -1,4 +1,4 @@
-﻿using Api.Features.Authentication;
+using Api.Features.Authentication;
 using FluentValidation;
 
 namespace Api.Features.Users;
@@ -36,7 +36,7 @@ public class RegisterUserRequestValidator : AbstractValidator<RegisterUserReques
       .Matches(@"[A-Z]+").WithMessage("Şifre en az bir büyük harf içermelidir.")
       .Matches(@"[a-z]+").WithMessage("Şifre en az bir küçük harf içermelidir.")
       .Matches(@"[0-9]+").WithMessage("Şifre en az bir rakam içermelidir.")
-      .Matches(@"[\!\?\*\.]*").WithMessage("Şifre özel karakter içerebilir (!, ?, *, .)");
+      .Matches(@"[\!\?\*\.]+").WithMessage("Şifre en az bir özel karakter (!, ?, *, .) içermelidir.");
 
     RuleFor(x => x.ProfileImageUrl)
       .MaximumLength(500).WithMessage("Profil resmi yolu 500 karakterden fazla olamaz.");
@@ -78,7 +78,8 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
       .NotEqual(x => x.CurrentPassword).WithMessage("Yeni şifre mevcut şifre ile aynı olamaz.")
       .Matches(@"[A-Z]+").WithMessage("Şifre en az bir büyük harf içermelidir.")
       .Matches(@"[a-z]+").WithMessage("Şifre en az bir küçük harf içermelidir.")
-      .Matches(@"[0-9]+").WithMessage("Şifre en az bir rakam içermelidir.");
+      .Matches(@"[0-9]+").WithMessage("Şifre en az bir rakam içermelidir.")
+      .Matches(@"[\!\?\*\.]+").WithMessage("Şifre en az bir özel karakter (!, ?, *, .) içermelidir.");
 
     RuleFor(x => x.ConfirmNewPassword)
       .NotEmpty().WithMessage("Şifre tekrarı boş olamaz.")

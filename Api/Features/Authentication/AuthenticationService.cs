@@ -51,6 +51,8 @@ public class AuthenticationService(
       cancellationToken: cancellationToken);
 
     _authBusinessRules.UserCredentialsMustMatch(user, request.Password);
+    // Aşama 1 Düzeltmesi: Hesap aktif mi kontrolü
+    _userBusinessRules.UserAccountMustBeActive(user!);
 
     user!.RefreshToken = GenerateRefreshToken();
     user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(_options.RefreshTokenExpiration);
