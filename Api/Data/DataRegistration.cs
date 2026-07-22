@@ -10,6 +10,13 @@ public static class DataRegistration
   {
     var connectionString = configuration.GetConnectionString("SqlConnection");
 
+    if (string.IsNullOrWhiteSpace(connectionString) ||
+        connectionString.Contains("YOUR_SERVER", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains("YOUR_DATABASE", StringComparison.OrdinalIgnoreCase))
+    {
+      throw new InvalidOperationException("ConnectionStrings:SqlConnection yapılandırması eksik veya placeholder değer içeriyor.");
+    }
+
     services.AddDbContext<BaseDbContext>(options =>
     {
       options.UseSqlServer(connectionString);

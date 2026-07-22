@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { UserResponseDto } from "@/features/users/types/userTypes";
 
-interface AuthState {
+export interface AuthState {
   user: UserResponseDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;

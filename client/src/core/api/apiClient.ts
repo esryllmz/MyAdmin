@@ -26,13 +26,15 @@ export const apiClient = async <T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   const token = localStorage.getItem("accessToken");
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
+  const isDemoMode = localStorage.getItem("demoMode") === "true";
+  const headers = new Headers(options.headers);
+
+  if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const config: RequestInit = {
@@ -45,7 +47,7 @@ export const apiClient = async <T>(
     let response = await fetch(`${BASE_URL}${endpoint}`, config);
 
     // --- 401 & Refresh Token Yönetimi (Race Condition Korumalı) ---
-    if (response.status === 401 && !endpoint.includes("/authentication/refresh-token")) {
+    if (response.status === 401 && !isDemoMode && !endpoint.includes("/authentication/refresh-token")) {
       const refreshToken = localStorage.getItem("refreshToken");
 
       if (isRefreshing) {
@@ -169,6 +171,7 @@ const handleLogout = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
+  localStorage.removeItem("demoMode");
   window.location.href = "/login";
 };
 

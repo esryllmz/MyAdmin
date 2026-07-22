@@ -1,9 +1,10 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { StatCard } from '../components/StatCard';
 import { ActivityTable } from '../components/ActivityTable';
 import { InboxSummary } from '../components/InboxSummary';
+import { UserRegistrationChart, ActivityDistributionChart } from '../components/Charts';
 import { exportToCsv } from '@/core/utils/exportUtils';
 import { apiClient } from '@/core/api/apiClient';
 
@@ -70,6 +71,7 @@ const DashboardPage = () => {
         },
       ];
       exportToCsv(exportData, 'dashboard-stats');
+      toast.success('Dashboard verisi CSV olarak dışa aktarıldı');
     } catch (error) {
       console.error('Export hatası:', error);
       toast.error('Dışa aktarma sırasında hata oluştu');
@@ -79,21 +81,21 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full">
+    <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full bg-surface dark:bg-dark-surface transition-colors">
       {/* Header Section */}
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-headline font-bold tracking-tight mb-1">
+          <h2 className="text-3xl font-headline font-bold tracking-tight mb-1 text-on-surface dark:text-dark-on-surface">
             System Overview
           </h2>
-          <p className="text-sm text-on-surface-variant">
+          <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
             Real-time metrics and activity feed from the editorial platform.
           </p>
         </div>
         <button
           onClick={handleExport}
           disabled={isExporting || isLoading}
-          className="bg-surface-container-lowest border border-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-low transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-surface-container-lowest dark:bg-dark-surface-container-low border border-outline-variant/20 dark:border-dark-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium text-on-surface dark:text-dark-on-surface hover:bg-surface-container-low dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-[18px]">
             {isExporting ? 'hourglass_empty' : 'download'}
@@ -102,7 +104,7 @@ const DashboardPage = () => {
         </button>
       </div>
 
-      {/* Bento Grid: Stats - Aşama 3 Düzeltmesi: Gerçek veriler */}
+      {/* Bento Grid: Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Users"
@@ -132,6 +134,12 @@ const DashboardPage = () => {
           icon="warning"
           color="error"
         />
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <UserRegistrationChart />
+        <ActivityDistributionChart />
       </div>
 
       {/* Main Content Area */}

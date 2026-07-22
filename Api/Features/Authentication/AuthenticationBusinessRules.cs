@@ -10,11 +10,14 @@ public class AuthenticationBusinessRules(ILogger<AuthenticationBusinessRules> _l
     User? user,
     string password)
   {
-    if (user == null || !HashingHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordKey))
+    if (user == null ||
+        string.IsNullOrWhiteSpace(user.PasswordHash) ||
+        string.IsNullOrWhiteSpace(user.PasswordKey) ||
+        !HashingHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordKey))
     {
       _logger.LogWarning("Hatalı giriş denemesi: {Email}", user?.Email);
 
-      throw new BusinessException("Eposta veya şifre hatalı.");
+      throw new AuthorizationException("E-posta veya şifre hatalı.");
     }
   }
 

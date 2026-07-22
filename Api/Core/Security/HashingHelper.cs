@@ -15,7 +15,25 @@ public static class HashingHelper
 
   public static bool VerifyPasswordHash(string password, string passwordHash, string passwordKey)
   {
-    using var hmac = new HMACSHA512(Convert.FromBase64String(passwordKey));
+    if (string.IsNullOrWhiteSpace(password) ||
+        string.IsNullOrWhiteSpace(passwordHash) ||
+        string.IsNullOrWhiteSpace(passwordKey))
+    {
+      return false;
+    }
+
+    byte[] key;
+
+    try
+    {
+      key = Convert.FromBase64String(passwordKey);
+    }
+    catch (FormatException)
+    {
+      return false;
+    }
+
+    using var hmac = new HMACSHA512(key);
 
     var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 

@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { Mail, Lock, ArrowRight, Hexagon, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import React, { useState } from "react";
+import { ArrowRight, Loader2, Lock, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
+import { PublicLayout } from "@/layouts/PublicLayout";
+import { useAuth } from "../hooks/useAuth";
 
 const LoginPage = () => {
   const { login, isLoginLoading } = useAuth();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = (e: React.SyntheticEvent) => {
@@ -18,92 +19,82 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="bg-surface text-on-surface min-h-screen flex flex-col antialiased font-body">
-      {/* Header */}
-      <header className="w-full py-6 px-6 flex justify-between items-center fixed top-0 z-50">
-        <div className="text-2xl font-black tracking-tighter text-on-surface flex items-center gap-2">
-          <Hexagon className="text-primary fill-primary w-8 h-8" />
-          MyAdmin
+    <PublicLayout mainClassName="flex-1 flex items-center justify-center p-6">
+      <div className="w-full max-w-md">
+        <div className="mb-10 text-center">
+          <h1 className="mb-2 text-4xl font-bold tracking-tight text-neutral-950 dark:text-white" style={{ letterSpacing: "-0.02em" }}>
+            Welcome Back
+          </h1>
+          <p className="text-base text-neutral-600 dark:text-zinc-400">Sign in to your Precision Architecture workspace.</p>
         </div>
-        <Link to="/" className="text-sm font-medium text-primary hover:text-primary-container transition-colors">
-          Return to Homepage
-        </Link>
-      </header>
 
-      <main className="flex-grow flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold tracking-tight text-on-surface mb-2" style={{ letterSpacing: '-0.02em' }}>
-              Welcome Back
-            </h1>
-            <p className="text-on-surface-variant text-base">Sign in to your Precision Architecture workspace.</p>
-          </div>
-
-          {/* Login Card */}
-          <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.06)] border border-outline-variant/20">
-            <form className="space-y-6" onSubmit={handleSubmit}>
-
-              {/* Email Input */}
-              <div>
-                <label className="block text-sm font-medium text-on-surface-variant mb-1.5" htmlFor="email">Email Address</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
-                    <Mail size={20} />
-                  </div>
-                  <input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2.5 bg-surface border border-outline-variant/20 rounded-md text-on-surface placeholder-outline focus:ring-2 focus:ring-primary transition-all sm:text-sm"
-                    placeholder="name@company.com"
-                    required
-                  />
+        <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.06)] dark:border-zinc-800 dark:bg-zinc-900/80">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-600 dark:text-zinc-400" htmlFor="email">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400 dark:text-zinc-500">
+                  <Mail size={20} />
                 </div>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border border-neutral-200 bg-white py-2.5 pl-10 pr-3 text-neutral-950 placeholder-neutral-400 transition-all focus:ring-2 focus:ring-neutral-400 dark:border-zinc-800 dark:bg-black dark:text-white sm:text-sm"
+                  placeholder="name@company.com"
+                  required
+                />
               </div>
+            </div>
 
-              {/* Password Input */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-medium text-on-surface-variant" htmlFor="password">Password</label>
-                  <Link to="/forgot-password" className="text-xs font-medium text-primary hover:text-primary-container transition-colors">Forgot Password?</Link>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="block text-sm font-medium text-neutral-600 dark:text-zinc-400" htmlFor="password">
+                  Password
+                </label>
+                <Link to="/forgot-password" className="text-xs font-medium text-neutral-700 transition-colors hover:text-black dark:text-zinc-300 dark:hover:text-white">
+                  Forgot Password?
+                </Link>
+              </div>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400 dark:text-zinc-500">
+                  <Lock size={20} />
                 </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
-                    <Lock size={20} />
-                  </div>
-                  <input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2.5 bg-surface border border-outline-variant/20 rounded-md text-on-surface placeholder-outline focus:ring-2 focus:ring-primary transition-all sm:text-sm"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
+                <input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border border-neutral-200 bg-white py-2.5 pl-10 pr-3 text-neutral-950 placeholder-neutral-400 transition-all focus:ring-2 focus:ring-neutral-400 dark:border-zinc-800 dark:bg-black dark:text-white sm:text-sm"
+                  placeholder="********"
+                  required
+                />
               </div>
+            </div>
 
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isLoginLoading}
-                  className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-primary hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isLoginLoading ? <Loader2 className="animate-spin" size={20} /> : <>Sign In <ArrowRight className="ml-2" size={16} /></>}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-sm text-on-surface-variant">
-              Don't have an account? <Link to="/register" className="font-semibold text-primary hover:text-primary-container transition-colors">Register</Link>
-            </p>
-          </div>
+            <button
+              type="submit"
+              disabled={isLoginLoading}
+              className="flex w-full items-center justify-center rounded-md border border-transparent bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+            >
+              {isLoginLoading ? <Loader2 className="animate-spin" size={20} /> : <>Sign In <ArrowRight className="ml-2" size={16} /></>}
+            </button>
+          </form>
         </div>
-      </main>
-    </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-neutral-600 dark:text-zinc-400">
+            Don't have an account?{" "}
+            <Link to="/register" className="font-semibold text-neutral-950 transition-colors hover:underline dark:text-white">
+              Register
+            </Link>
+          </p>
+        </div>
+      </div>
+    </PublicLayout>
   );
 };
 

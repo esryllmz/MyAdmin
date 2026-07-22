@@ -45,7 +45,7 @@ public class UserBusinessRules(
     {
       _logger.LogWarning("E-posta zaten kullanımda: {Email}", email);
 
-      throw new BusinessException("Bu eposta adresi zaten kullanımda.");
+      throw new ConflictException("Bu eposta adresi zaten kullanımda.");
     }
   }
 
@@ -57,7 +57,7 @@ public class UserBusinessRules(
     {
       _logger.LogWarning("Kullanıcı adı alınmış: {Username}", username);
 
-      throw new BusinessException("Bu kullanıcı adı zaten alınmış.");
+      throw new ConflictException("Bu kullanıcı adı zaten alınmış.");
     }
   }
 

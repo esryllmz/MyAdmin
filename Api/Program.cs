@@ -76,6 +76,15 @@ builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("Token
 
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>() ?? throw new InvalidOperationException("TokenOptions bölümü yapılandırma dosyasında appsettings bulunamadı.");
 
+if (string.IsNullOrWhiteSpace(tokenOptions.Issuer) ||
+    string.IsNullOrWhiteSpace(tokenOptions.Audience) ||
+    string.IsNullOrWhiteSpace(tokenOptions.SecurityKey) ||
+    tokenOptions.SecurityKey.Contains("YOUR_SECRET", StringComparison.OrdinalIgnoreCase) ||
+    Encoding.UTF8.GetByteCount(tokenOptions.SecurityKey) <= 64)
+{
+  throw new InvalidOperationException("TokenOptions yapılandırması eksik veya HMAC-SHA512 için yeterli uzunlukta JWT imzalama anahtarı içermiyor.");
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(options =>
   {
