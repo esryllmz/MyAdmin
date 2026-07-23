@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/core/store/store';
 import { ThemeToggle } from '@/core/components/ThemeToggle';
+import { NotificationCenter } from '@/features/notifications/components/NotificationCenter';
 
 export const TopBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,10 +45,7 @@ export const TopBar = () => {
         <ThemeToggle />
 
         {/* Notifications */}
-        <button className="text-on-surface-variant dark:text-dark-on-surface-variant hover:text-primary dark:hover:text-dark-primary transition-all relative p-2 rounded-full hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high">
-          <span className="material-symbols-outlined">notifications</span>
-          <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface dark:border-dark-surface"></span>
-        </button>
+        <NotificationCenter />
 
         {/* Profile Dropdown Container */}
         <div className="relative" ref={menuRef}>

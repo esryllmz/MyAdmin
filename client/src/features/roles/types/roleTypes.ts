@@ -1,8 +1,6 @@
-export interface PermissionResponseDto {
-  id: string;
-  name: string;
-  label: string | null;
-}
+import type { PermissionResponseDto } from "@/features/permissions/types/permissionTypes";
+
+export type { PermissionResponseDto };
 
 export interface RoleResponseDto {
   id: string;

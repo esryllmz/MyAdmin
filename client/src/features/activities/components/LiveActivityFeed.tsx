@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Power, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import { formatRelativeTime } from "@/core/utils/formatRelativeTime";
 import type { RootState } from "@/core/store/store";
 import type { ActivityEventType } from "../store/activityFeedSlice";
 
@@ -17,16 +18,6 @@ const EVENT_COLORS: Record<ActivityEventType, string> = {
   "status-toggle": "text-warning bg-warning/10",
   "user-delete": "text-error bg-error/10",
   "demo-role-switch": "text-info bg-info/10",
-};
-
-const formatRelativeTime = (isoTimestamp: string): string => {
-  const diffSec = Math.max(0, Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 1000));
-  if (diffSec < 5) return "az önce";
-  if (diffSec < 60) return `${diffSec} sn önce`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} dk önce`;
-  const diffHour = Math.floor(diffMin / 60);
-  return `${diffHour} sa önce`;
 };
 
 export const LiveActivityFeed = () => {

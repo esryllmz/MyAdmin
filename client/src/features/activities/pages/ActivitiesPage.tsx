@@ -1,47 +1,46 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { ActivityFilter } from '../components/ActivityFilter';
 import { ActivityTable } from '../components/ActivityTable';
 import { ActivityDetail } from '../components/ActivityDetail';
+import { useActivities } from '../hooks/useActivities';
 import { exportToCsv } from '@/core/utils/exportUtils';
-import { apiClient } from '@/core/api/apiClient';
-
-interface Activity {
-  id: string;
-  entityName: string;
-  action: string;
-  userId: string;
-  timestamp: string;
-  details?: string;
-}
+import { useSearchParamState } from '@/core/hooks/useDebouncedSearchParams';
 
 const ActivitiesPage = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
 
-  // Aktiviteleri API'den çek (Aşama 3 Düzeltmesi)
-  const { data: activities = [] } = useQuery({
-    queryKey: ['activities'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient<Activity[]>('/activities');
-        return response.data || [];
-      } catch (error) {
-        console.warn('Activities API çalışmadı');
-        return [];
-      }
-    },
-    retry: 1,
-  });
+  const { data: activities = [], isLoading } = useActivities();
+  const [entityFilter, setEntityFilter] = useSearchParamState('entity', 'all');
+  const [statusFilter, setStatusFilter] = useSearchParamState('status', 'all');
+
+  const entityOptions = useMemo(
+    () => Array.from(new Set(activities.map((activity) => activity.entityName))).sort(),
+    [activities]
+  );
+
+  const filteredActivities = useMemo(() => {
+    return activities.filter((activity) => {
+      const matchesEntity = entityFilter === 'all' || activity.entityName === entityFilter;
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'success' && activity.isSuccess) ||
+        (statusFilter === 'failed' && !activity.isSuccess);
+      return matchesEntity && matchesStatus;
+    });
+  }, [activities, entityFilter, statusFilter]);
+
+  const selectedActivity = filteredActivities.find((activity) => activity.id === selectedActivityId) ?? null;
 
   const handleExportCsv = async () => {
     try {
       setIsExporting(true);
-      if (!activities || activities.length === 0) {
+      if (!filteredActivities.length) {
         toast.warning('Dışa aktarılacak aktivite yok');
         return;
       }
-      exportToCsv(activities, 'activities');
+      exportToCsv(filteredActivities, 'activities');
     } catch (error) {
       console.error('CSV export hatası:', error);
       toast.error('Dışa aktarma sırasında hata oluştu');
@@ -68,7 +67,7 @@ const ActivitiesPage = () => {
             </div>
             <button
               onClick={handleExportCsv}
-              disabled={isExporting || !activities.length}
+              disabled={isExporting || !filteredActivities.length}
               className="bg-surface-container-lowest text-on-surface border border-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-sm">
@@ -77,10 +76,21 @@ const ActivitiesPage = () => {
               {isExporting ? 'İhraç ediliyor...' : 'Export CSV'}
             </button>
           </div>
-          <ActivityFilter />
+          <ActivityFilter
+            entity={entityFilter}
+            status={statusFilter}
+            entityOptions={entityOptions}
+            onEntityChange={setEntityFilter}
+            onStatusChange={setStatusFilter}
+          />
           <div className="bg-surface-container-lowest rounded-xl overflow-hidden flex border border-outline-variant/10 shadow-sm">
-            <ActivityTable />
-            <ActivityDetail />
+            <ActivityTable
+              activities={filteredActivities}
+              selectedId={selectedActivityId}
+              onSelectRow={setSelectedActivityId}
+              isLoading={isLoading}
+            />
+            <ActivityDetail activity={selectedActivity} />
           </div>
         </div>
       </main>

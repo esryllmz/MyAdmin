@@ -9,6 +9,7 @@ import type { ApiResponse } from '@/core/types/ApiResponse';
 import type { RootState } from '@/core/store/store';
 import type { UserResponseDto } from '../types/userTypes';
 import { useDebouncedSearchParam, useSearchParamState } from '@/core/hooks/useDebouncedSearchParams';
+import { useIsAdmin } from '@/core/hooks/useIsAdmin';
 
 const PAGE_SIZE = 8;
 const DELETE_CONFIRM_TIMEOUT = 3000;
@@ -17,7 +18,7 @@ const UserTable = () => {
   const { data: users, isLoading, isError, error } = useUsers();
   const { data: roles } = useRoles();
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const isAdmin = currentUser?.roles?.some((role) => role.name === 'Admin') ?? false;
+  const isAdmin = useIsAdmin();
 
   const deleteUser = useDeleteUser();
   const updateStatus = useUpdateUserStatus();

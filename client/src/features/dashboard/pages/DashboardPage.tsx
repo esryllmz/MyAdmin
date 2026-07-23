@@ -1,72 +1,38 @@
-﻿import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { StatCard } from '../components/StatCard';
 import { LiveActivityFeed } from '@/features/activities/components/LiveActivityFeed';
 import { InboxSummary } from '../components/InboxSummary';
 import { UserRegistrationChart, ActivityDistributionChart } from '../components/Charts';
+import { useDashboardStats } from '../hooks/useDashboardStats';
 import { exportToCsv } from '@/core/utils/exportUtils';
-import { apiClient } from '@/core/api/apiClient';
-
-interface DashboardStats {
-  totalUsers: number;
-  activeRoles: number;
-  todayNotifications: number;
-  recentFailedActivities: number;
-}
 
 const DashboardPage = () => {
   const [isExporting, setIsExporting] = useState(false);
-
-  // Dashboard istatistiklerini API'den çek
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['dashboardStats'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient<DashboardStats>('/dashboard/stats');
-        return response.data || {
-          totalUsers: 0,
-          activeRoles: 0,
-          todayNotifications: 0,
-          recentFailedActivities: 0,
-        };
-      } catch (error) {
-        console.warn('Dashboard stats API çalışmadı, placeholder değerler kullanılıyor');
-        // Placeholder values fallback
-        return {
-          totalUsers: 14208,
-          activeRoles: 856,
-          todayNotifications: 1204,
-          recentFailedActivities: 23,
-        };
-      }
-    },
-    retry: 1,
-  });
+  const { stats, chartData, isLoading, isDemoMode } = useDashboardStats();
 
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      // Dashboard verilerini CSV olarak dışa aktar
       const exportData = [
         {
           Metrik: 'Toplam Kullanıcılar',
-          Değer: stats?.totalUsers || 0,
+          Değer: stats.totalUsers,
           Tarih: new Date().toLocaleDateString('tr-TR'),
         },
         {
           Metrik: 'Aktif Roller',
-          Değer: stats?.activeRoles || 0,
+          Değer: stats.activeRoles,
           Tarih: new Date().toLocaleDateString('tr-TR'),
         },
         {
-          Metrik: "Bugün's Bildirimler",
-          Değer: stats?.todayNotifications || 0,
+          Metrik: 'Bugünkü Bildirimler',
+          Değer: stats.todayNotifications,
           Tarih: new Date().toLocaleDateString('tr-TR'),
         },
         {
           Metrik: 'Başarısız Aktiviteler',
-          Değer: stats?.recentFailedActivities || 0,
+          Değer: stats.recentFailedActivities,
           Tarih: new Date().toLocaleDateString('tr-TR'),
         },
       ];
@@ -88,8 +54,17 @@ const DashboardPage = () => {
           <h2 className="text-3xl font-headline font-bold tracking-tight mb-1 text-on-surface dark:text-dark-on-surface">
             System Overview
           </h2>
-          <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
-            Real-time metrics and activity feed from the editorial platform.
+          <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant flex items-center gap-2">
+            {isDemoMode ? 'Demo verisi üzerinde canlı simülasyon.' : 'Real-time metrics and activity feed from the platform.'}
+            {isDemoMode && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-info">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-info opacity-75"></span>
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-info"></span>
+                </span>
+                Demo
+              </span>
+            )}
           </p>
         </div>
         <button
@@ -108,31 +83,31 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Users"
-          value={(stats?.totalUsers ?? 0).toLocaleString('tr-TR')}
-          trend="+12%"
+          value={stats.totalUsers.toLocaleString('tr-TR')}
+          subText="Kayıtlı kullanıcılar"
           icon="group"
           color="primary"
           isLoading={isLoading}
         />
         <StatCard
           title="Active Roles"
-          value={(stats?.activeRoles ?? 0).toLocaleString('tr-TR')}
-          subText="Across departments"
+          value={stats.activeRoles.toLocaleString('tr-TR')}
+          subText="Tanımlı roller"
           icon="badge"
           color="secondary"
           isLoading={isLoading}
         />
         <StatCard
           title="Today's Notifications"
-          value={(stats?.todayNotifications ?? 0).toLocaleString('tr-TR')}
-          badge={`${Math.floor((stats?.todayNotifications || 0) * 0.03)} UNREAD`}
+          value={stats.todayNotifications.toLocaleString('tr-TR')}
+          badge={`${stats.unreadNotifications} UNREAD`}
           icon="notifications"
           isBright
           isLoading={isLoading}
         />
         <StatCard
           title="Recent Failed Activities"
-          value={(stats?.recentFailedActivities ?? 0).toLocaleString('tr-TR')}
+          value={stats.recentFailedActivities.toLocaleString('tr-TR')}
           subText="Requires review"
           icon="warning"
           color="error"
@@ -142,8 +117,8 @@ const DashboardPage = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <UserRegistrationChart />
-        <ActivityDistributionChart />
+        <UserRegistrationChart data={chartData.userRegistration} isLoading={isLoading} />
+        <ActivityDistributionChart data={chartData.activityDistribution} isLoading={isLoading} />
       </div>
 
       {/* Main Content Area */}

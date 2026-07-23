@@ -1,7 +1,20 @@
+import { useState } from 'react';
 import RoleList from '../components/RoleList';
 import PermissionPanel from '../components/PermissionPanel';
+import NewRoleModal from '../components/NewRoleModal';
+import { useRoles } from '../hooks/useRoles';
 
 const RolesAndPermissionsPage = () => {
+  const { data: roles } = useRoles();
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+  const [isNewRoleModalOpen, setIsNewRoleModalOpen] = useState(false);
+
+  // Roller ilk yüklendiğinde varsayılan olarak ilk rolü seç — useEffect yerine
+  // render sırasında ayarlama (bu koşul yalnızca henüz seçim yokken tetiklenir).
+  if (!selectedRoleId && roles && roles.length > 0) {
+    setSelectedRoleId(roles[0].id);
+  }
+
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
       <div className="mb-8">
@@ -17,9 +30,15 @@ const RolesAndPermissionsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <RoleList />
-        <PermissionPanel />
+        <RoleList
+          selectedRoleId={selectedRoleId}
+          onSelectRole={setSelectedRoleId}
+          onNewRole={() => setIsNewRoleModalOpen(true)}
+        />
+        <PermissionPanel selectedRoleId={selectedRoleId} />
       </div>
+
+      <NewRoleModal isOpen={isNewRoleModalOpen} onClose={() => setIsNewRoleModalOpen(false)} />
     </div>
   );
 };

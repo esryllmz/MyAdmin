@@ -1,27 +1,19 @@
-﻿import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTheme } from '@/core/theme/ThemeContext';
+import { Skeleton } from '@/core/components/ui/skeleton';
+import type { DistributionPoint, RegistrationPoint } from '../hooks/useDashboardStats';
 
-// Sample data for user registration trend
-const userRegistrationData = [
-  { month: 'Jan', users: 240, active: 210 },
-  { month: 'Feb', users: 320, active: 250 },
-  { month: 'Mar', users: 280, active: 240 },
-  { month: 'Apr', users: 450, active: 380 },
-  { month: 'May', users: 520, active: 410 },
-  { month: 'Jun', users: 680, active: 520 },
-  { month: 'Jul', users: 720, active: 600 },
-];
+interface UserRegistrationChartProps {
+  data: RegistrationPoint[];
+  isLoading?: boolean;
+}
 
-// Sample data for activity distribution
-const activityData = [
-  { name: 'Login', value: 2400 },
-  { name: 'Edit', value: 1398 },
-  { name: 'Delete', value: 980 },
-  { name: 'Create', value: 1908 },
-  { name: 'Export', value: 781 },
-];
+interface ActivityDistributionChartProps {
+  data: DistributionPoint[];
+  isLoading?: boolean;
+}
 
-export const UserRegistrationChart = () => {
+export const UserRegistrationChart = ({ data, isLoading }: UserRegistrationChartProps) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -37,41 +29,49 @@ export const UserRegistrationChart = () => {
       <h3 className="text-lg font-semibold text-on-surface dark:text-dark-on-surface mb-4">
         User Registration Trend
       </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={userRegistrationData}>
-          <CartesianGrid strokeDasharray="3 3" stroke={colors.gridColor} />
-          <XAxis stroke={colors.textColor} />
-          <YAxis stroke={colors.textColor} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: isDark ? '#161b22' : '#ffffff',
-              border: `1px solid ${colors.gridColor}`,
-              borderRadius: '8px',
-            }}
-            labelStyle={{ color: colors.textColor }}
-          />
-          <Legend wrapperStyle={{ color: colors.textColor }} />
-          <Area
-            type="monotone"
-            dataKey="users"
-            stroke={colors.lineColor}
-            fill={colors.fillColor}
-            name="Total Registrations"
-          />
-          <Area
-            type="monotone"
-            dataKey="active"
-            stroke={isDark ? '#22c55e' : '#10b981'}
-            fill={isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)'}
-            name="Active Users"
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      {isLoading ? (
+        <Skeleton className="h-[300px] w-full rounded-lg" />
+      ) : data.length === 0 ? (
+        <div className="h-[300px] flex items-center justify-center text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
+          Henüz kayıt verisi yok.
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.gridColor} />
+            <XAxis dataKey="label" stroke={colors.textColor} />
+            <YAxis stroke={colors.textColor} allowDecimals={false} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDark ? '#161b22' : '#ffffff',
+                border: `1px solid ${colors.gridColor}`,
+                borderRadius: '8px',
+              }}
+              labelStyle={{ color: colors.textColor }}
+            />
+            <Legend wrapperStyle={{ color: colors.textColor }} />
+            <Area
+              type="monotone"
+              dataKey="users"
+              stroke={colors.lineColor}
+              fill={colors.fillColor}
+              name="Total Registrations"
+            />
+            <Area
+              type="monotone"
+              dataKey="active"
+              stroke={isDark ? '#22c55e' : '#10b981'}
+              fill={isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)'}
+              name="Active Users"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };
 
-export const ActivityDistributionChart = () => {
+export const ActivityDistributionChart = ({ data, isLoading }: ActivityDistributionChartProps) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -87,23 +87,31 @@ export const ActivityDistributionChart = () => {
       <h3 className="text-lg font-semibold text-on-surface dark:text-dark-on-surface mb-4">
         Activity Distribution
       </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={activityData}>
-          <CartesianGrid strokeDasharray="3 3" stroke={colors.gridColor} />
-          <XAxis stroke={colors.textColor} />
-          <YAxis stroke={colors.textColor} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: isDark ? '#161b22' : '#ffffff',
-              border: `1px solid ${colors.gridColor}`,
-              borderRadius: '8px',
-            }}
-            labelStyle={{ color: colors.textColor }}
-          />
-          <Legend wrapperStyle={{ color: colors.textColor }} />
-          <Bar dataKey="value" fill={chartColors[0]} name="Activity Count" />
-        </BarChart>
-      </ResponsiveContainer>
+      {isLoading ? (
+        <Skeleton className="h-[300px] w-full rounded-lg" />
+      ) : data.length === 0 ? (
+        <div className="h-[300px] flex items-center justify-center text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
+          Henüz aktivite verisi yok.
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.gridColor} />
+            <XAxis dataKey="name" stroke={colors.textColor} />
+            <YAxis stroke={colors.textColor} allowDecimals={false} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDark ? '#161b22' : '#ffffff',
+                border: `1px solid ${colors.gridColor}`,
+                borderRadius: '8px',
+              }}
+              labelStyle={{ color: colors.textColor }}
+            />
+            <Legend wrapperStyle={{ color: colors.textColor }} />
+            <Bar dataKey="value" fill={chartColors[0]} name="Activity Count" />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };
