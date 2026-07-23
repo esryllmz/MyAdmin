@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "@/core/store/store";
 import { ToastProvider } from "./ToastProvider";
 import { ThemeProvider } from "@/core/theme/ThemeContext";
+import { CommandPalette } from "@/core/components/CommandPalette";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
           <BrowserRouter>
             <ToastProvider>
               {children}
+              <CommandPalette />
             </ToastProvider>
           </BrowserRouter>
         </QueryClientProvider>

@@ -40,4 +40,10 @@ public interface IUserService
     ChangePasswordRequest request,
     Guid userId,
     CancellationToken cancellationToken = default);
+
+  Task<ReturnModel<NoData>> UpdateStatusAsync(
+    Guid id,
+    bool isActive,
+    Guid currentUserId,
+    CancellationToken cancellationToken = default);
 }

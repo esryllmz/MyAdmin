@@ -44,6 +44,7 @@ const authSlice = createSlice({
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
+      localStorage.removeItem("demoMode");
     },
   },
 });

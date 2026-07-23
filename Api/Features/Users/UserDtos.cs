@@ -42,3 +42,5 @@ public sealed record ChangePasswordRequest(
   string CurrentPassword,
   string NewPassword,
   string ConfirmNewPassword);
+
+public sealed record UpdateUserStatusRequest(bool IsActive);

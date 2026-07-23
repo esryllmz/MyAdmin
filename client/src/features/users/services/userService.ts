@@ -19,5 +19,22 @@ export const userService = {
     await apiClient<null>("/users/profile", {
       method: "PUT",
       body: request,
-    })
+    }),
+
+  deleteUser: async (id: string): Promise<ApiResponse<null>> =>
+    await apiClient<null>(`/users/${id}`, {
+      method: "DELETE",
+    }),
+
+  updateUserStatus: async (id: string, isActive: boolean): Promise<ApiResponse<null>> =>
+    await apiClient<null>(`/users/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ isActive }),
+    }),
+
+  syncUserRoles: async (userId: string, roleIds: string[]): Promise<ApiResponse<null>> =>
+    await apiClient<null>(`/userroles/sync/${userId}`, {
+      method: "POST",
+      body: JSON.stringify(roleIds),
+    }),
 };

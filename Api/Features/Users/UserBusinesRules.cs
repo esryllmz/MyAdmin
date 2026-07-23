@@ -82,6 +82,16 @@ public class UserBusinessRules(
     }
   }
 
+  public void UserCannotDeactivateSelf(Guid targetUserId, Guid currentUserId, bool isActive)
+  {
+    if (!isActive && targetUserId == currentUserId)
+    {
+      _logger.LogWarning("Kullanıcı kendi hesabını pasifleştirmeye çalıştı. ID: {UserId}", currentUserId);
+
+      throw new BusinessException("Kendi hesabınızı pasifleştiremezsiniz.");
+    }
+  }
+
   public void UserAccountMustBeActive(User user)
   {
     if (!user.IsActive)

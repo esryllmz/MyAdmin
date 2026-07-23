@@ -236,4 +236,32 @@ public class UserService(
       StatusCode = 200
     };
   }
+
+  public async Task<ReturnModel<NoData>> UpdateStatusAsync(
+    Guid id,
+    bool isActive,
+    Guid currentUserId,
+    CancellationToken cancellationToken = default)
+  {
+    _logger.LogInformation("Kullanıcı durum güncelleme işlemi başlatıldı. ID: {UserId}, IsActive: {IsActive}", id, isActive);
+
+    _businessRules.UserCannotDeactivateSelf(id, currentUserId, isActive);
+
+    User user = await _businessRules.GetUserIfExistAsync(id, enableTracking: true, cancellationToken: cancellationToken);
+
+    user.IsActive = isActive;
+
+    _userRepository.Update(user);
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+    _logger.LogInformation("Kullanıcı durumu güncellendi. ID: {UserId}, IsActive: {IsActive}", id, isActive);
+
+    return new ReturnModel<NoData>()
+    {
+      Success = true,
+      Message = isActive ? "Kullanıcı aktifleştirildi." : "Kullanıcı pasifleştirildi.",
+      Data = null,
+      StatusCode = 200
+    };
+  }
 }

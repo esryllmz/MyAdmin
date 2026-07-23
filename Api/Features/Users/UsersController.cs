@@ -52,6 +52,18 @@ public class UsersController(IUserService _userService) : CustomBaseController
     return CreateActionResult(result);
   }
 
+  [HttpPatch("{id:guid}/status")]
+  [Authorize(Roles = "Admin")]
+  public async Task<IActionResult> UpdateStatus(
+    Guid id,
+    [FromBody] UpdateUserStatusRequest request,
+    CancellationToken cancellationToken)
+  {
+    var result = await _userService.UpdateStatusAsync(id, request.IsActive, GetUserId(), cancellationToken);
+
+    return CreateActionResult(result);
+  }
+
   [HttpDelete("{id:guid}")]
   [Authorize]
   public async Task<IActionResult> Delete(

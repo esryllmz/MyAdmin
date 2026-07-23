@@ -2,27 +2,13 @@ import { useEffect, useRef, useState } from "react";
 
 type GameMode = "watch" | "play";
 
-type Threat = {
-  x: number;
-  width: number;
-  height: number;
-  label: string;
-};
-
-type Crystal = {
-  x: number;
-  y: number;
-  label: string;
-  phase: number;
-};
-
-const threats: Threat[] = [
+const threats = [
   { x: 520, width: 112, height: 42, label: "Race Condition" },
   { x: 830, width: 104, height: 42, label: "Auth Bypass" },
   { x: 1140, width: 122, height: 42, label: "401 Unauthorized" },
 ];
 
-const crystals: Crystal[] = [
+const crystals = [
   { x: 410, y: 92, label: "JWT Token", phase: 0 },
   { x: 710, y: 72, label: "Audit Log", phase: 1.8 },
   { x: 1030, y: 96, label: "JWT Token", phase: 3.2 },
@@ -30,7 +16,6 @@ const crystals: Crystal[] = [
 
 export const SecurityGame = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const jumpRef = useRef(false);
   const [mode, setMode] = useState<GameMode>("watch");
 
   useEffect(() => {
@@ -60,9 +45,7 @@ export const SecurityGame = () => {
     };
 
     const jump = () => {
-      if (runnerY === 0) {
-        velocityY = 8.5;
-      }
+      if (runnerY === 0) velocityY = 8.5;
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -70,10 +53,6 @@ export const SecurityGame = () => {
         event.preventDefault();
         jump();
       }
-    };
-
-    const handlePointerDown = () => {
-      jump();
     };
 
     const drawPixelAdmin = (x: number, y: number, frame: number) => {
@@ -92,13 +71,27 @@ export const SecurityGame = () => {
       context.fillRect(x + 32, y + 66, 7, 17 - footOffset);
     };
 
+    const drawRoundedRect = (x: number, y: number, rectWidth: number, rectHeight: number, radius: number) => {
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.lineTo(x + rectWidth - radius, y);
+      context.quadraticCurveTo(x + rectWidth, y, x + rectWidth, y + radius);
+      context.lineTo(x + rectWidth, y + rectHeight - radius);
+      context.quadraticCurveTo(x + rectWidth, y + rectHeight, x + rectWidth - radius, y + rectHeight);
+      context.lineTo(x + radius, y + rectHeight);
+      context.quadraticCurveTo(x, y + rectHeight, x, y + rectHeight - radius);
+      context.lineTo(x, y + radius);
+      context.quadraticCurveTo(x, y, x + radius, y);
+      context.closePath();
+    };
+
     const draw = (time: number) => {
       context.clearRect(0, 0, width, height);
-
       const isDark = document.documentElement.classList.contains("dark");
+
       const panelGradient = context.createLinearGradient(0, 0, width, height);
-      panelGradient.addColorStop(0, isDark ? "rgba(24,24,27,0.86)" : "rgba(255,255,255,0.86)");
-      panelGradient.addColorStop(1, isDark ? "rgba(9,9,11,0.9)" : "rgba(244,244,245,0.86)");
+      panelGradient.addColorStop(0, isDark ? "rgba(24,24,27,0.9)" : "rgba(255,255,255,0.9)");
+      panelGradient.addColorStop(1, isDark ? "rgba(9,9,11,0.94)" : "rgba(244,244,245,0.9)");
       context.fillStyle = panelGradient;
       context.fillRect(0, 0, width, height);
 
@@ -110,17 +103,9 @@ export const SecurityGame = () => {
 
       context.fillStyle = isDark ? "#3f3f46" : "#d4d4d8";
       context.fillRect(0, groundY + 24, width, 2);
-
       scroll = (scroll + (mode === "play" ? 2.8 : 1.5)) % 1260;
 
-      if (mode === "watch" && Math.sin(time / 520) > 0.88) {
-        velocityY = Math.max(velocityY, 7);
-      }
-
-      if (jumpRef.current) {
-        jump();
-        jumpRef.current = false;
-      }
+      if (mode === "watch" && Math.sin(time / 520) > 0.88) velocityY = Math.max(velocityY, 7);
 
       runnerY += velocityY;
       velocityY -= 0.42;
@@ -154,8 +139,7 @@ export const SecurityGame = () => {
         context.fillStyle = isDark ? "rgba(127,29,29,0.72)" : "rgba(254,226,226,0.95)";
         context.strokeStyle = isDark ? "rgba(248,113,113,0.45)" : "rgba(239,68,68,0.38)";
         context.lineWidth = 1;
-        context.beginPath();
-        context.roundRect(wrappedX, y, threat.width, threat.height, 8);
+        drawRoundedRect(wrappedX, y, threat.width, threat.height, 8);
         context.fill();
         context.stroke();
         context.fillStyle = isDark ? "#fecaca" : "#991b1b";
@@ -178,24 +162,22 @@ export const SecurityGame = () => {
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("keydown", handleKeyDown);
-    canvas.addEventListener("pointerdown", handlePointerDown);
+    canvas.addEventListener("pointerdown", jump);
     animationFrame = requestAnimationFrame(draw);
 
     return () => {
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", handleKeyDown);
-      canvas.removeEventListener("pointerdown", handlePointerDown);
+      canvas.removeEventListener("pointerdown", jump);
       cancelAnimationFrame(animationFrame);
     };
   }, [mode]);
 
   return (
-    <div className="w-full max-w-4xl overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/70 shadow-2xl shadow-zinc-900/10 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/60 dark:shadow-black/30">
+    <div className="w-full overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/70 shadow-2xl shadow-zinc-900/10 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/80 dark:shadow-black/30">
       <div className="flex items-center justify-between gap-3 border-b border-zinc-200/70 px-4 py-3 dark:border-zinc-800">
         <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
-            Security Simulator
-          </p>
+          <p className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500">Security Simulator</p>
           <p className="text-sm font-semibold text-zinc-900 dark:text-white">Admin Runner: Zero-Trust Pipeline</p>
         </div>
         <button

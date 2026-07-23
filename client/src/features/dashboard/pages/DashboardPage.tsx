@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { StatCard } from '../components/StatCard';
-import { ActivityTable } from '../components/ActivityTable';
+import { LiveActivityFeed } from '@/features/activities/components/LiveActivityFeed';
 import { InboxSummary } from '../components/InboxSummary';
 import { UserRegistrationChart, ActivityDistributionChart } from '../components/Charts';
 import { exportToCsv } from '@/core/utils/exportUtils';
@@ -108,31 +108,35 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Users"
-          value={isLoading ? '...' : (stats?.totalUsers ?? 0).toLocaleString('tr-TR')}
+          value={(stats?.totalUsers ?? 0).toLocaleString('tr-TR')}
           trend="+12%"
           icon="group"
           color="primary"
+          isLoading={isLoading}
         />
         <StatCard
           title="Active Roles"
-          value={isLoading ? '...' : (stats?.activeRoles ?? 0).toLocaleString('tr-TR')}
+          value={(stats?.activeRoles ?? 0).toLocaleString('tr-TR')}
           subText="Across departments"
           icon="badge"
           color="secondary"
+          isLoading={isLoading}
         />
         <StatCard
           title="Today's Notifications"
-          value={isLoading ? '...' : (stats?.todayNotifications ?? 0).toLocaleString('tr-TR')}
+          value={(stats?.todayNotifications ?? 0).toLocaleString('tr-TR')}
           badge={`${Math.floor((stats?.todayNotifications || 0) * 0.03)} UNREAD`}
           icon="notifications"
           isBright
+          isLoading={isLoading}
         />
         <StatCard
           title="Recent Failed Activities"
-          value={isLoading ? '...' : (stats?.recentFailedActivities ?? 0).toLocaleString('tr-TR')}
+          value={(stats?.recentFailedActivities ?? 0).toLocaleString('tr-TR')}
           subText="Requires review"
           icon="warning"
           color="error"
+          isLoading={isLoading}
         />
       </div>
 
@@ -145,7 +149,7 @@ const DashboardPage = () => {
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
-          <ActivityTable />
+          <LiveActivityFeed />
         </div>
         <div className="lg:col-span-1">
           <InboxSummary />

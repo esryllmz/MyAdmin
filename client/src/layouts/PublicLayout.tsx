@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/core/components/ThemeToggle";
-import { setCredentials } from "@/features/auth/store/authSlice";
-import type { UserResponseDto } from "@/features/users/types/userTypes";
+import { useInstantDemo } from "@/features/landing/hooks/useInstantDemo";
+import { FloatingDemoBar } from "@/features/landing/components/FloatingDemoBar";
 import type { ReactNode } from "react";
 
 interface PublicLayoutProps {
@@ -19,39 +17,7 @@ export const PublicLayout = ({
   mainClassName = "flex-1",
   footer,
 }: PublicLayoutProps) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const startInstantDemo = () => {
-    const now = new Date().toISOString();
-    const demoUser: UserResponseDto = {
-      id: "guest-admin-demo",
-      username: "Guest Admin",
-      email: "guest@myadmin.demo",
-      profileImageUrl: null,
-      bio: "Instant demo session",
-      isActive: true,
-      createdDate: now,
-      updatedDate: null,
-      roles: [
-        {
-          id: "demo-admin-role",
-          name: "Admin",
-          label: "Administrator",
-          description: "Demo administrator role",
-          createdDate: now,
-          updatedDate: null,
-          permissions: [],
-        },
-      ],
-    };
-
-    localStorage.setItem("demoMode", "true");
-    localStorage.setItem("accessToken", "demo.guest.access-token");
-    localStorage.setItem("refreshToken", "demo.guest.refresh-token");
-    dispatch(setCredentials(demoUser));
-    navigate("/dashboard");
-  };
+  const startInstantDemo = useInstantDemo();
 
   return (
     <div className={`relative isolate bg-white dark:bg-black text-neutral-950 dark:text-white font-sans antialiased flex flex-col ${className}`}>
@@ -83,7 +49,7 @@ export const PublicLayout = ({
             <ThemeToggle />
             <button
               type="button"
-              onClick={startInstantDemo}
+              onClick={() => startInstantDemo("Admin")}
               className="inline-flex rounded-full bg-gradient-to-r from-amber-400 via-pink-500 to-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_0_28px_rgba(236,72,153,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_36px_rgba(168,85,247,0.42)] sm:px-4"
             >
               <span className="sm:hidden">⚡ Demo</span>
@@ -102,6 +68,8 @@ export const PublicLayout = ({
       <main className={mainClassName}>{children}</main>
 
       {footer}
+
+      <FloatingDemoBar />
     </div>
   );
 };
