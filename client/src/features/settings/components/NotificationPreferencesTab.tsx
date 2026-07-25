@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { realtimeEventBus } from '@/core/realtime/realtimeEventBus';
+import type { RootState } from '@/core/store/store';
 
 interface Preferences {
   email: boolean;
@@ -14,6 +17,7 @@ const PREFERENCE_ITEMS: Array<{ key: keyof Preferences; label: string; desc: str
 ];
 
 const NotificationPreferencesTab = () => {
+  const actor = useSelector((state: RootState) => state.auth.user?.username) ?? 'Bilinmeyen Kullanıcı';
   const [preferences, setPreferences] = useState<Preferences>({
     email: true,
     push: true,
@@ -26,6 +30,13 @@ const NotificationPreferencesTab = () => {
 
   const handleSave = () => {
     toast.success('Bildirim tercihleriniz kaydedildi.');
+    realtimeEventBus.publish({
+      type: 'SETTINGS_UPDATED',
+      title: 'Bildirim tercihleri güncellendi',
+      description: `${actor} bildirim tercihlerini güncelledi`,
+      actor,
+      status: 'success',
+    });
   };
 
   return (

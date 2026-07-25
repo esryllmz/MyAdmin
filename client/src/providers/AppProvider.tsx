@@ -6,6 +6,7 @@ import { store } from "@/core/store/store";
 import { ToastProvider } from "./ToastProvider";
 import { ThemeProvider } from "@/core/theme/ThemeContext";
 import { CommandPalette } from "@/core/components/CommandPalette";
+import { RealtimeBridge } from "@/core/realtime/RealtimeBridge";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             <ToastProvider>
               {children}
               <CommandPalette />
+              <RealtimeBridge />
             </ToastProvider>
           </BrowserRouter>
         </QueryClientProvider>

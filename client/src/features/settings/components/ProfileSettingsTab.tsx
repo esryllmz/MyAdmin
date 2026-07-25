@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { userService } from '@/features/users/services/userService';
 import { updateUserInfo } from '@/features/auth/store/authSlice';
+import { realtimeEventBus } from '@/core/realtime/realtimeEventBus';
 import type { RootState } from '@/core/store/store';
 
 const ProfileSettingsTab = () => {
@@ -22,6 +23,13 @@ const ProfileSettingsTab = () => {
       if (response.success) {
         dispatch(updateUserInfo({ username, profileImageUrl: previewUrl ?? undefined }));
         toast.success('Profil bilgileriniz güncellendi.');
+        realtimeEventBus.publish({
+          type: 'SETTINGS_UPDATED',
+          title: 'Profil güncellendi',
+          description: `@${username} profil bilgilerini güncelledi`,
+          actor: username,
+          status: 'success',
+        });
       }
     },
   });

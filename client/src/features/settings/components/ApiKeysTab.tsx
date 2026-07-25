@@ -1,34 +1,38 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 import { Copy, Eye, EyeOff, RefreshCw } from 'lucide-react';
-import { useIsAdmin } from '@/core/hooks/useIsAdmin';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
+import { realtimeEventBus } from '@/core/realtime/realtimeEventBus';
+import type { RootState } from '@/core/store/store';
 
 const generateFakeKey = () => `sk_demo_${crypto.randomUUID().replace(/-/g, '')}`;
 const maskKey = (key: string) => `${key.slice(0, 11)}${'•'.repeat(24)}`;
 
 const ApiKeysTab = () => {
-  const isAdmin = useIsAdmin();
+  const { can } = useRolePermissions();
+  const apiKeyPermission = can('manageApiKeys');
+  const actor = useSelector((state: RootState) => state.auth.user?.username) ?? 'Bilinmeyen Kullanıcı';
   const [apiKey, setApiKey] = useState(generateFakeKey);
   const [isRevealed, setIsRevealed] = useState(false);
 
-  const guardAdminAction = () => {
-    if (!isAdmin) {
-      toast.error('Bu işlem için Admin yetkisi gereklidir.');
-      return false;
-    }
-    return true;
-  };
-
   const handleToggleReveal = () => {
-    if (!guardAdminAction()) return;
+    if (!apiKeyPermission.allowed) return;
     setIsRevealed((prev) => !prev);
   };
 
   const handleRegenerate = () => {
-    if (!guardAdminAction()) return;
+    if (!apiKeyPermission.allowed) return;
     setApiKey(generateFakeKey());
     setIsRevealed(true);
     toast.success('Yeni API anahtarı oluşturuldu.');
+    realtimeEventBus.publish({
+      type: 'SETTINGS_UPDATED',
+      title: 'API anahtarı yenilendi',
+      description: 'Kişisel erişim anahtarını yeniden oluşturdu',
+      actor,
+      status: 'success',
+    });
   };
 
   const handleCopy = () => {
@@ -54,8 +58,9 @@ const ApiKeysTab = () => {
           <button
             type="button"
             onClick={handleToggleReveal}
-            title={isAdmin ? (isRevealed ? 'Gizle' : 'Göster') : 'Admin yetkisi gerekir'}
-            className="p-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            disabled={!apiKeyPermission.allowed}
+            title={apiKeyPermission.allowed ? (isRevealed ? 'Gizle' : 'Göster') : apiKeyPermission.reason}
+            className="p-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -73,7 +78,9 @@ const ApiKeysTab = () => {
       <button
         type="button"
         onClick={handleRegenerate}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/20 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+        disabled={!apiKeyPermission.allowed}
+        title={apiKeyPermission.reason}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/20 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <RefreshCw className="w-3.5 h-3.5" />
         Yeniden Oluştur

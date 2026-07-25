@@ -22,17 +22,17 @@ export const PublicLayout = ({
 
   return (
     <div className={`relative isolate bg-white dark:bg-black text-neutral-950 dark:text-white font-sans antialiased flex flex-col ${className}`}>
-      <header className="sticky top-0 z-50 shrink-0 border-none bg-transparent px-8 py-4">
+      <header className="sticky top-0 z-50 shrink-0 border-none bg-transparent px-4 py-4 sm:px-8">
         <div className="mx-auto flex items-center justify-between gap-3 max-w-7xl">
-          <BrandLogo variant="wordmark" size="lg" linkTo="/" />
+          <BrandLogo variant="wordmark" size="md" linkTo="/" />
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <a
               href="https://github.com/esryllmz/MyAdmin"
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub repository"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-700 transition hover:bg-zinc-100/80 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800/80 dark:hover:text-white"
+              className="hidden h-9 w-9 items-center justify-center rounded-lg text-zinc-700 transition hover:bg-zinc-100/80 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800/80 dark:hover:text-white sm:inline-flex"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                 <path

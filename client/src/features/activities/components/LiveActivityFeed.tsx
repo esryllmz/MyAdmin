@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Power, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import { Activity, Power, Settings2, ShieldCheck, Sparkles, Trash2, UserPlus } from "lucide-react";
 import { formatRelativeTime } from "@/core/utils/formatRelativeTime";
 import type { RootState } from "@/core/store/store";
 import type { ActivityEventType } from "../store/activityFeedSlice";
@@ -11,6 +11,10 @@ const EVENT_ICONS: Record<ActivityEventType, typeof ShieldCheck> = {
   "status-toggle": Power,
   "user-delete": Trash2,
   "demo-role-switch": Sparkles,
+  "user-invite": UserPlus,
+  "role-create": ShieldCheck,
+  "settings-update": Settings2,
+  "system-health": Activity,
 };
 
 const EVENT_COLORS: Record<ActivityEventType, string> = {
@@ -18,6 +22,10 @@ const EVENT_COLORS: Record<ActivityEventType, string> = {
   "status-toggle": "text-warning bg-warning/10",
   "user-delete": "text-error bg-error/10",
   "demo-role-switch": "text-info bg-info/10",
+  "user-invite": "text-success bg-success/10",
+  "role-create": "text-primary bg-primary/10",
+  "settings-update": "text-secondary bg-secondary/10",
+  "system-health": "text-info bg-info/10",
 };
 
 const VISIBLE_EVENT_COUNT = 5;

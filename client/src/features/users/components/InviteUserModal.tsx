@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
 import { userService } from '../services/userService';
+import { realtimeEventBus } from '@/core/realtime/realtimeEventBus';
+import type { RootState } from '@/core/store/store';
 import type { RegisterUserRequest } from '@/features/auth/types/authTypes';
 
 interface InviteUserModalProps {
@@ -10,6 +13,7 @@ interface InviteUserModalProps {
 
 const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
   const queryClient = useQueryClient();
+  const actor = useSelector((state: RootState) => state.auth.user?.username) ?? 'Bilinmeyen Kullanıcı';
   const [formData, setFormData] = useState<RegisterUserRequest>({
     username: '',
     email: '',
@@ -21,6 +25,13 @@ const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
     onSuccess: (response) => {
       if (response.success) {
         queryClient.invalidateQueries({ queryKey: ["users"] }); // Tabloyu tazele
+        realtimeEventBus.publish({
+          type: 'USER_INVITED',
+          title: 'Yeni kullanıcı davet edildi',
+          description: `@${formData.username} kullanıcısını davet etti`,
+          actor,
+          status: 'success',
+        });
         onClose(); // Modalı kapat
         setFormData({ username: '', email: '', password: '' }); // Formu temizle
       }

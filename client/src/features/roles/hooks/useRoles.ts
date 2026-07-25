@@ -1,11 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import { roleService } from "../services/roleService";
+import { realtimeEventBus } from "@/core/realtime/realtimeEventBus";
+import type { RootState } from "@/core/store/store";
 import type { ApiResponse } from "@/core/types/ApiResponse";
 import type { CreateRoleRequest, PermissionResponseDto, RoleResponseDto } from "../types/roleTypes";
 
 const ROLES_QUERY_KEY = ["roles"];
 
 type RolesResponse = ApiResponse<RoleResponseDto[]>;
+
+const useActorName = () =>
+  useSelector((state: RootState) => state.auth.user?.username) ?? "Bilinmeyen Kullanıcı";
 
 export const useRoles = () => {
   return useQuery<RolesResponse, ApiResponse<null>, RoleResponseDto[]>({
@@ -17,17 +23,26 @@ export const useRoles = () => {
 
 export const useCreateRole = () => {
   const queryClient = useQueryClient();
+  const actor = useActorName();
 
   return useMutation({
     mutationFn: (request: CreateRoleRequest) => roleService.createRole(request),
-    onSuccess: () => {
+    onSuccess: (_data, request) => {
       queryClient.invalidateQueries({ queryKey: ROLES_QUERY_KEY });
+      realtimeEventBus.publish({
+        type: "ROLE_CREATED",
+        title: "Yeni rol oluşturuldu",
+        description: `${request.label || request.name} rolünü oluşturdu`,
+        actor,
+        status: "success",
+      });
     },
   });
 };
 
 export const useSyncRolePermissions = () => {
   const queryClient = useQueryClient();
+  const actor = useActorName();
 
   return useMutation({
     mutationFn: ({ roleId, permissions }: { roleId: string; permissions: PermissionResponseDto[] }) =>
@@ -46,6 +61,17 @@ export const useSyncRolePermissions = () => {
       );
 
       return { previousRoles };
+    },
+    onSuccess: (_data, { roleId }, context) => {
+      const targetRole = context?.previousRoles?.data?.find((role) => role.id === roleId);
+      realtimeEventBus.publish({
+        type: "ROLE_SYNCED",
+        title: "Rol yetkileri senkronize edildi",
+        description: `${targetRole?.label || targetRole?.name || roleId} rolünün yetkilerini güncelledi`,
+        actor,
+        status: "success",
+        entityId: roleId,
+      });
     },
     onError: (_err, _vars, context) => {
       if (context?.previousRoles) {

@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { userService } from "../services/userService";
 import type { ApiResponse } from "@/core/types/ApiResponse";
 import type { UserResponseDto } from "../types/userTypes";
 import type { RoleResponseDto } from "@/features/roles/types/roleTypes";
 import type { RootState } from "@/core/store/store";
-import { logActivity } from "@/features/activities/store/activityFeedSlice";
+import { realtimeEventBus } from "@/core/realtime/realtimeEventBus";
 
 const USERS_QUERY_KEY = ["users"];
 
@@ -30,7 +30,6 @@ const useActorName = () =>
 
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
   const actor = useActorName();
 
   return useMutation({
@@ -47,14 +46,14 @@ export const useDeleteUser = () => {
     },
     onSuccess: (_data, id, context) => {
       const targetUsername = context?.previousUsers?.data?.find((user) => user.id === id)?.username ?? id;
-      dispatch(
-        logActivity({
-          type: "user-delete",
-          actor,
-          message: `@${targetUsername} kullanıcısını sildi`,
-          isSuccess: true,
-        })
-      );
+      realtimeEventBus.publish({
+        type: "USER_DELETED",
+        title: "Kullanıcı silindi",
+        description: `@${targetUsername} kullanıcısını sildi`,
+        actor,
+        status: "success",
+        entityId: id,
+      });
     },
     onError: (_err, _id, context) => {
       if (context?.previousUsers) {
@@ -69,7 +68,6 @@ export const useDeleteUser = () => {
 
 export const useUpdateUserStatus = () => {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
   const actor = useActorName();
 
   return useMutation({
@@ -94,14 +92,14 @@ export const useUpdateUserStatus = () => {
     },
     onSuccess: (_data, { id, isActive }, context) => {
       const targetUsername = context?.previousUsers?.data?.find((user) => user.id === id)?.username ?? id;
-      dispatch(
-        logActivity({
-          type: "status-toggle",
-          actor,
-          message: `@${targetUsername} hesabını ${isActive ? "Aktif" : "Pasif"} yaptı`,
-          isSuccess: true,
-        })
-      );
+      realtimeEventBus.publish({
+        type: "USER_STATUS_CHANGED",
+        title: "Hesap durumu değişti",
+        description: `@${targetUsername} hesabını ${isActive ? "Aktif" : "Pasif"} yaptı`,
+        actor,
+        status: "success",
+        entityId: id,
+      });
     },
     onError: (_err, _vars, context) => {
       if (context?.previousUsers) {
@@ -116,7 +114,6 @@ export const useUpdateUserStatus = () => {
 
 export const useSyncUserRole = () => {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
   const actor = useActorName();
 
   return useMutation({
@@ -141,14 +138,14 @@ export const useSyncUserRole = () => {
     },
     onSuccess: (_data, { userId, role }, context) => {
       const targetUsername = context?.previousUsers?.data?.find((user) => user.id === userId)?.username ?? userId;
-      dispatch(
-        logActivity({
-          type: "role-change",
-          actor,
-          message: `@${targetUsername} kullanıcısının rolünü ${role.name} olarak güncelledi`,
-          isSuccess: true,
-        })
-      );
+      realtimeEventBus.publish({
+        type: "ROLE_SYNCED",
+        title: "Kullanıcı rolü güncellendi",
+        description: `@${targetUsername} kullanıcısının rolünü ${role.name} olarak güncelledi`,
+        actor,
+        status: "success",
+        entityId: userId,
+      });
     },
     onError: (_err, _vars, context) => {
       if (context?.previousUsers) {

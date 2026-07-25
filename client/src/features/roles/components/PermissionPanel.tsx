@@ -1,8 +1,7 @@
-import { toast } from 'react-toastify';
-import { useIsAdmin } from '@/core/hooks/useIsAdmin';
 import { Skeleton } from '@/core/components/ui/skeleton';
 import { usePermissions } from '@/features/permissions/hooks/usePermissions';
 import { groupPermissionsByResource } from '@/features/permissions/utils/groupPermissions';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
 import { useRoles, useSyncRolePermissions } from '../hooks/useRoles';
 
 interface PermissionPanelProps {
@@ -13,18 +12,14 @@ const PermissionPanel = ({ selectedRoleId }: PermissionPanelProps) => {
   const { data: roles = [] } = useRoles();
   const { data: allPermissions = [], isLoading } = usePermissions();
   const syncPermissions = useSyncRolePermissions();
-  const isAdmin = useIsAdmin();
+  const { can } = useRolePermissions();
+  const syncPermission = can('syncRolePermissions');
 
   const selectedRole = roles.find((role) => role.id === selectedRoleId);
   const permissionGroups = groupPermissionsByResource(allPermissions);
 
   const handleToggle = (permissionId: string) => {
-    if (!selectedRole) return;
-
-    if (!isAdmin) {
-      toast.error('Bu işlem için yetkiniz bulunmamaktadır.');
-      return;
-    }
+    if (!selectedRole || !syncPermission.allowed) return;
 
     const hasPermission = selectedRole.permissions.some((permission) => permission.id === permissionId);
     const nextPermissions = hasPermission
@@ -53,7 +48,7 @@ const PermissionPanel = ({ selectedRoleId }: PermissionPanelProps) => {
           <span className="material-symbols-outlined text-primary text-[20px]">admin_panel_settings</span>
         </div>
         <p className="text-xs text-on-surface-variant">
-          {isAdmin
+          {syncPermission.allowed
             ? 'Bir yetkiye tıklayarak anında güncelleyin.'
             : 'Sadece görüntüleme — düzenlemek için Admin yetkisi gerekir.'}
         </p>
@@ -74,14 +69,15 @@ const PermissionPanel = ({ selectedRoleId }: PermissionPanelProps) => {
                   return (
                     <label
                       key={permission.id}
+                      title={syncPermission.allowed ? undefined : syncPermission.reason}
                       className={`flex items-start gap-3 cursor-pointer group ${isSyncingSelectedRole ? 'opacity-50 pointer-events-none' : ''
-                        }`}
+                        } ${!syncPermission.allowed ? 'cursor-not-allowed' : ''}`}
                     >
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => handleToggle(permission.id)}
-                        disabled={!isAdmin}
+                        disabled={!syncPermission.allowed}
                         className="mt-0.5 rounded border-outline-variant/40 text-primary focus:ring-primary disabled:opacity-50"
                       />
                       <div>

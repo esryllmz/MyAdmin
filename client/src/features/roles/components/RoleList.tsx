@@ -1,7 +1,6 @@
-import { toast } from 'react-toastify';
-import { useIsAdmin } from '@/core/hooks/useIsAdmin';
 import { Skeleton } from '@/core/components/ui/skeleton';
 import { useUsers } from '@/features/users/hooks/useUsers';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
 import { useRoles } from '../hooks/useRoles';
 
 interface RoleListProps {
@@ -13,26 +12,21 @@ interface RoleListProps {
 const RoleList = ({ selectedRoleId, onSelectRole, onNewRole }: RoleListProps) => {
   const { data: roles = [], isLoading } = useRoles();
   const { data: users = [] } = useUsers();
-  const isAdmin = useIsAdmin();
+  const { can } = useRolePermissions();
+  const newRolePermission = can('newRole');
 
   const countUsersForRole = (roleId: string) =>
     users.filter((user) => user.roles?.some((role) => role.id === roleId)).length;
-
-  const handleNewRoleClick = () => {
-    if (!isAdmin) {
-      toast.error('Bu işlem için yetkiniz bulunmamaktadır.');
-      return;
-    }
-    onNewRole();
-  };
 
   return (
     <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-on-surface">Active Roles</h3>
         <button
-          onClick={handleNewRoleClick}
-          className="text-sm font-medium text-primary hover:text-primary-container transition-colors flex items-center gap-1"
+          onClick={onNewRole}
+          disabled={!newRolePermission.allowed}
+          title={newRolePermission.reason}
+          className="text-sm font-medium text-primary hover:text-primary-container transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-primary"
         >
           <span className="material-symbols-outlined text-[18px]">add</span> New Role
         </button>

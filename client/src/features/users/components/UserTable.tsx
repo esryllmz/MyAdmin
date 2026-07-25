@@ -9,7 +9,7 @@ import type { ApiResponse } from '@/core/types/ApiResponse';
 import type { RootState } from '@/core/store/store';
 import type { UserResponseDto } from '../types/userTypes';
 import { useDebouncedSearchParam, useSearchParamState } from '@/core/hooks/useDebouncedSearchParams';
-import { useIsAdmin } from '@/core/hooks/useIsAdmin';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
 
 const PAGE_SIZE = 8;
 const DELETE_CONFIRM_TIMEOUT = 3000;
@@ -18,7 +18,10 @@ const UserTable = () => {
   const { data: users, isLoading, isError, error } = useUsers();
   const { data: roles } = useRoles();
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const isAdmin = useIsAdmin();
+  const { can } = useRolePermissions();
+  const toggleStatusPermission = can('toggleUserStatus');
+  const syncRolePermission = can('syncUserRole');
+  const deleteUserPermission = can('deleteUser');
 
   const deleteUser = useDeleteUser();
   const updateStatus = useUpdateUserStatus();
@@ -29,21 +32,13 @@ const UserTable = () => {
   const [pageParam, setPageParam] = useSearchParamState('page', '1');
   const page = Math.max(1, Number(pageParam) || 1);
 
-  const guardAdminAction = () => {
-    if (!isAdmin) {
-      toast.error('Bu işlem için yetkiniz bulunmamaktadır.');
-      return false;
-    }
-    return true;
-  };
-
   const handleToggleStatus = (user: UserResponseDto) => {
-    if (!guardAdminAction()) return;
+    if (!toggleStatusPermission.allowed) return;
     updateStatus.mutate({ id: user.id, isActive: !user.isActive });
   };
 
   const handleRoleChange = (user: UserResponseDto, roleName: string) => {
-    if (!guardAdminAction()) return;
+    if (!syncRolePermission.allowed) return;
     const targetRole = roles?.find((role) => role.name === roleName);
     if (!targetRole) return;
     syncRole.mutate({ userId: user.id, role: targetRole });
@@ -51,7 +46,10 @@ const UserTable = () => {
 
   const handleDeleteClick = (user: UserResponseDto) => {
     const isSelf = currentUser?.id === user.id;
-    if (!isSelf && !guardAdminAction()) return;
+    if (!isSelf && !deleteUserPermission.allowed) {
+      toast.error(deleteUserPermission.reason);
+      return;
+    }
 
     if (confirmDeleteId !== user.id) {
       setConfirmDeleteId(user.id);
@@ -229,9 +227,9 @@ const UserTable = () => {
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(user)}
-                      disabled={updateStatus.isPending && updateStatus.variables?.id === user.id}
+                      disabled={!toggleStatusPermission.allowed || (updateStatus.isPending && updateStatus.variables?.id === user.id)}
                       className="flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={isAdmin ? 'Durumu değiştir' : 'Bu işlem için yetkiniz bulunmamaktadır'}
+                      title={toggleStatusPermission.allowed ? 'Durumu değiştir' : toggleStatusPermission.reason}
                     >
                       {updateStatus.isPending && updateStatus.variables?.id === user.id ? (
                         <Loader2 className="w-3 h-3 animate-spin text-on-surface-variant" />
@@ -247,7 +245,7 @@ const UserTable = () => {
                     </button>
                   </td>
                   <td className="px-6 py-4">
-                    {isAdmin && roles && roles.length > 0 ? (
+                    {syncRolePermission.allowed && roles && roles.length > 0 ? (
                       <select
                         value={user.roles?.[0]?.name ?? ''}
                         onChange={(e) => handleRoleChange(user, e.target.value)}
@@ -287,8 +285,15 @@ const UserTable = () => {
                       <button
                         type="button"
                         onClick={() => handleDeleteClick(user)}
-                        disabled={deleteUser.isPending && deleteUser.variables === user.id}
-                        title="Kullanıcıyı sil"
+                        disabled={
+                          (deleteUser.isPending && deleteUser.variables === user.id) ||
+                          (!deleteUserPermission.allowed && currentUser?.id !== user.id)
+                        }
+                        title={
+                          deleteUserPermission.allowed || currentUser?.id === user.id
+                            ? 'Kullanıcıyı sil'
+                            : deleteUserPermission.reason
+                        }
                         className={`inline-flex items-center gap-1.5 font-bold text-xs px-3 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-50 ${confirmDeleteId === user.id
                             ? 'bg-error text-white hover:brightness-110'
                             : 'text-error hover:bg-error/10'

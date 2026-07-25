@@ -63,6 +63,11 @@
 #*.RTF   diff=astextplain
 
 package-lock.json linguist-generated=true
-node_modules/* linguist-vendored=true
+node_modules/** linguist-vendored=true
 src/**/*.mock.ts linguist-vendored=true
+*.mock.ts linguist-vendored=true
+*.mock.tsx linguist-vendored=true
+dist/** linguist-generated=true
+build/** linguist-generated=true
+coverage/** linguist-generated=true
 *.json linguist-documentation=true

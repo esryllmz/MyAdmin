@@ -1,7 +1,15 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-export type ActivityEventType = "role-change" | "status-toggle" | "user-delete" | "demo-role-switch";
+export type ActivityEventType =
+  | "role-change"
+  | "status-toggle"
+  | "user-delete"
+  | "demo-role-switch"
+  | "user-invite"
+  | "role-create"
+  | "settings-update"
+  | "system-health";
 
 export interface ActivityEvent {
   id: string;

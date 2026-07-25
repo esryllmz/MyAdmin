@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { toast } from 'react-toastify';
-import { Eye, EyeOff } from 'lucide-react';
-import { useIsAdmin } from '@/core/hooks/useIsAdmin';
+import { Database, Eye, EyeOff, Radio, Timer } from 'lucide-react';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
+import { deriveObservabilityMeta } from '@/core/utils/observability';
 import type { ActivityResponseDto } from '../types/activityTypes';
 
 interface ActivityDetailProps {
@@ -21,7 +21,8 @@ const tryFormatJson = (value: string | null): string | null => {
 
 export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
   const [isRevealed, setIsRevealed] = useState(false);
-  const isAdmin = useIsAdmin();
+  const { can } = useRolePermissions();
+  const viewSensitivePermission = can('viewSensitiveData');
 
   if (!activity) {
     return (
@@ -34,12 +35,10 @@ export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
 
   const oldValues = tryFormatJson(activity.oldValues);
   const newValues = tryFormatJson(activity.newValues);
+  const observability = deriveObservabilityMeta(activity.id);
 
   const handleToggleReveal = () => {
-    if (!isAdmin) {
-      toast.error('Hassas verileri görüntülemek için Admin yetkisi gereklidir.');
-      return;
-    }
+    if (!viewSensitivePermission.allowed) return;
     setIsRevealed((prev) => !prev);
   };
 
@@ -56,6 +55,24 @@ export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
       </div>
 
       <div className="p-6 flex-1 overflow-y-auto space-y-5">
+        <div className="flex flex-wrap gap-2">
+          <span
+            title={`Correlation ID: ${observability.correlationId}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-success"
+          >
+            <Database className="w-3 h-3" /> Elasticsearch Indexed
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+            <Timer className="w-3 h-3" /> Response Time: {observability.responseTimeMs}ms
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-info/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-info">
+            <Radio className="w-3 h-3" /> {observability.transport}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-2.5 py-1 text-[10px] font-mono font-semibold text-on-surface-variant">
+            {observability.correlationId}
+          </span>
+        </div>
+
         <div className="grid grid-cols-2 gap-x-3 gap-y-4 text-xs">
           <div>
             <span className="text-on-surface-variant">Actor</span>
@@ -96,8 +113,9 @@ export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
               <button
                 type="button"
                 onClick={handleToggleReveal}
-                title={isAdmin ? (isRevealed ? 'Gizle' : 'Göster') : 'Bu işlem için Admin yetkisi gereklidir'}
-                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors"
+                disabled={!viewSensitivePermission.allowed}
+                title={viewSensitivePermission.allowed ? (isRevealed ? 'Gizle' : 'Göster') : viewSensitivePermission.reason}
+                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 {isRevealed ? 'Gizle' : 'Göster'}
