@@ -18,13 +18,13 @@ const EVENT_ICONS: Record<ActivityEventType, typeof ShieldCheck> = {
 };
 
 const EVENT_COLORS: Record<ActivityEventType, string> = {
-  "role-change": "text-primary bg-primary/10",
+  "role-change": "text-on-surface bg-on-surface/10 dark:text-dark-on-surface dark:bg-dark-on-surface/10",
   "status-toggle": "text-warning bg-warning/10",
   "user-delete": "text-error bg-error/10",
   "demo-role-switch": "text-info bg-info/10",
   "user-invite": "text-success bg-success/10",
-  "role-create": "text-primary bg-primary/10",
-  "settings-update": "text-secondary bg-secondary/10",
+  "role-create": "text-on-surface bg-on-surface/10 dark:text-dark-on-surface dark:bg-dark-on-surface/10",
+  "settings-update": "text-on-surface-variant bg-on-surface-variant/10 dark:text-dark-on-surface-variant dark:bg-dark-on-surface-variant/10",
   "system-health": "text-info bg-info/10",
 };
 

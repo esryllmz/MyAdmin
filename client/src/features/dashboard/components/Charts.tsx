@@ -18,10 +18,10 @@ export const UserRegistrationChart = ({ data, isLoading }: UserRegistrationChart
   const isDark = theme === 'dark';
 
   const colors = {
-    textColor: isDark ? '#e6edf3' : '#0b1c30',
-    gridColor: isDark ? '#30363d' : '#c3c6d7',
-    lineColor: isDark ? '#5a9eff' : '#004ac6',
-    fillColor: isDark ? 'rgba(90, 158, 255, 0.1)' : 'rgba(0, 74, 198, 0.1)',
+    textColor: isDark ? '#a3a3a3' : '#666666',
+    gridColor: isDark ? '#2a2a2a' : '#dddddd',
+    lineColor: isDark ? '#f5f5f5' : '#111111',
+    fillColor: isDark ? 'rgba(245, 245, 245, 0.08)' : 'rgba(17, 17, 17, 0.06)',
   };
 
   return (
@@ -43,7 +43,7 @@ export const UserRegistrationChart = ({ data, isLoading }: UserRegistrationChart
             <YAxis stroke={colors.textColor} allowDecimals={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: isDark ? '#161b22' : '#ffffff',
+                backgroundColor: isDark ? '#1b1b1b' : '#ffffff',
                 border: `1px solid ${colors.gridColor}`,
                 borderRadius: '8px',
               }}
@@ -60,8 +60,8 @@ export const UserRegistrationChart = ({ data, isLoading }: UserRegistrationChart
             <Area
               type="monotone"
               dataKey="active"
-              stroke={isDark ? '#22c55e' : '#10b981'}
-              fill={isDark ? 'rgba(34, 197, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)'}
+              stroke={isDark ? '#a3a3a3' : '#525252'}
+              fill={isDark ? 'rgba(163, 163, 163, 0.12)' : 'rgba(82, 82, 82, 0.08)'}
               name="Active Users"
             />
           </AreaChart>
@@ -76,11 +76,13 @@ export const ActivityDistributionChart = ({ data, isLoading }: ActivityDistribut
   const isDark = theme === 'dark';
 
   const colors = {
-    textColor: isDark ? '#e6edf3' : '#0b1c30',
-    gridColor: isDark ? '#30363d' : '#c3c6d7',
+    textColor: isDark ? '#a3a3a3' : '#666666',
+    gridColor: isDark ? '#2a2a2a' : '#dddddd',
   };
 
-  const chartColors = ['#004ac6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const chartColors = isDark
+    ? ['#f5f5f5', '#d4d4d4', '#a3a3a3', '#737373', '#525252']
+    : ['#111111', '#333333', '#525252', '#737373', '#a3a3a3'];
 
   return (
     <div className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-xl border border-outline-variant/10 dark:border-dark-outline-variant/10 p-6">
@@ -101,7 +103,7 @@ export const ActivityDistributionChart = ({ data, isLoading }: ActivityDistribut
             <YAxis stroke={colors.textColor} allowDecimals={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: isDark ? '#161b22' : '#ffffff',
+                backgroundColor: isDark ? '#1b1b1b' : '#ffffff',
                 border: `1px solid ${colors.gridColor}`,
                 borderRadius: '8px',
               }}

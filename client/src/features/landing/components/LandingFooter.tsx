@@ -1,58 +1,76 @@
-import { useEffect, useState } from "react";
 import { BrandLogo } from "@/core/components/common/BrandLogo";
-import { SecurityGame } from "./SecurityGame";
+
+const COLUMNS = [
+  {
+    heading: "Product",
+    links: [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Reports", href: "/reports" },
+      { label: "Settings", href: "/settings/profile" },
+    ],
+  },
+  {
+    heading: "Resources",
+    links: [
+      { label: "Documentation", href: "https://github.com/esryllmz/MyAdmin", external: true },
+      { label: "Repository", href: "https://github.com/esryllmz/MyAdmin", external: true },
+    ],
+  },
+  {
+    heading: "Security",
+    links: [
+      { label: "Access Reviews", href: "/security/access-reviews" },
+      { label: "Sessions", href: "/security/sessions" },
+    ],
+  },
+];
 
 export const LandingFooter = () => {
-  const [isGameOpen, setIsGameOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isGameOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsGameOpen(false);
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isGameOpen]);
-
   return (
-    <>
-      <footer className="border-t border-zinc-200/70 bg-white py-10 dark:border-zinc-800 dark:bg-black">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-6 md:flex-row">
-          <BrandLogo variant="wordmark" size="sm" linkTo={null} />
-
-          <button
-            type="button"
-            onClick={() => setIsGameOpen(true)}
-            className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:-translate-y-0.5 hover:bg-zinc-100 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-white"
-          >
-            🎮 Play Mini-Game
-          </button>
-
-          <div className="text-xs text-zinc-500">© 2026 MyAdmin. All rights reserved.</div>
-        </div>
-      </footer>
-
-      {isGameOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-5xl">
-            <button
-              type="button"
-              onClick={() => setIsGameOpen(false)}
-              className="absolute -right-2 -top-12 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
-            >
-              Close
-            </button>
-            <SecurityGame />
+    <footer className="border-t border-outline-variant dark:border-dark-outline-variant bg-surface-container-lowest dark:bg-dark-surface-container-low">
+      <div className="mx-auto max-w-7xl px-6 py-14">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+          <div className="col-span-2 sm:col-span-1">
+            <BrandLogo variant="footer" linkTo={null} />
           </div>
+
+          {COLUMNS.map((column) => (
+            <div key={column.heading}>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant">
+                {column.heading}
+              </p>
+              <ul className="mt-3 space-y-2">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      target={"external" in link && link.external ? "_blank" : undefined}
+                      rel={"external" in link && link.external ? "noreferrer" : undefined}
+                      className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-      )}
-    </>
+
+        <div className="mt-10 flex flex-col gap-3 border-t border-outline-variant dark:border-dark-outline-variant pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">
+            © 2026 MyAdmin. All rights reserved.
+          </p>
+          <a
+            href="https://github.com/esryllmz/MyAdmin"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface transition-colors"
+          >
+            GitHub Repository
+          </a>
+        </div>
+      </div>
+    </footer>
   );
 };

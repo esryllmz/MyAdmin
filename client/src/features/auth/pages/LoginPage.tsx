@@ -25,7 +25,7 @@ const LoginPage = () => {
           <h1 className="mb-2 text-4xl font-bold tracking-tight text-neutral-950 dark:text-white" style={{ letterSpacing: "-0.02em" }}>
             Welcome Back
           </h1>
-          <p className="text-base text-neutral-600 dark:text-zinc-400">Sign in to your Precision Architecture workspace.</p>
+          <p className="text-base text-neutral-600 dark:text-zinc-400">Sign in to your MyAdmin workspace.</p>
         </div>
 
         <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.06)] dark:border-zinc-800 dark:bg-zinc-900/80">

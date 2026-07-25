@@ -72,25 +72,25 @@ const ActivitiesPage = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-surface-container-low">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-surface-container-low dark:bg-dark-surface-container-low">
       <main className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-end">
             <div>
               <h2
-                className="text-3xl font-bold text-on-background tracking-tight"
+                className="text-3xl font-bold text-on-surface dark:text-dark-on-surface tracking-tight"
                 style={{ letterSpacing: '-0.02em' }}
               >
                 Activity Details
               </h2>
-              <p className="text-sm text-on-surface-variant mt-1">
+              <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant mt-1">
                 System activity logs and data mutations.
               </p>
             </div>
             <button
               onClick={handleExportCsv}
               disabled={isExporting || !filteredActivities.length}
-              className="bg-surface-container-lowest text-on-surface border border-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest text-on-surface dark:text-dark-on-surface border border-outline-variant/60 dark:border-dark-outline-variant px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest dark:hover:bg-dark-surface-container-highest transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-sm">
                 {isExporting ? 'hourglass_empty' : 'download'}
@@ -105,7 +105,7 @@ const ActivitiesPage = () => {
             onEntityChange={handleEntityChange}
             onStatusChange={handleStatusChange}
           />
-          <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/10 shadow-sm">
+          <div className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/60 dark:border-dark-outline-variant shadow-sm">
             <div className="flex">
               <ActivityTable
                 activities={paginatedActivities}
@@ -117,16 +117,16 @@ const ActivitiesPage = () => {
             </div>
 
             {filteredActivities.length > 0 && (
-              <div className="px-5 py-3 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-low/30">
-                <span className="text-xs text-on-surface-variant">
-                  Sayfa <span className="font-semibold text-on-background">{currentPage}</span> / {totalPages}
+              <div className="px-5 py-3 border-t border-outline-variant/60 dark:border-dark-outline-variant flex items-center justify-between bg-surface-container-low/30 dark:bg-dark-surface-container-low/30">
+                <span className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">
+                  Sayfa <span className="font-semibold text-on-surface dark:text-dark-on-surface">{currentPage}</span> / {totalPages}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setPageParam(String(currentPage - 1))}
                     disabled={currentPage <= 1}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     Önceki
@@ -135,7 +135,7 @@ const ActivitiesPage = () => {
                     type="button"
                     onClick={() => setPageParam(String(currentPage + 1))}
                     disabled={currentPage >= totalPages}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     Sonraki
                     <ChevronRight className="w-3.5 h-3.5" />

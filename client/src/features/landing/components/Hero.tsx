@@ -1,71 +1,85 @@
 import { Link } from "react-router-dom";
-import { Eye, PenSquare, Shield } from "lucide-react";
-import { InteractiveShowcase } from "./InteractiveShowcase";
-import { useInstantDemo, type DemoRole } from "../hooks/useInstantDemo";
+import { ArrowRight } from "lucide-react";
 
-const ROLE_SWITCH_OPTIONS: Array<{ role: DemoRole; icon: typeof Shield; label: string }> = [
-  { role: "Admin", icon: Shield, label: "Admin" },
-  { role: "Editor", icon: PenSquare, label: "Editor" },
-  { role: "Viewer", icon: Eye, label: "Viewer" },
+const PREVIEW_STATS = [
+  { label: "API Uptime", value: "99.98%" },
+  { label: "Active Sessions", value: "42" },
+  { label: "Pending Reviews", value: "3" },
+];
+
+const PREVIEW_ROWS = [
+  { label: "Role sync completed", meta: "2 min ago", tone: "ok" },
+  { label: "New user invited", meta: "18 min ago", tone: "ok" },
+  { label: "Failed login attempt", meta: "1 hr ago", tone: "warn" },
 ];
 
 export const Hero = () => {
-  const startInstantDemo = useInstantDemo();
-
   return (
-    <section className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-6 py-16 text-center lg:py-24">
-      <div className="max-w-4xl">
-        <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/70 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-zinc-500 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-zinc-400">
-          .NET 10 · React 19 · Real-Time RBAC
+    <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
+      <div>
+        <span className="inline-flex items-center rounded-md border border-outline-variant dark:border-dark-outline-variant px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant">
+          Admin Console
         </span>
 
-        <h1 className="text-5xl font-black leading-[1.02] tracking-tight text-zinc-950 dark:text-white md:text-7xl">
-          Enterprise-Grade{" "}
-          <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
-            .NET &amp; React
-          </span>{" "}
-          Admin Console
+        <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-on-surface dark:text-dark-on-surface md:text-5xl">
+          Administration, without the noise.
         </h1>
 
-        <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-zinc-600 dark:text-zinc-300 md:text-lg">
-          A full-stack enterprise admin platform with granular RBAC, cryptographic audit logging, real-time
-          monitoring, and a modern React 19 dashboard — backed by a .NET 10 Web API.
+        <p className="mt-5 max-w-lg text-base leading-7 text-on-surface-variant dark:text-dark-on-surface-variant">
+          A focused control center for teams, permissions, security operations, reporting, and system
+          configuration.
         </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-on-surface dark:bg-dark-on-surface px-5 py-3 text-sm font-semibold text-surface dark:text-dark-surface transition-opacity hover:opacity-90"
+          >
+            Open Console
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a
+            href="https://github.com/esryllmz/MyAdmin"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center rounded-md border border-outline-variant dark:border-dark-outline-variant px-5 py-3 text-sm font-semibold text-on-surface dark:text-dark-on-surface transition-colors hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high"
+          >
+            View Documentation
+          </a>
+        </div>
       </div>
 
-      <InteractiveShowcase />
+      <div className="rounded-lg border border-outline-variant dark:border-dark-outline-variant bg-surface-container-lowest dark:bg-dark-surface-container-lowest shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b border-outline-variant dark:border-dark-outline-variant px-5 py-3">
+          <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant">
+            System Overview
+          </span>
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-on-surface-variant dark:text-dark-on-surface-variant">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            Operational
+          </span>
+        </div>
 
-      <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <button
-          type="button"
-          onClick={() => startInstantDemo("Admin")}
-          className="rounded-full bg-gradient-to-r from-amber-400 via-pink-500 to-violet-500 px-6 py-3 text-sm font-bold text-white shadow-[0_0_34px_rgba(236,72,153,0.32)] transition hover:-translate-y-0.5 hover:shadow-[0_0_46px_rgba(168,85,247,0.42)]"
-        >
-          ⚡ Anında Demo ile Tüm Paneli Keşfet
-        </button>
-        <Link
-          to="/login"
-          className="rounded-full px-5 py-3 text-sm font-semibold text-zinc-600 transition hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
-        >
-          Giriş Yap
-        </Link>
-      </div>
+        <div className="grid grid-cols-3 divide-x divide-outline-variant dark:divide-dark-outline-variant border-b border-outline-variant dark:border-dark-outline-variant">
+          {PREVIEW_STATS.map((stat) => (
+            <div key={stat.label} className="px-4 py-4">
+              <p className="text-lg font-bold text-on-surface dark:text-dark-on-surface">{stat.value}</p>
+              <p className="mt-0.5 text-[11px] text-on-surface-variant dark:text-dark-on-surface-variant">{stat.label}</p>
+            </div>
+          ))}
+        </div>
 
-      <div className="flex flex-col items-center gap-2.5">
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-          Canlı demo — bir rol seçip anında keşfedin
-        </p>
-        <div className="flex items-center gap-2 rounded-2xl border border-zinc-200/80 bg-white/70 p-1.5 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/70">
-          {ROLE_SWITCH_OPTIONS.map(({ role, icon: Icon, label }) => (
-            <button
-              key={role}
-              type="button"
-              onClick={() => startInstantDemo(role)}
-              className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-zinc-700 transition-all hover:-translate-y-0.5 hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950"
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
-            </button>
+        <div className="divide-y divide-outline-variant dark:divide-dark-outline-variant">
+          {PREVIEW_ROWS.map((row) => (
+            <div key={row.label} className="flex items-center justify-between px-5 py-3 text-sm">
+              <span className="flex items-center gap-2 text-on-surface dark:text-dark-on-surface">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${row.tone === "warn" ? "bg-warning" : "bg-success"}`}
+                />
+                {row.label}
+              </span>
+              <span className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">{row.meta}</span>
+            </div>
           ))}
         </div>
       </div>

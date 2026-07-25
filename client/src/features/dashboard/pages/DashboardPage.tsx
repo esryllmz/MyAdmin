@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { StatCard } from '../components/StatCard';
 import { LiveActivityFeed } from '@/features/activities/components/LiveActivityFeed';
-import { InboxSummary } from '../components/InboxSummary';
-import { UserRegistrationChart, ActivityDistributionChart } from '../components/Charts';
+import { SystemHealthPanel } from '../components/SystemHealthPanel';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { exportToCsv } from '@/core/utils/exportUtils';
 
 const DashboardPage = () => {
   const [isExporting, setIsExporting] = useState(false);
-  const { stats, chartData, isLoading, isDemoMode } = useDashboardStats();
+  const { stats, isLoading, isDemoMode } = useDashboardStats();
 
   const handleExport = async () => {
     try {
@@ -47,15 +46,15 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full bg-surface dark:bg-dark-surface transition-colors">
+    <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full">
       {/* Header Section */}
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-headline font-bold tracking-tight mb-1 text-on-surface dark:text-dark-on-surface">
+          <h2 className="text-3xl font-bold tracking-tight mb-1 text-on-surface dark:text-dark-on-surface">
             System Overview
           </h2>
           <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant flex items-center gap-2">
-            {isDemoMode ? 'Demo verisi üzerinde canlı simülasyon.' : 'Real-time metrics and activity feed from the platform.'}
+            {isDemoMode ? 'Demo verisi üzerinde canlı simülasyon.' : 'Recent activity and current system state.'}
             {isDemoMode && (
               <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-info">
                 <span className="relative flex h-1.5 w-1.5">
@@ -70,7 +69,7 @@ const DashboardPage = () => {
         <button
           onClick={handleExport}
           disabled={isExporting || isLoading}
-          className="bg-surface-container-lowest dark:bg-dark-surface-container-low border border-outline-variant/20 dark:border-dark-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium text-on-surface dark:text-dark-on-surface hover:bg-surface-container-low dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-surface-container-lowest dark:bg-dark-surface-container-low border border-outline-variant/60 dark:border-dark-outline-variant px-4 py-2 rounded-lg text-sm font-medium text-on-surface dark:text-dark-on-surface hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-[18px]">
             {isExporting ? 'hourglass_empty' : 'download'}
@@ -115,19 +114,13 @@ const DashboardPage = () => {
         />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <UserRegistrationChart data={chartData.userRegistration} isLoading={isLoading} />
-        <ActivityDistributionChart data={chartData.activityDistribution} isLoading={isLoading} />
-      </div>
-
-      {/* Main Content Area */}
+      {/* Main Content Area: recent activity + system health */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <LiveActivityFeed />
         </div>
         <div className="lg:col-span-1">
-          <InboxSummary />
+          <SystemHealthPanel />
         </div>
       </div>
     </div>

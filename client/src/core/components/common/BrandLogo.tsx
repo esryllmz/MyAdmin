@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-type BrandLogoVariant = 'full' | 'icon' | 'wordmark';
+type BrandLogoVariant = 'full' | 'mark' | 'footer' | 'icon' | 'wordmark';
 type BrandLogoSize = 'sm' | 'md' | 'lg';
 
 interface BrandLogoProps {
@@ -10,44 +10,50 @@ interface BrandLogoProps {
   className?: string;
 }
 
-const ICON_SIZE: Record<BrandLogoSize, string> = {
-  sm: 'w-8 h-8 text-base rounded-md',
-  md: 'w-10 h-10 text-xl rounded-lg',
-  lg: 'w-11 h-11 text-xl rounded-lg',
+const MARK_SIZE: Record<BrandLogoSize, string> = {
+  sm: 'w-7 h-7 text-xs rounded-md',
+  md: 'w-9 h-9 text-sm rounded-md',
+  lg: 'w-10 h-10 text-base rounded-md',
 };
 
 const WORDMARK_SIZE: Record<BrandLogoSize, string> = {
-  sm: 'text-base',
-  md: 'text-xl',
-  lg: 'text-2xl',
+  sm: 'text-sm',
+  md: 'text-lg',
+  lg: 'text-xl',
 };
 
-const IconMark = ({ size }: { size: BrandLogoSize }) => (
+const Monogram = ({ size }: { size: BrandLogoSize }) => (
   <div
-    className={`${ICON_SIZE[size]} bg-gradient-to-r from-[#004ac6] to-[#2563eb] text-white flex items-center justify-center font-bold shadow-sm shrink-0`}
+    className={`${MARK_SIZE[size]} bg-on-surface dark:bg-dark-on-surface text-surface dark:text-dark-surface flex items-center justify-center font-bold tracking-tight shrink-0 select-none`}
+    aria-hidden="true"
   >
     M
   </div>
 );
 
 /**
- * Sidebar, TopBar (mobil), PublicLayout ve Footer'daki dağınık "MyAdmin" logo/wordmark
- * implementasyonlarının tek kanonik kaynağı. `full` = ikon + wordmark + tagline (Sidebar),
- * `icon` = sadece kare ikon (TopBar mobil), `wordmark` = sadece metin (Public header/Footer).
+ * Sidebar, TopBar, PublicLayout ve Footer'daki logo kullanımlarının tek kanonik kaynağı.
+ * `full` = monogram + wordmark + tagline (Sidebar açık), `mark`/`icon` = yalnızca monogram
+ * (Sidebar kapalı, TopBar mobil), `wordmark` = yalnızca metin, `footer` = küçük monogram + metin.
  */
 export const BrandLogo = ({ variant = 'full', size = 'md', linkTo = '/', className = '' }: BrandLogoProps) => {
-  const content = (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {(variant === 'full' || variant === 'icon') && <IconMark size={size} />}
+  const showMark = variant === 'full' || variant === 'mark' || variant === 'icon' || variant === 'footer';
+  const showWordmark = variant === 'full' || variant === 'wordmark' || variant === 'footer';
 
-      {(variant === 'full' || variant === 'wordmark') && (
-        <div>
-          <p className={`${WORDMARK_SIZE[size]} font-black tracking-tighter text-on-surface dark:text-dark-on-surface leading-none`}>
+  const content = (
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      {showMark && <Monogram size={variant === 'footer' ? 'sm' : size} />}
+
+      {showWordmark && (
+        <div className="leading-none">
+          <p
+            className={`${WORDMARK_SIZE[variant === 'footer' ? 'sm' : size]} font-bold tracking-tight text-on-surface dark:text-dark-on-surface leading-none`}
+          >
             MyAdmin
           </p>
           {variant === 'full' && (
             <p className="text-[10px] text-on-surface-variant dark:text-dark-on-surface-variant font-medium uppercase tracking-widest mt-1">
-              Command Center
+              Control Center
             </p>
           )}
         </div>

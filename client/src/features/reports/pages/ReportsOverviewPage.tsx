@@ -8,7 +8,7 @@ import { useRoles } from '@/features/roles/hooks/useRoles';
 import { useActivities } from '@/features/activities/hooks/useActivities';
 import { exportToCsv } from '@/core/utils/exportUtils';
 
-const ReportsPage = () => {
+const ReportsOverviewPage = () => {
   const [isExporting, setIsExporting] = useState(false);
   const { data: users = [] } = useUsers();
   const { data: roles = [] } = useRoles();
@@ -38,7 +38,7 @@ const ReportsPage = () => {
       }
       exportToCsv(
         usersByRole.map((row) => ({ Rol: row.role, 'Kullanıcı Sayısı': row.count })),
-        'reports-users-by-role'
+        'reports-overview-users-by-role'
       );
       toast.success('Rapor CSV olarak indirildi.');
     } finally {
@@ -46,36 +46,17 @@ const ReportsPage = () => {
     }
   };
 
-  const handleExportPdf = () => {
-    toast.info('PDF raporu demo ortamında simüle edilmiştir — gerçek dosya üretimi bu projede aktif değildir.');
-  };
-
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full">
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-on-surface tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-            Reports & Analytics
-          </h2>
-          <p className="text-sm text-on-surface-variant mt-1">Sistem verilerinden türetilen detaylı raporlar.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportCsv}
-            disabled={isExporting}
-            className="bg-surface-container-lowest text-on-surface border border-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest transition-colors flex items-center gap-2 disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-[18px]">download</span>
-            Export CSV
-          </button>
-          <button
-            onClick={handleExportPdf}
-            className="bg-surface-container-lowest text-on-surface border border-outline-variant/20 px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest transition-colors flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-            Export PDF
-          </button>
-        </div>
+    <div>
+      <div className="mb-6 flex justify-end">
+        <button
+          onClick={handleExportCsv}
+          disabled={isExporting}
+          className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest text-on-surface dark:text-dark-on-surface border border-outline-variant/60 dark:border-dark-outline-variant px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-colors flex items-center gap-2 disabled:opacity-50"
+        >
+          <span className="material-symbols-outlined text-[18px]">download</span>
+          Export CSV
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -110,19 +91,19 @@ const ReportsPage = () => {
         <ActivityDistributionChart data={chartData.activityDistribution} isLoading={isLoading} />
       </div>
 
-      <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 p-6">
-        <h3 className="text-lg font-semibold text-on-surface mb-4">Role Bazlı Kullanıcı Dağılımı</h3>
+      <div className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-xl border border-outline-variant/60 dark:border-dark-outline-variant p-6">
+        <h3 className="text-lg font-semibold text-on-surface dark:text-dark-on-surface mb-4">Role Bazlı Kullanıcı Dağılımı</h3>
         {usersByRole.length === 0 ? (
-          <p className="text-sm text-on-surface-variant">Henüz veri yok.</p>
+          <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant">Henüz veri yok.</p>
         ) : (
           <div className="space-y-2">
             {usersByRole.map((row) => (
               <div
                 key={row.role}
-                className="flex items-center justify-between p-3.5 rounded-lg bg-surface-container-low/50 border border-outline-variant/10"
+                className="flex items-center justify-between p-3.5 rounded-lg bg-surface-container-low/50 dark:bg-dark-surface-container-low/50 border border-outline-variant/60 dark:border-dark-outline-variant"
               >
-                <span className="text-sm font-medium text-on-surface">{row.role}</span>
-                <span className="text-sm font-bold text-primary">{row.count} kullanıcı</span>
+                <span className="text-sm font-medium text-on-surface dark:text-dark-on-surface">{row.role}</span>
+                <span className="text-sm font-bold text-on-surface dark:text-dark-on-surface">{row.count} kullanıcı</span>
               </div>
             ))}
           </div>
@@ -132,4 +113,4 @@ const ReportsPage = () => {
   );
 };
 
-export default ReportsPage;
+export default ReportsOverviewPage;

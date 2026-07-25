@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "@/core/store/store";
 import { ToastProvider } from "./ToastProvider";
 import { ThemeProvider } from "@/core/theme/ThemeContext";
-import { CommandPalette } from "@/core/components/CommandPalette";
 import { RealtimeBridge } from "@/core/realtime/RealtimeBridge";
 
 const queryClient = new QueryClient({
@@ -29,7 +28,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
           <BrowserRouter>
             <ToastProvider>
               {children}
-              <CommandPalette />
               <RealtimeBridge />
             </ToastProvider>
           </BrowserRouter>

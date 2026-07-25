@@ -1,17 +1,19 @@
 import { Hero } from "../components/Hero";
-import { BentoFeatures } from "../components/BentoFeatures";
-import { ArchitectureShowcase } from "../components/ArchitectureShowcase";
+import { CapabilitiesGrid } from "../components/CapabilitiesGrid";
+import { WorkflowSection } from "../components/WorkflowSection";
+import { SecuritySection } from "../components/SecuritySection";
+import { ProductScreens } from "../components/ProductScreens";
 import { LandingFooter } from "../components/LandingFooter";
 import { PublicLayout } from "@/layouts/PublicLayout";
-import { StarryBackground } from "@/core/components/StarryBackground";
 
 export default function LandingPage() {
   return (
-    <PublicLayout className="min-h-screen px-6 py-4" mainClassName="flex-1" footer={<LandingFooter />}>
-      <StarryBackground />
+    <PublicLayout className="min-h-screen" mainClassName="flex-1" footer={<LandingFooter />}>
       <Hero />
-      <BentoFeatures />
-      <ArchitectureShowcase />
+      <CapabilitiesGrid />
+      <WorkflowSection />
+      <SecuritySection />
+      <ProductScreens />
     </PublicLayout>
   );
 }

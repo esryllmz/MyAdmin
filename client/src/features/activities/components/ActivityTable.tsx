@@ -9,9 +9,9 @@ interface ActivityTableProps {
 }
 
 export const ActivityTable = ({ activities, selectedId, onSelectRow, isLoading }: ActivityTableProps) => (
-  <div className="flex-1 border-r border-outline-variant/10 overflow-x-auto">
+  <div className="flex-1 border-r border-outline-variant/60 dark:border-dark-outline-variant overflow-x-auto">
     <table className="w-full text-left text-sm whitespace-nowrap">
-      <thead className="bg-surface-container-low text-on-surface-variant text-xs font-semibold uppercase tracking-wider border-b border-outline-variant/10">
+      <thead className="bg-surface-container-low dark:bg-dark-surface-container-low text-on-surface-variant dark:text-dark-on-surface-variant text-xs font-semibold uppercase tracking-wider border-b border-outline-variant/60 dark:border-dark-outline-variant">
         <tr>
           <th className="px-6 py-4">Timestamp</th>
           <th className="px-6 py-4">Actor</th>
@@ -19,7 +19,7 @@ export const ActivityTable = ({ activities, selectedId, onSelectRow, isLoading }
           <th className="px-6 py-4">Status</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-outline-variant/5">
+      <tbody className="divide-y divide-outline-variant/60 dark:divide-dark-outline-variant">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, index) => (
             <tr key={index}>
@@ -31,7 +31,7 @@ export const ActivityTable = ({ activities, selectedId, onSelectRow, isLoading }
           ))
         ) : activities.length === 0 ? (
           <tr>
-            <td colSpan={4} className="px-6 py-16 text-center text-on-surface-variant text-sm">
+            <td colSpan={4} className="px-6 py-16 text-center text-on-surface-variant dark:text-dark-on-surface-variant text-sm">
               Bu filtrelerle eşleşen kayıt bulunamadı.
             </td>
           </tr>
@@ -40,15 +40,15 @@ export const ActivityTable = ({ activities, selectedId, onSelectRow, isLoading }
             <tr
               key={activity.id}
               onClick={() => onSelectRow(activity.id)}
-              className={`hover:bg-surface-container-highest transition-colors cursor-pointer ${selectedId === activity.id ? 'bg-surface-container-high/60' : ''
+              className={`hover:bg-surface-container-high/60 dark:hover:bg-dark-surface-container-high/60 transition-colors cursor-pointer ${selectedId === activity.id ? 'bg-surface-container-high/60 dark:bg-dark-surface-container-high/60' : ''
                 }`}
             >
-              <td className="px-6 py-4 text-on-surface-variant">
+              <td className="px-6 py-4 text-on-surface-variant dark:text-dark-on-surface-variant">
                 {new Date(activity.createdDate).toLocaleString('tr-TR')}
               </td>
-              <td className="px-6 py-4 font-medium text-on-surface">{activity.userName ?? 'Sistem'}</td>
+              <td className="px-6 py-4 font-medium text-on-surface dark:text-dark-on-surface">{activity.userName ?? 'Sistem'}</td>
               <td className="px-6 py-4">
-                <span className="bg-primary-container/20 text-primary px-2 py-1 rounded-md text-xs font-semibold">
+                <span className="bg-on-surface/10 dark:bg-dark-on-surface/10 text-on-surface dark:text-dark-on-surface px-2 py-1 rounded-md text-xs font-semibold">
                   {activity.action} · {activity.entityName}
                 </span>
               </td>

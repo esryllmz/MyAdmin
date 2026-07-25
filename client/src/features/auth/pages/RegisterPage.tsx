@@ -26,7 +26,7 @@ const RegisterPage = () => {
             Create Your Account
           </h1>
           <p className="text-base leading-relaxed text-neutral-600 dark:text-zinc-400">
-            Establish sovereign control with .NET Core Precision Architecture.
+            Join your team's MyAdmin workspace.
           </p>
         </div>
 

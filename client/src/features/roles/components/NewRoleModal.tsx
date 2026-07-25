@@ -75,7 +75,7 @@ const NewRoleModal = ({ isOpen, onClose }: NewRoleModalProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">
               Rol Adı
             </label>
             <input
@@ -84,12 +84,12 @@ const NewRoleModal = ({ isOpen, onClose }: NewRoleModalProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="örn. Support"
-              className="w-full bg-surface border border-outline-variant/20 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary transition-all"
+              className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant text-on-surface dark:text-dark-on-surface rounded-lg px-4 py-2 text-sm outline-none focus:border-outline dark:focus:border-dark-outline transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">
               Etiket
             </label>
             <input
@@ -97,12 +97,12 @@ const NewRoleModal = ({ isOpen, onClose }: NewRoleModalProps) => {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="örn. Destek Ekibi"
-              className="w-full bg-surface border border-outline-variant/20 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary transition-all"
+              className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant text-on-surface dark:text-dark-on-surface rounded-lg px-4 py-2 text-sm outline-none focus:border-outline dark:focus:border-dark-outline transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">
               Açıklama
             </label>
             <textarea
@@ -110,18 +110,18 @@ const NewRoleModal = ({ isOpen, onClose }: NewRoleModalProps) => {
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="Bu rolün ne için kullanılacağını açıklayın."
-              className="w-full bg-surface border border-outline-variant/20 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary transition-all resize-none"
+              className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant text-on-surface dark:text-dark-on-surface rounded-lg px-4 py-2 text-sm outline-none focus:border-outline dark:focus:border-dark-outline transition-all resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-2">
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-2">
               Yetki Seçimi
             </label>
             <div className="max-h-48 overflow-y-auto space-y-3 pr-1">
               {permissionGroups.map((group) => (
                 <div key={group.key}>
-                  <p className="text-xs font-semibold text-on-surface-variant mb-1.5">{group.label}</p>
+                  <p className="text-xs font-semibold text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">{group.label}</p>
                   <div className="space-y-1.5 pl-2">
                     {group.permissions.map((permission) => (
                       <label key={permission.id} className="flex items-center gap-2.5 cursor-pointer">
@@ -129,9 +129,9 @@ const NewRoleModal = ({ isOpen, onClose }: NewRoleModalProps) => {
                           type="checkbox"
                           checked={selectedIds.includes(permission.id)}
                           onChange={() => togglePermission(permission.id)}
-                          className="rounded border-outline-variant/40 text-primary focus:ring-primary"
+                          className="rounded border-outline-variant/60 dark:border-dark-outline-variant text-on-surface dark:text-dark-on-surface focus:ring-0"
                         />
-                        <span className="text-sm text-on-surface">{permission.name}</span>
+                        <span className="text-sm text-on-surface dark:text-dark-on-surface">{permission.name}</span>
                       </label>
                     ))}
                   </div>
@@ -144,14 +144,14 @@ const NewRoleModal = ({ isOpen, onClose }: NewRoleModalProps) => {
             <button
               type="button"
               onClick={() => handleOpenChange(false)}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-colors"
             >
               İptal
             </button>
             <button
               type="submit"
               disabled={createRole.isPending}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#004ac6] to-[#2563eb] text-white text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-on-surface dark:bg-dark-on-surface text-surface dark:text-dark-surface text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {createRole.isPending ? 'Oluşturuluyor...' : 'Rol Oluştur'}
             </button>
