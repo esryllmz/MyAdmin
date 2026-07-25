@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ActivityFilter } from '../components/ActivityFilter';
 import { ActivityTable } from '../components/ActivityTable';
 import { ActivityDetail } from '../components/ActivityDetail';
 import { useActivities } from '../hooks/useActivities';
 import { exportToCsv } from '@/core/utils/exportUtils';
 import { useSearchParamState } from '@/core/hooks/useDebouncedSearchParams';
+
+const PAGE_SIZE = 10;
 
 const ActivitiesPage = () => {
   const [isExporting, setIsExporting] = useState(false);
@@ -14,6 +17,8 @@ const ActivitiesPage = () => {
   const { data: activities = [], isLoading } = useActivities();
   const [entityFilter, setEntityFilter] = useSearchParamState('entity', 'all');
   const [statusFilter, setStatusFilter] = useSearchParamState('status', 'all');
+  const [pageParam, setPageParam] = useSearchParamState('page', '1');
+  const page = Math.max(1, Number(pageParam) || 1);
 
   const entityOptions = useMemo(
     () => Array.from(new Set(activities.map((activity) => activity.entityName))).sort(),
@@ -31,7 +36,24 @@ const ActivitiesPage = () => {
     });
   }, [activities, entityFilter, statusFilter]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredActivities.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedActivities = filteredActivities.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
   const selectedActivity = filteredActivities.find((activity) => activity.id === selectedActivityId) ?? null;
+
+  const handleEntityChange = (value: string) => {
+    setEntityFilter(value);
+    setPageParam('1');
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
+    setPageParam('1');
+  };
 
   const handleExportCsv = async () => {
     try {
@@ -80,17 +102,47 @@ const ActivitiesPage = () => {
             entity={entityFilter}
             status={statusFilter}
             entityOptions={entityOptions}
-            onEntityChange={setEntityFilter}
-            onStatusChange={setStatusFilter}
+            onEntityChange={handleEntityChange}
+            onStatusChange={handleStatusChange}
           />
-          <div className="bg-surface-container-lowest rounded-xl overflow-hidden flex border border-outline-variant/10 shadow-sm">
-            <ActivityTable
-              activities={filteredActivities}
-              selectedId={selectedActivityId}
-              onSelectRow={setSelectedActivityId}
-              isLoading={isLoading}
-            />
-            <ActivityDetail activity={selectedActivity} />
+          <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/10 shadow-sm">
+            <div className="flex">
+              <ActivityTable
+                activities={paginatedActivities}
+                selectedId={selectedActivityId}
+                onSelectRow={setSelectedActivityId}
+                isLoading={isLoading}
+              />
+              <ActivityDetail key={selectedActivity?.id ?? 'none'} activity={selectedActivity} />
+            </div>
+
+            {filteredActivities.length > 0 && (
+              <div className="px-5 py-3 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-low/30">
+                <span className="text-xs text-on-surface-variant">
+                  Sayfa <span className="font-semibold text-on-background">{currentPage}</span> / {totalPages}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPageParam(String(currentPage - 1))}
+                    disabled={currentPage <= 1}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    Önceki
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPageParam(String(currentPage + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    Sonraki
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

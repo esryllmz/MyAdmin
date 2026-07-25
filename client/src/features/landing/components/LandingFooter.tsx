@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/core/components/common/BrandLogo";
 import { SecurityGame } from "./SecurityGame";
 
 export const LandingFooter = () => {
@@ -24,7 +25,7 @@ export const LandingFooter = () => {
     <>
       <footer className="border-t border-zinc-200/70 bg-white py-10 dark:border-zinc-800 dark:bg-black">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-6 md:flex-row">
-          <div className="font-bold text-zinc-950 dark:text-white">MyAdmin</div>
+          <BrandLogo variant="wordmark" size="sm" linkTo={null} />
 
           <button
             type="button"
@@ -44,7 +45,7 @@ export const LandingFooter = () => {
             <button
               type="button"
               onClick={() => setIsGameOpen(false)}
-              className="absolute -right-2 -top-12 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+              className="absolute -right-2 -top-12 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
             >
               Close
             </button>

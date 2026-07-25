@@ -91,7 +91,7 @@ export const InteractiveShowcase = () => {
   };
 
   return (
-    <div className="w-full overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/75 text-left shadow-2xl shadow-zinc-900/10 backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/70 dark:shadow-black/30">
+    <div className="w-full overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/75 text-left shadow-2xl shadow-zinc-900/10 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/70 dark:shadow-black/30">
       <div className="flex items-center gap-3 border-b border-zinc-200/70 bg-zinc-50/80 px-5 py-3 dark:border-zinc-800 dark:bg-zinc-950/80">
         <div className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />

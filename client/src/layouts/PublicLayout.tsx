@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/core/components/ThemeToggle";
+import { BrandLogo } from "@/core/components/common/BrandLogo";
 import { useInstantDemo } from "@/features/landing/hooks/useInstantDemo";
 import { FloatingDemoBar } from "@/features/landing/components/FloatingDemoBar";
 import type { ReactNode } from "react";
@@ -23,12 +24,7 @@ export const PublicLayout = ({
     <div className={`relative isolate bg-white dark:bg-black text-neutral-950 dark:text-white font-sans antialiased flex flex-col ${className}`}>
       <header className="sticky top-0 z-50 shrink-0 border-none bg-transparent px-8 py-4">
         <div className="mx-auto flex items-center justify-between gap-3 max-w-7xl">
-          <Link
-            to="/"
-            className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white"
-          >
-            MyAdmin
-          </Link>
+          <BrandLogo variant="wordmark" size="lg" linkTo="/" />
 
           <div className="flex items-center gap-2 sm:gap-3">
             <a

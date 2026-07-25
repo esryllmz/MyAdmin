@@ -20,8 +20,11 @@ const EVENT_COLORS: Record<ActivityEventType, string> = {
   "demo-role-switch": "text-info bg-info/10",
 };
 
+const VISIBLE_EVENT_COUNT = 5;
+
 export const LiveActivityFeed = () => {
   const events = useSelector((state: RootState) => state.activityFeed.events);
+  const visibleEvents = events.slice(0, VISIBLE_EVENT_COUNT);
   const [flashId, setFlashId] = useState<string | null>(null);
   const latestIdRef = useRef<string | null>(null);
 
@@ -53,8 +56,8 @@ export const LiveActivityFeed = () => {
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {events.length === 0 ? (
+      <div className="flex-1 overflow-hidden">
+        {visibleEvents.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center gap-3 text-center px-6">
             <span className="material-symbols-outlined text-4xl text-on-surface-variant/20">bolt</span>
             <p className="text-sm text-on-surface-variant">
@@ -63,7 +66,7 @@ export const LiveActivityFeed = () => {
           </div>
         ) : (
           <ul className="divide-y divide-outline-variant/5">
-            {events.map((event) => {
+            {visibleEvents.map((event) => {
               const Icon = EVENT_ICONS[event.type];
               return (
                 <li

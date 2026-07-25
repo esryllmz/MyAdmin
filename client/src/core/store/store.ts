@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../../features/auth/store/authSlice";
 import activityFeedReducer from "../../features/activities/store/activityFeedSlice";
+import uiReducer from "./uiSlice";
 
 /**
  * Root Store Yapılandırması
@@ -11,6 +12,7 @@ export const store = configureStore({
     // Özellik bazlı reducer'ları buraya ekliyoruz
     auth: authReducer,
     activityFeed: activityFeedReducer,
+    ui: uiReducer,
   },
   // Veri tipi güvenliği için middleware ayarları
   middleware: (getDefaultMiddleware) =>

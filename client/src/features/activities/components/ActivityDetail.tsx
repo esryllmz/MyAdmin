@@ -1,8 +1,14 @@
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import { Eye, EyeOff } from 'lucide-react';
+import { useIsAdmin } from '@/core/hooks/useIsAdmin';
 import type { ActivityResponseDto } from '../types/activityTypes';
 
 interface ActivityDetailProps {
   activity: ActivityResponseDto | null;
 }
+
+const MASK_PLACEHOLDER = '••••••••••••••••••••';
 
 const tryFormatJson = (value: string | null): string | null => {
   if (!value) return null;
@@ -14,6 +20,9 @@ const tryFormatJson = (value: string | null): string | null => {
 };
 
 export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
+  const [isRevealed, setIsRevealed] = useState(false);
+  const isAdmin = useIsAdmin();
+
   if (!activity) {
     return (
       <div className="w-96 bg-surface-bright flex flex-col items-center justify-center hidden lg:flex border-l border-outline-variant/10 p-6 text-center gap-2">
@@ -25,6 +34,14 @@ export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
 
   const oldValues = tryFormatJson(activity.oldValues);
   const newValues = tryFormatJson(activity.newValues);
+
+  const handleToggleReveal = () => {
+    if (!isAdmin) {
+      toast.error('Hassas verileri görüntülemek için Admin yetkisi gereklidir.');
+      return;
+    }
+    setIsRevealed((prev) => !prev);
+  };
 
   return (
     <div className="w-96 bg-surface-bright flex flex-col hidden lg:flex border-l border-outline-variant/10">
@@ -70,20 +87,41 @@ export const ActivityDetail = ({ activity }: ActivityDetailProps) => {
           </div>
         </div>
 
-        {oldValues && (
+        {(oldValues || newValues) && (
           <div>
-            <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Eski Değer</p>
-            <div className="bg-inverse-surface rounded-lg p-4 font-mono text-xs text-inverse-on-surface leading-relaxed overflow-x-auto">
-              <pre>{oldValues}</pre>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">
+                Değişiklik Detayı (Hassas Veri)
+              </p>
+              <button
+                type="button"
+                onClick={handleToggleReveal}
+                title={isAdmin ? (isRevealed ? 'Gizle' : 'Göster') : 'Bu işlem için Admin yetkisi gereklidir'}
+                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors"
+              >
+                {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {isRevealed ? 'Gizle' : 'Göster'}
+              </button>
             </div>
-          </div>
-        )}
 
-        {newValues && (
-          <div>
-            <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Yeni Değer</p>
-            <div className="bg-inverse-surface rounded-lg p-4 font-mono text-xs text-inverse-on-surface leading-relaxed overflow-x-auto">
-              <pre>{newValues}</pre>
+            <div className="space-y-3">
+              {oldValues && (
+                <div>
+                  <p className="text-[10px] font-semibold text-on-surface-variant mb-1">Eski Değer</p>
+                  <div className="bg-inverse-surface rounded-lg p-4 font-mono text-xs text-inverse-on-surface leading-relaxed overflow-x-auto">
+                    <pre>{isRevealed ? oldValues : MASK_PLACEHOLDER}</pre>
+                  </div>
+                </div>
+              )}
+
+              {newValues && (
+                <div>
+                  <p className="text-[10px] font-semibold text-on-surface-variant mb-1">Yeni Değer</p>
+                  <div className="bg-inverse-surface rounded-lg p-4 font-mono text-xs text-inverse-on-surface leading-relaxed overflow-x-auto">
+                    <pre>{isRevealed ? newValues : MASK_PLACEHOLDER}</pre>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

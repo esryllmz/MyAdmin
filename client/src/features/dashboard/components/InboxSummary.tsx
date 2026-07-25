@@ -1,4 +1,9 @@
+import { useDispatch } from 'react-redux';
+import { openNotificationCenter } from '@/core/store/uiSlice';
+
 export const InboxSummary = () => {
+  const dispatch = useDispatch();
+
   const items = [
     { label: 'System Alerts', desc: 'Unread messages', count: 12, icon: 'mail', color: 'primary' },
     { label: 'Approvals', desc: 'Pending action', count: 5, icon: 'assignment_late', color: 'secondary' },
@@ -24,7 +29,10 @@ export const InboxSummary = () => {
           </div>
         ))}
       </div>
-      <button className="w-full py-2 bg-surface-container-low text-primary text-sm font-medium rounded-lg hover:bg-surface-container-highest transition-colors mt-auto">
+      <button
+        onClick={() => dispatch(openNotificationCenter())}
+        className="w-full py-2 bg-surface-container-low text-primary text-sm font-medium rounded-lg hover:bg-surface-container-highest transition-colors mt-auto"
+      >
         Open Notification Center
       </button>
     </div>

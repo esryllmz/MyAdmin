@@ -1,14 +1,13 @@
 ﻿import { Link } from "react-router-dom";
 import { Button } from "@/core/components/ui/button";
 import { ThemeToggle } from "@/core/components/ThemeToggle";
+import { BrandLogo } from "@/core/components/common/BrandLogo";
 
 export const LandingNavbar = () => {
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-neutral-200 dark:border-zinc-800 transition-colors">
       <div className="flex justify-between items-center max-w-7xl mx-auto px-6 h-16">
-        <div className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white">
-          MyAdmin
-        </div>
+        <BrandLogo variant="wordmark" size="lg" linkTo={null} />
 
         <div className="flex items-center gap-4">
           <ThemeToggle />

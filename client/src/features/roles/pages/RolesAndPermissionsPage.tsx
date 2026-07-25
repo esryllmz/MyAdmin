@@ -2,12 +2,16 @@ import { useState } from 'react';
 import RoleList from '../components/RoleList';
 import PermissionPanel from '../components/PermissionPanel';
 import NewRoleModal from '../components/NewRoleModal';
+import PermissionCatalog from '../components/PermissionCatalog';
 import { useRoles } from '../hooks/useRoles';
+
+type TabKey = 'roles' | 'permissions';
 
 const RolesAndPermissionsPage = () => {
   const { data: roles } = useRoles();
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [isNewRoleModalOpen, setIsNewRoleModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabKey>('roles');
 
   // Roller ilk yüklendiğinde varsayılan olarak ilk rolü seç — useEffect yerine
   // render sırasında ayarlama (bu koşul yalnızca henüz seçim yokken tetiklenir).
@@ -25,18 +29,38 @@ const RolesAndPermissionsPage = () => {
       </div>
 
       <div className="flex gap-6 border-b border-outline-variant/20 mb-8">
-        <button className="pb-3 border-b-2 border-primary text-primary font-semibold text-sm px-1">Roles</button>
-        <button className="pb-3 border-b-2 border-transparent text-on-surface-variant font-medium text-sm px-1">Permissions</button>
+        <button
+          onClick={() => setActiveTab('roles')}
+          className={`pb-3 border-b-2 text-sm px-1 transition-colors ${activeTab === 'roles'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-on-surface-variant font-medium hover:text-on-surface'
+            }`}
+        >
+          Roles
+        </button>
+        <button
+          onClick={() => setActiveTab('permissions')}
+          className={`pb-3 border-b-2 text-sm px-1 transition-colors ${activeTab === 'permissions'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-on-surface-variant font-medium hover:text-on-surface'
+            }`}
+        >
+          Permissions
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <RoleList
-          selectedRoleId={selectedRoleId}
-          onSelectRole={setSelectedRoleId}
-          onNewRole={() => setIsNewRoleModalOpen(true)}
-        />
-        <PermissionPanel selectedRoleId={selectedRoleId} />
-      </div>
+      {activeTab === 'roles' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <RoleList
+            selectedRoleId={selectedRoleId}
+            onSelectRole={setSelectedRoleId}
+            onNewRole={() => setIsNewRoleModalOpen(true)}
+          />
+          <PermissionPanel selectedRoleId={selectedRoleId} />
+        </div>
+      ) : (
+        <PermissionCatalog />
+      )}
 
       <NewRoleModal isOpen={isNewRoleModalOpen} onClose={() => setIsNewRoleModalOpen(false)} />
     </div>

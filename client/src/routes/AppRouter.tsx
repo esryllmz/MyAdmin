@@ -5,10 +5,12 @@ import ForgotPasswordPage from '@/features/auth/pages/ForgotPasswordPage';
 import ProtectedRoute from './ProtectedRoute';
 import LandingPage from '../features/landing/pages/LandingPage';
 import DashboardPage from '@/features/dashboard/pages/DashboardPage';
-import UserManagementPage from '@/features/users/pages/UserManagementPage'; 
+import UserManagementPage from '@/features/users/pages/UserManagementPage';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import RolesAndPermissionsPage from '@/features/roles/pages/RolesAndPermissionsPage';
 import ActivitiesPage from '@/features/activities/pages/ActivitiesPage';
+import ReportsPage from '@/features/reports/pages/ReportsPage';
+import SettingsPage from '@/features/settings/pages/SettingsPage';
 
 export const AppRouter = () => {
   return (
@@ -31,12 +33,22 @@ export const AppRouter = () => {
 
         {/* Diğer sayfalar */}
         <Route path="/team" element={<UserManagementPage />} />
-        <Route path="/roles" element={<RolesAndPermissionsPage />} />
-        <Route path="/activities" element={<ActivitiesPage />} /> 
-
+        <Route path="/activities" element={<ActivitiesPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
-      {/* Admin Özel Alanı */}
+      {/* Admin Özel Alanı — Roller ve İzinler sadece Admin rolüne açık */}
+      <Route
+        element={
+          <ProtectedRoute requiredRole="Admin">
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/roles" element={<RolesAndPermissionsPage />} />
+      </Route>
+
       <Route
         path="/admin"
         element={

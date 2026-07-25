@@ -1,4 +1,5 @@
 import { AlertTriangle, Bell, CheckCircle2, Info, XCircle } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Popover,
   PopoverContent,
@@ -6,6 +7,8 @@ import {
 } from "@/core/components/ui/popover";
 import { Skeleton } from "@/core/components/ui/skeleton";
 import { formatRelativeTime } from "@/core/utils/formatRelativeTime";
+import { setNotificationCenterOpen } from "@/core/store/uiSlice";
+import type { RootState } from "@/core/store/store";
 import {
   useMarkAllNotificationsAsRead,
   useMarkNotificationAsRead,
@@ -30,11 +33,13 @@ export const NotificationCenter = () => {
   const { data: notifications = [], isLoading } = useNotifications();
   const markAsRead = useMarkNotificationAsRead();
   const markAllAsRead = useMarkAllNotificationsAsRead();
+  const dispatch = useDispatch();
+  const isOpen = useSelector((state: RootState) => state.ui.isNotificationCenterOpen);
 
   const unreadCount = notifications.filter((notification) => !notification.isRead).length;
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={(open) => dispatch(setNotificationCenterOpen(open))}>
       <PopoverTrigger asChild>
         <button
           type="button"

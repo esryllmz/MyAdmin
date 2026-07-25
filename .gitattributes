@@ -61,3 +61,8 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+package-lock.json linguist-generated=true
+node_modules/* linguist-vendored=true
+src/**/*.mock.ts linguist-vendored=true
+*.json linguist-documentation=true

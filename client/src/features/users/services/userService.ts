@@ -34,11 +34,15 @@ export const userService = {
     });
   },
 
-  updateUserByAdmin: async (_id: string, request: FormData): Promise<ApiResponse<null>> =>
-    await apiClient<null>("/users/profile", {
+  updateUserByAdmin: async (_id: string, request: FormData): Promise<ApiResponse<null>> => {
+    if (isDemoModeActive()) {
+      return createMockResponse(null, "Profil bilgileri güncellendi (demo).");
+    }
+    return await apiClient<null>("/users/profile", {
       method: "PUT",
       body: request,
-    }),
+    });
+  },
 
   deleteUser: async (id: string): Promise<ApiResponse<null>> => {
     if (isDemoModeActive()) {

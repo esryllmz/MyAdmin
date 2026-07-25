@@ -2,7 +2,7 @@ import { ShieldCheck, Users, History } from "lucide-react";
 
 export const BentoFeatures = () => {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-20 bg-neutral-50 dark:bg-black rounded-[2rem] my-10 border border-neutral-200 dark:border-zinc-800">
+    <section className="max-w-7xl mx-auto px-6 py-20 bg-neutral-50 dark:bg-black rounded-3xl my-10 border border-neutral-200 dark:border-zinc-800">
       <div className="mb-16 md:flex justify-between items-end">
         <div className="max-w-xl">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-neutral-950 dark:text-white">The Science of Security.</h2>
@@ -22,7 +22,7 @@ export const BentoFeatures = () => {
             </p>
           </div>
           <div className="mt-8 bg-neutral-50 dark:bg-zinc-950/70 rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-md border border-neutral-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-neutral-200 dark:border-zinc-800">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-zinc-800 text-neutral-950 dark:text-white flex items-center justify-center text-xs font-bold">SA</div>
                 <div className="text-sm font-semibold text-neutral-950 dark:text-white">System Administrator</div>
