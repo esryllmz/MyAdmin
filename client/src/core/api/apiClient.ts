@@ -110,7 +110,7 @@ export const apiClient = async <T>(
 
     // --- Güvenli Yanıt İşleme ---
     const responseText = await response.text();
-    return parseResponse<T>(responseText, response.status, options.method as string);
+    return parseResponse<T>(responseText, response.status, options.method);
 
   } catch (error: unknown) {
     const isApiResponse = (err: unknown): err is ApiResponse<T> => {
@@ -128,8 +128,11 @@ export const apiClient = async <T>(
       }
     }
 
+    // Sadece gerçek bir ağ/bağlantı hatası burada yakalanır (handleApiError'a
+    // hiç uğramadan) — bu yüzden bu tek toast tüm eşzamanlı istekler için
+    // sabit bir id ile birikmeden gösterilir.
     const errorMessage = error instanceof Error ? error.message : "Sunucuya bağlanılamadı.";
-    toast.error(errorMessage);
+    toast.error(errorMessage, { toastId: "network-error" });
     throw error;
   }
 };
@@ -156,7 +159,7 @@ const parseResponse = <T>(responseText: string, statusCode: number, method?: str
   }
 
   if (!result.success && statusCode >= 400) {
-    handleApiError(result);
+    handleApiError(result, method);
     throw result;
   }
 
@@ -175,15 +178,24 @@ const handleLogout = () => {
   window.location.href = "/login";
 };
 
-const handleApiError = (errorResponse: ApiResponse<unknown>) => {
+const handleApiError = (errorResponse: ApiResponse<unknown>, method?: string) => {
   const { statusCode, message, errors } = errorResponse;
+  const isMutation = !!method && method.toUpperCase() !== "GET";
 
   switch (statusCode) {
     case 401:
       // Genellikle refresh logic tarafından halledilir
       break;
     case 403:
-      toast.error("Bu işlem için yetkiniz bulunmamaktadır.");
+      // Sayfa açılışındaki arka plan GET isteklerinde (ör. Dashboard'un
+      // useUsers/useRoles/useActivities/useNotifications sorguları) 403 sessizce
+      // yutulur — bu gerçek bir kullanıcı aksiyonu değil. Yalnızca kullanıcının
+      // tetiklediği bir mutasyon (POST/PUT/PATCH/DELETE) 403 alırsa toast
+      // gösterilir; sabit toastId ile aynı anda birden fazla mutasyon
+      // başarısız olsa bile tek bir toast görünür.
+      if (isMutation) {
+        toast.error("Bu işlem için yetkiniz bulunmamaktadır.", { toastId: "permission-denied" });
+      }
       break;
     case 400:
       if (errors && errors.length > 0) {

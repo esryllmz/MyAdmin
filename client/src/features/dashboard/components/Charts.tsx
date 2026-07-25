@@ -1,5 +1,5 @@
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useTheme } from '@/core/theme/ThemeContext';
+import { useTheme } from '@/core/theme/useTheme';
 import { Skeleton } from '@/core/components/ui/skeleton';
 import type { DistributionPoint, RegistrationPoint } from '../hooks/useDashboardStats';
 

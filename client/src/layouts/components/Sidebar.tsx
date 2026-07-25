@@ -65,11 +65,11 @@ export const Sidebar = () => {
         <BrandLogo variant={isCollapsed ? 'mark' : 'full'} linkTo={null} />
       </div>
 
-      <div className="flex flex-col gap-5 flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-6 flex-1 overflow-y-auto">
         {visibleGroups.map((group) => (
           <div key={group.label}>
             {!isCollapsed && (
-              <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant">
+              <p className="px-3 mb-2.5 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant dark:text-dark-on-surface-variant">
                 {group.label}
               </p>
             )}
@@ -80,7 +80,7 @@ export const Sidebar = () => {
                   to={item.path}
                   title={isCollapsed ? item.name : undefined}
                   className={({ isActive }) =>
-                    `rounded-md flex items-center gap-3 text-sm font-medium transition-colors ${isCollapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2'
+                    `rounded-md flex items-center gap-3 text-sm font-medium leading-none transition-colors ${isCollapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
                     } ${isActive
                       ? 'bg-on-surface text-surface dark:bg-dark-on-surface dark:text-dark-surface'
                       : 'text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface'

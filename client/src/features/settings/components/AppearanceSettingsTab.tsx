@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useTheme } from '@/core/theme/ThemeContext';
+import { useTheme } from '@/core/theme/useTheme';
 
 type Density = 'comfortable' | 'compact';
 type SidebarMode = 'expanded' | 'collapsed';
