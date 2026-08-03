@@ -47,7 +47,16 @@ export const apiClient = async <T>(
     let response = await fetch(`${BASE_URL}${endpoint}`, config);
 
     // --- 401 & Refresh Token Yönetimi (Race Condition Korumalı) ---
-    if (response.status === 401 && !isDemoMode && !endpoint.includes("/authentication/refresh-token")) {
+    // Not: login/register uçları kimlik doğrulama denemesinin kendisidir — bunlarda dönen 401
+    // (hatalı e-posta/şifre) bir "oturum süresi doldu" durumu değildir, bu yüzden sessiz
+    // refresh-token akışına asla girmemeli. Aksi halde gerçek hata mesajı kaybolur ve
+    // localStorage'daki (varsa) eski refreshToken ile alakasız bir yenileme denemesi başlar.
+    const isAuthAttemptEndpoint =
+      endpoint.includes("/authentication/refresh-token") ||
+      endpoint.includes("/authentication/login") ||
+      endpoint.includes("/authentication/register");
+
+    if (response.status === 401 && !isDemoMode && !isAuthAttemptEndpoint) {
       const refreshToken = localStorage.getItem("refreshToken");
 
       if (isRefreshing) {

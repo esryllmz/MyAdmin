@@ -45,8 +45,10 @@ export const useAuth = () => {
   return {
     login: loginMutation.mutate,
     isLoginLoading: loginMutation.isPending,
+    loginError: loginMutation.error,
     register: registerMutation.mutate,
     isRegisterLoading: registerMutation.isPending,
+    registerError: registerMutation.error,
     logout,
   };
 };

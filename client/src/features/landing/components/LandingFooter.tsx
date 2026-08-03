@@ -12,7 +12,7 @@ const COLUMNS = [
   {
     heading: "Resources",
     links: [
-      { label: "Documentation", href: "https://github.com/esryllmz/MyAdmin", external: true },
+      { label: "Documentation", href: "#documentation" },
       { label: "Repository", href: "https://github.com/esryllmz/MyAdmin", external: true },
     ],
   },
@@ -57,18 +57,10 @@ export const LandingFooter = () => {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-outline-variant dark:border-dark-outline-variant pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 border-t border-outline-variant dark:border-dark-outline-variant pt-6">
           <p className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">
             © 2026 MyAdmin. All rights reserved.
           </p>
-          <a
-            href="https://github.com/esryllmz/MyAdmin"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface transition-colors"
-          >
-            GitHub Repository
-          </a>
         </div>
       </div>
     </footer>

@@ -52,6 +52,21 @@ export default {
         error: "#c0392b",
         warning: "#a3760f",
         info: "#4b5563",
+
+        // Single controlled accent — dark emerald. Reserved for focus rings, active nav/tab
+        // state, badges, success states and link hover. Never used as a base surface color.
+        accent: "#167A5B",
+        "accent-hover": "#12684D",
+        "accent-active": "#0F5942",
+        "accent-soft": "rgba(22, 122, 91, 0.10)",
+        "accent-on": "#ffffff",
+
+        // Dark mode — brightened slightly for AA contrast against dark surfaces
+        "dark-accent": "#22A67D",
+        "dark-accent-hover": "#2BBE8F",
+        "dark-accent-active": "#3ED2A2",
+        "dark-accent-soft": "rgba(34, 166, 125, 0.16)",
+        "dark-accent-on": "#052A1E",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

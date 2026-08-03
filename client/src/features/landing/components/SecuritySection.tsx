@@ -1,11 +1,12 @@
 import { CheckCircle2 } from "lucide-react";
 
 const POINTS = [
-  "Role-based access enforced down to individual buttons and mutations",
-  "Every change is written to an audit record with actor and entity",
-  "Active sessions and devices are visible and revocable per user",
-  "Permission grants are reviewable per role, not just per user",
-  "API keys carry a visible lifecycle — issued, used, expired, revoked",
+  "Role-based access control enforced down to individual mutations",
+  "Permission review, per role and per user",
+  "Session visibility — active sessions are listed and revocable",
+  "Activity records for every meaningful change, with actor and entity",
+  "API key lifecycle — issued, used, expired, revoked",
+  "Sensitive actions are restricted to admin-only routes",
 ];
 
 export const SecuritySection = () => {
@@ -14,16 +15,17 @@ export const SecuritySection = () => {
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-on-surface dark:text-dark-on-surface md:text-4xl">
-            Security operations, made visible.
+            Security your team can inspect.
           </h2>
           <p className="mt-3 max-w-md text-base text-on-surface-variant dark:text-dark-on-surface-variant">
-            Access control isn't a checkbox — it's something your team can inspect at any time.
+            Review access, sessions, permissions, and sensitive changes from one traceable
+            workspace.
           </p>
 
           <ul className="mt-8 space-y-4">
             {POINTS.map((point) => (
               <li key={point} className="flex items-start gap-3 text-sm text-on-surface dark:text-dark-on-surface">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-on-surface-variant dark:text-dark-on-surface-variant" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent dark:text-dark-accent" aria-hidden="true" />
                 {point}
               </li>
             ))}
@@ -48,7 +50,7 @@ export const SecuritySection = () => {
                 <span
                   className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${event.tone === "warn"
                       ? "bg-warning/10 text-warning"
-                      : "bg-success/10 text-success"
+                      : "bg-accent-soft text-accent dark:bg-dark-accent-soft dark:text-dark-accent"
                     }`}
                 >
                   {event.role}

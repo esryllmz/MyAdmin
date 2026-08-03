@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/core/store/store";
 
 const PREVIEW_STATS = [
-  { label: "API Uptime", value: "99.98%" },
-  { label: "Active Sessions", value: "42" },
+  { label: "Active Sessions", value: "12" },
   { label: "Pending Reviews", value: "3" },
+  { label: "System Health", value: "98.7%" },
 ];
 
 const PREVIEW_ROWS = [
@@ -14,6 +16,8 @@ const PREVIEW_ROWS = [
 ];
 
 export const Hero = () => {
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+
   return (
     <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
       <div>
@@ -26,36 +30,37 @@ export const Hero = () => {
         </h1>
 
         <p className="mt-5 max-w-lg text-base leading-7 text-on-surface-variant dark:text-dark-on-surface-variant">
-          A focused control center for teams, permissions, security operations, reporting, and system
-          configuration.
+          Manage users, permissions, security events, reports, and system settings from one
+          focused workspace.
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
-            to="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-on-surface dark:bg-dark-on-surface px-5 py-3 text-sm font-semibold text-surface dark:text-dark-surface transition-opacity hover:opacity-90"
+            to={isAuthenticated ? "/dashboard" : "/login"}
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-on-surface dark:bg-dark-on-surface px-5 py-3 text-sm font-semibold text-surface dark:text-dark-surface transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:focus-visible:ring-dark-accent/60"
           >
             Open Console
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
           <a
-            href="https://github.com/esryllmz/MyAdmin"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center justify-center rounded-md border border-outline-variant dark:border-dark-outline-variant px-5 py-3 text-sm font-semibold text-on-surface dark:text-dark-on-surface transition-colors hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high"
+            href="#documentation"
+            className="inline-flex items-center justify-center rounded-md border border-outline-variant dark:border-dark-outline-variant px-5 py-3 text-sm font-semibold text-on-surface dark:text-dark-on-surface transition-colors hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:focus-visible:ring-dark-accent/60"
           >
             View Documentation
           </a>
         </div>
       </div>
 
-      <div className="rounded-lg border border-outline-variant dark:border-dark-outline-variant bg-surface-container-lowest dark:bg-dark-surface-container-lowest shadow-sm overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="rounded-lg border border-outline-variant dark:border-dark-outline-variant bg-surface-container-lowest dark:bg-dark-surface-container-lowest shadow-sm overflow-hidden"
+      >
         <div className="flex items-center justify-between border-b border-outline-variant dark:border-dark-outline-variant px-5 py-3">
           <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant">
             System Overview
           </span>
           <span className="flex items-center gap-1.5 text-[11px] font-medium text-on-surface-variant dark:text-dark-on-surface-variant">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="h-1.5 w-1.5 rounded-full bg-accent dark:bg-dark-accent" />
             Operational
           </span>
         </div>
@@ -74,7 +79,7 @@ export const Hero = () => {
             <div key={row.label} className="flex items-center justify-between px-5 py-3 text-sm">
               <span className="flex items-center gap-2 text-on-surface dark:text-dark-on-surface">
                 <span
-                  className={`h-1.5 w-1.5 rounded-full ${row.tone === "warn" ? "bg-warning" : "bg-success"}`}
+                  className={`h-1.5 w-1.5 rounded-full ${row.tone === "warn" ? "bg-warning" : "bg-accent dark:bg-dark-accent"}`}
                 />
                 {row.label}
               </span>
