@@ -24,7 +24,7 @@ export interface DistributionPoint {
   value: number;
 }
 
-const MONTH_LABELS = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const isToday = (iso: string) => {
   const date = new Date(iso);

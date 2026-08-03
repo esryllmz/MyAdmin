@@ -9,7 +9,7 @@ import {
 } from "./userService.mock";
 import type { ApiResponse } from "@/core/types/ApiResponse";
 import type { RegisterUserRequest, CreatedUserResponseDto } from "@/features/auth/types/authTypes";
-import type { UserResponseDto } from "../types/userTypes";
+import type { ChangePasswordRequest, UserResponseDto } from "../types/userTypes";
 
 export const userService = {
 
@@ -34,11 +34,23 @@ export const userService = {
     });
   },
 
-  updateUserByAdmin: async (_id: string, request: FormData): Promise<ApiResponse<null>> => {
+  /** Self-service — always updates the caller's own profile (server derives the ID from the JWT). */
+  updateOwnProfile: async (request: FormData): Promise<ApiResponse<null>> => {
     if (isDemoModeActive()) {
-      return createMockResponse(null, "Profil bilgileri güncellendi (demo).");
+      return createMockResponse(null, "Profile updated (demo).");
     }
     return await apiClient<null>("/users/profile", {
+      method: "PUT",
+      body: request,
+    });
+  },
+
+  /** Admin editing a *different* user — targets the route's {id}, not the caller. Admin-only. */
+  updateUserByAdmin: async (id: string, request: FormData): Promise<ApiResponse<null>> => {
+    if (isDemoModeActive()) {
+      return createMockResponse(null, "User profile updated (demo).");
+    }
+    return await apiClient<null>(`/users/${id}`, {
       method: "PUT",
       body: request,
     });
@@ -62,6 +74,16 @@ export const userService = {
     return await apiClient<null>(`/users/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ isActive }),
+    });
+  },
+
+  changePassword: async (request: ChangePasswordRequest): Promise<ApiResponse<null>> => {
+    if (isDemoModeActive()) {
+      return createMockResponse(null, "Password changed (demo).");
+    }
+    return await apiClient<null>("/users/change-password", {
+      method: "PATCH",
+      body: JSON.stringify(request),
     });
   },
 

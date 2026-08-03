@@ -18,6 +18,7 @@ import ReportsSecurityPage from '@/features/reports/pages/ReportsSecurityPage';
 import ReportsPermissionsPage from '@/features/reports/pages/ReportsPermissionsPage';
 import ReportsExportsPage from '@/features/reports/pages/ReportsExportsPage';
 import ReportsScheduledPage from '@/features/reports/pages/ReportsScheduledPage';
+import ReportsAvailablePage from '@/features/reports/pages/ReportsAvailablePage';
 import SettingsLayout from '@/features/settings/components/SettingsLayout';
 import ProfileSettingsTab from '@/features/settings/components/ProfileSettingsTab';
 import AccountSettingsTab from '@/features/settings/components/AccountSettingsTab';
@@ -35,6 +36,7 @@ import SecurityLayout from '@/features/security/components/SecurityLayout';
 import SecurityOverviewPage from '@/features/security/pages/SecurityOverviewPage';
 import SecuritySessionsPage from '@/features/security/pages/SecuritySessionsPage';
 import SecurityAccessReviewsPage from '@/features/security/pages/SecurityAccessReviewsPage';
+import UnauthorizedPage from '@/features/errors/pages/UnauthorizedPage';
 
 export const AppRouter = () => {
   return (
@@ -43,8 +45,9 @@ export const AppRouter = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-      {/* Herhangi bir kimliği doğrulanmış rol erişebilir */}
+      {/* Herhangi bir kimliği doğrulanmış rol erişebilir — sayfa içeriği role göre kendini uyarlar */}
       <Route
         element={
           <ProtectedRoute>
@@ -54,22 +57,88 @@ export const AppRouter = () => {
       >
         <Route path="/dashboard" element={<DashboardPage />} />
 
-        <Route path="/team" element={<UserManagementPage />} />
-        <Route path="/team/:id" element={<UserDetailPage />} />
+        <Route
+          path="/team"
+          element={
+            <ProtectedRoute requiredFeature="users">
+              <UserManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team/:id"
+          element={
+            <ProtectedRoute requiredFeature="users">
+              <UserDetailPage />
+            </ProtectedRoute>
+          }
+        />
 
+        {/* Global aktivite akışı yalnızca Admin'e açık; Editor/Viewer aynı route'ta kendi
+            aktivitelerini görür (bkz. ActivitiesPage'in rol bazlı içerik seçimi). */}
         <Route path="/activities" element={<ActivitiesPage />} />
-        <Route path="/activities/:id" element={<ActivityDetailPage />} />
+        <Route
+          path="/activities/:id"
+          element={
+            <ProtectedRoute requiredFeature="globalActivity">
+              <ActivityDetailPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/teams/:id" element={<TeamDetailPage />} />
+        <Route
+          path="/teams"
+          element={
+            <ProtectedRoute requiredFeature="teams">
+              <TeamsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teams/:id"
+          element={
+            <ProtectedRoute requiredFeature="teams">
+              <TeamDetailPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/reports" element={<ReportsLayout />}>
           <Route index element={<ReportsOverviewPage />} />
           <Route path="activity" element={<ReportsActivityPage />} />
-          <Route path="security" element={<ReportsSecurityPage />} />
-          <Route path="permissions" element={<ReportsPermissionsPage />} />
-          <Route path="exports" element={<ReportsExportsPage />} />
-          <Route path="scheduled" element={<ReportsScheduledPage />} />
+          <Route path="available" element={<ReportsAvailablePage />} />
+          <Route
+            path="security"
+            element={
+              <ProtectedRoute requiredFeature="securityReports">
+                <ReportsSecurityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="permissions"
+            element={
+              <ProtectedRoute requiredFeature="permissionReports">
+                <ReportsPermissionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="exports"
+            element={
+              <ProtectedRoute requiredFeature="exportReports">
+                <ReportsExportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="scheduled"
+            element={
+              <ProtectedRoute requiredFeature="scheduledReports">
+                <ReportsScheduledPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         <Route path="/settings" element={<SettingsLayout />}>
@@ -79,8 +148,22 @@ export const AppRouter = () => {
           <Route path="security" element={<SecuritySettingsTab />} />
           <Route path="appearance" element={<AppearanceSettingsTab />} />
           <Route path="notifications" element={<NotificationPreferencesTab />} />
-          <Route path="api-keys" element={<ApiKeysTab />} />
-          <Route path="integrations" element={<IntegrationsTab />} />
+          <Route
+            path="api-keys"
+            element={
+              <ProtectedRoute requiredFeature="apiKeys">
+                <ApiKeysTab />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="integrations"
+            element={
+              <ProtectedRoute requiredFeature="integrations">
+                <IntegrationsTab />
+              </ProtectedRoute>
+            }
+          />
           <Route path="audit" element={<AuditLogTab />} />
         </Route>
       </Route>

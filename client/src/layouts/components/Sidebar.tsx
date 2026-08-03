@@ -17,13 +17,24 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const NAV_GROUPS: NavGroup[] = [
+/**
+ * Viewer gets a deliberately short, personal-only nav (Dashboard / My Activity / My Reports /
+ * Settings) — everything else here is Admin/Editor management surface. This is presentation
+ * only: the actual access control lives in route guards (AppRouter/ProtectedRoute) and backend
+ * [Authorize] attributes, since hiding a link never stops someone from typing the URL directly.
+ */
+const buildNavGroups = (isViewer: boolean): NavGroup[] => [
   {
     label: 'Overview',
     items: [
       { name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Editor', 'Viewer'] },
-      { name: 'Reports', icon: 'monitoring', path: '/reports', roles: ['Admin', 'Editor', 'Viewer'] },
-      { name: 'Activity', icon: 'history', path: '/activities', roles: ['Admin', 'Editor', 'Viewer'] },
+    ],
+  },
+  {
+    label: isViewer ? 'Workspace' : 'Reports & Activity',
+    items: [
+      { name: isViewer ? 'My Reports' : 'Reports', icon: 'monitoring', path: '/reports', roles: ['Admin', 'Editor', 'Viewer'] },
+      { name: isViewer ? 'My Activity' : 'Activity', icon: 'history', path: '/activities', roles: ['Admin', 'Editor', 'Viewer'] },
     ],
   },
   {
@@ -51,10 +62,14 @@ export const Sidebar = () => {
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state: RootState) => state.ui.isSidebarCollapsed);
 
-  const visibleGroups = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => role && item.roles.includes(role)),
-  })).filter((group) => group.items.length > 0);
+  const navGroups = buildNavGroups(role === 'Viewer');
+
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => role && item.roles.includes(role)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <nav
@@ -80,7 +95,7 @@ export const Sidebar = () => {
                   to={item.path}
                   title={isCollapsed ? item.name : undefined}
                   className={({ isActive }) =>
-                    `rounded-md flex items-center gap-3 text-sm font-medium leading-none transition-colors ${isCollapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
+                    `density-nav-item rounded-md flex items-center gap-3 text-sm font-medium leading-none transition-colors ${isCollapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
                     } ${isActive
                       ? 'bg-on-surface text-surface dark:bg-dark-on-surface dark:text-dark-surface'
                       : 'text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface'
@@ -99,14 +114,14 @@ export const Sidebar = () => {
       <button
         type="button"
         onClick={() => dispatch(toggleSidebarCollapsed())}
-        aria-label={isCollapsed ? 'Kenar çubuğunu genişlet' : 'Kenar çubuğunu daralt'}
+        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         className={`mt-3 flex items-center gap-2 rounded-md py-2 text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface transition-colors ${isCollapsed ? 'justify-center px-0' : 'justify-start px-3'
           }`}
       >
         <span className="material-symbols-outlined text-[20px]">
           {isCollapsed ? 'chevron_right' : 'chevron_left'}
         </span>
-        {!isCollapsed && 'Daralt'}
+        {!isCollapsed && 'Collapse'}
       </button>
     </nav>
   );

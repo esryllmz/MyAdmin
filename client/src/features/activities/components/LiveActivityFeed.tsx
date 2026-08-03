@@ -51,17 +51,17 @@ export const LiveActivityFeed = () => {
     <div className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-xl border border-outline-variant/70 dark:border-dark-outline-variant flex flex-col h-full min-w-0 overflow-hidden">
       <div className="p-5 border-b border-outline-variant/70 dark:border-dark-outline-variant flex justify-between items-center gap-3 bg-surface-container-low/40 dark:bg-dark-surface-container-low/40">
         <div className="flex items-center gap-2 min-w-0">
-          <h3 className="font-bold text-on-surface dark:text-dark-on-surface truncate">Canlı Hareket Akışı</h3>
+          <h3 className="font-bold text-on-surface dark:text-dark-on-surface truncate">Live Activity Feed</h3>
           <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-success shrink-0">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
             </span>
-            Canlı
+            Live
           </span>
         </div>
         <Link to="/activities" className="text-xs font-medium text-primary flex items-center gap-1 shrink-0">
-          Tümünü Gör <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+          View all <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
         </Link>
       </div>
 
@@ -70,7 +70,7 @@ export const LiveActivityFeed = () => {
           <div className="min-h-[168px] flex flex-col items-center justify-center gap-2 text-center px-6 py-8">
             <span className="material-symbols-outlined text-3xl text-on-surface-variant/25 dark:text-dark-on-surface-variant/25">bolt</span>
             <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant max-w-xs">
-              Henüz bir işlem yapılmadı. Kullanıcı Yönetimi'nde bir rol/durum değişikliği deneyin.
+              No activity yet. Try a role or status change in User Management.
             </p>
           </div>
         ) : (

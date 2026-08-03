@@ -6,6 +6,7 @@ import { store } from "@/core/store/store";
 import { ToastProvider } from "./ToastProvider";
 import { ThemeProvider } from "@/core/theme/ThemeContext";
 import { RealtimeBridge } from "@/core/realtime/RealtimeBridge";
+import { AppearanceEffects } from "@/core/components/AppearanceEffects";
 import type { ApiResponse } from "@/core/types/ApiResponse";
 
 const isClientError = (error: unknown): boolean => {
@@ -41,6 +42,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             <ToastProvider>
               {children}
               <RealtimeBridge />
+              <AppearanceEffects />
             </ToastProvider>
           </BrowserRouter>
         </QueryClientProvider>

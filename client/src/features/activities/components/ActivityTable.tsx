@@ -32,7 +32,7 @@ export const ActivityTable = ({ activities, selectedId, onSelectRow, isLoading }
         ) : activities.length === 0 ? (
           <tr>
             <td colSpan={4} className="px-6 py-16 text-center text-on-surface-variant dark:text-dark-on-surface-variant text-sm">
-              Bu filtrelerle eşleşen kayıt bulunamadı.
+              No records match these filters.
             </td>
           </tr>
         ) : (
@@ -44,9 +44,9 @@ export const ActivityTable = ({ activities, selectedId, onSelectRow, isLoading }
                 }`}
             >
               <td className="px-6 py-4 text-on-surface-variant dark:text-dark-on-surface-variant">
-                {new Date(activity.createdDate).toLocaleString('tr-TR')}
+                {new Date(activity.createdDate).toLocaleString('en-US')}
               </td>
-              <td className="px-6 py-4 font-medium text-on-surface dark:text-dark-on-surface">{activity.userName ?? 'Sistem'}</td>
+              <td className="px-6 py-4 font-medium text-on-surface dark:text-dark-on-surface">{activity.userName ?? 'System'}</td>
               <td className="px-6 py-4">
                 <span className="bg-on-surface/10 dark:bg-dark-on-surface/10 text-on-surface dark:text-dark-on-surface px-2 py-1 rounded-md text-xs font-semibold">
                   {activity.action} · {activity.entityName}

@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useActivities } from '@/features/activities/hooks/useActivities';
+import { MyActivityPanel } from '@/features/activities/components/MyActivityPanel';
 import { useSearchParamState } from '@/core/hooks/useDebouncedSearchParams';
 import { exportToCsv } from '@/core/utils/exportUtils';
 import { formatRelativeTime } from '@/core/utils/formatRelativeTime';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
 
 const hashToMs = (value: string) => {
   let hash = 0;
@@ -11,7 +13,8 @@ const hashToMs = (value: string) => {
   return 40 + (hash % 420);
 };
 
-const ReportsActivityPage = () => {
+/** Admin-only: cross-user activity report (GET /activities). */
+const GlobalActivityReport = () => {
   const { data: activities = [], isLoading } = useActivities();
   const [statusFilter, setStatusFilter] = useSearchParamState('status', 'all');
   const [entityFilter, setEntityFilter] = useSearchParamState('entity', 'all');
@@ -37,22 +40,22 @@ const ReportsActivityPage = () => {
 
   const handleExport = () => {
     if (!filtered.length) {
-      toast.warning('Dışa aktarılacak veri yok');
+      toast.warning('There is no data to export.');
       return;
     }
     setIsExporting(true);
     try {
       exportToCsv(
         filtered.map((activity) => ({
-          Kullanici: activity.userName ?? 'Sistem',
-          Aksiyon: activity.action,
-          Varlik: activity.entityName,
-          Durum: activity.isSuccess ? 'Başarılı' : 'Başarısız',
-          Tarih: activity.createdDate,
+          User: activity.userName ?? 'System',
+          Action: activity.action,
+          Entity: activity.entityName,
+          Status: activity.isSuccess ? 'Success' : 'Failed',
+          Date: activity.createdDate,
         })),
         'report-user-activity'
       );
-      toast.success('Rapor indirildi.');
+      toast.success('Report downloaded.');
     } finally {
       setIsExporting(false);
     }
@@ -112,20 +115,20 @@ const ReportsActivityPage = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-10 text-center text-on-surface-variant dark:text-dark-on-surface-variant">
-                    Yükleniyor...
+                    Loading...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-16 text-center text-on-surface-variant dark:text-dark-on-surface-variant">
-                    Filtreyle eşleşen aktivite bulunamadı.
+                    No activity matches these filters.
                   </td>
                 </tr>
               ) : (
                 filtered.slice(0, 50).map((activity) => (
                   <tr key={activity.id} className="hover:bg-surface-container-high/30 dark:hover:bg-dark-surface-container-high/30">
                     <td className="px-5 py-3 text-on-surface dark:text-dark-on-surface font-medium">
-                      {activity.userName ?? 'Sistem'}
+                      {activity.userName ?? 'System'}
                     </td>
                     <td className="px-5 py-3 text-on-surface-variant dark:text-dark-on-surface-variant">{activity.action}</td>
                     <td className="px-5 py-3 text-on-surface-variant dark:text-dark-on-surface-variant">{activity.entityName}</td>
@@ -150,6 +153,12 @@ const ReportsActivityPage = () => {
       </div>
     </div>
   );
+};
+
+const ReportsActivityPage = () => {
+  const { isAdmin } = useRolePermissions();
+
+  return isAdmin ? <GlobalActivityReport /> : <MyActivityPanel />;
 };
 
 export default ReportsActivityPage;

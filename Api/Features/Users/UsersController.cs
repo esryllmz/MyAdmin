@@ -41,6 +41,23 @@ public class UsersController(IUserService _userService) : CustomBaseController
     return CreateActionResult(result);
   }
 
+  /// <summary>
+  /// Admin bir başka kullanıcının profil bilgilerini düzenler. "profile" ucundan farklı olarak
+  /// token'daki kullanıcı yerine route'taki {id} hedeflenir — aksi halde bir Admin başka
+  /// kullanıcıyı düzenlerken yanlışlıkla kendi hesabını güncellemiş olurdu.
+  /// </summary>
+  [HttpPut("{id:guid}")]
+  [Authorize(Roles = "Admin")]
+  public async Task<IActionResult> UpdateByAdmin(
+    Guid id,
+    [FromForm] UpdateUserRequest request,
+    CancellationToken cancellationToken)
+  {
+    var result = await _userService.UpdateAsync(request, id, cancellationToken);
+
+    return CreateActionResult(result);
+  }
+
   [HttpPatch("change-password")]
   [Authorize]
   public async Task<IActionResult> ChangePassword(

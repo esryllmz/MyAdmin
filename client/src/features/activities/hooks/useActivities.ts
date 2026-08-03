@@ -10,3 +10,12 @@ export const useActivities = () => {
     select: (response) => response.data || [],
   });
 };
+
+/** Personal activity feed (GET /activities/me) — safe for every authenticated role, including Viewer. */
+export const useMyActivities = () => {
+  return useQuery<ApiResponse<ActivityResponseDto[]>, ApiResponse<null>, ActivityResponseDto[]>({
+    queryKey: ["activities", "me"],
+    queryFn: activityService.getMyActivities,
+    select: (response) => response.data || [],
+  });
+};

@@ -24,7 +24,7 @@ export const StatCard = ({ title, value, trend, subText, badge, icon, color = 'p
       className={`${isBright
           ? 'bg-surface-container-high dark:bg-dark-surface-container-high border-on-surface/25 dark:border-dark-on-surface/25'
           : 'bg-surface-container-lowest dark:bg-dark-surface-container-lowest border-outline-variant/70 dark:border-dark-outline-variant'
-        } rounded-xl p-6 border hover:border-outline dark:hover:border-dark-outline transition-colors flex flex-col justify-between min-h-40 relative overflow-hidden min-w-0`}
+        } density-card rounded-xl p-6 border hover:border-outline dark:hover:border-dark-outline transition-colors flex flex-col justify-between min-h-40 relative overflow-hidden min-w-0`}
     >
       <div className="flex justify-between items-start gap-3 relative z-10 min-w-0">
         <span className="text-sm font-medium text-on-surface-variant dark:text-dark-on-surface-variant truncate" title={title}>

@@ -75,7 +75,7 @@ export const TopBar = () => {
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface dark:text-dark-on-surface hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">settings</span>
-                  Ayarlar
+                  Settings
                 </Link>
               </div>
 
@@ -85,7 +85,7 @@ export const TopBar = () => {
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-error/5 dark:hover:bg-error/10 transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">logout</span>
-                  Çıkış Yap
+                  Log out
                 </button>
               </div>
             </div>

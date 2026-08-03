@@ -3,14 +3,20 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/core/store/store';
 import { Loader2 } from 'lucide-react';
+import { useRolePermissions } from '@/core/hooks/useRolePermissions';
+import type { ViewFeature } from '@/core/hooks/useRolePermissions';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  /** Legacy role-name check (e.g. "Admin"). Prefer requiredFeature for new routes. */
   requiredRole?: string;
+  /** Centralized view-level permission — see core/hooks/useRolePermissions.ts VIEW_ACCESS. */
+  requiredFeature?: ViewFeature;
 }
 
-const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requiredRole, requiredFeature }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, user } = useSelector((state: RootState) => state.auth);
+  const { canView } = useRolePermissions();
   const location = useLocation();
 
   if (isLoading) {
@@ -31,6 +37,10 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     if (!hasPermission) {
       return <Navigate to="/unauthorized" replace />;
     }
+  }
+
+  if (requiredFeature && !canView(requiredFeature)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <>{children}</>;

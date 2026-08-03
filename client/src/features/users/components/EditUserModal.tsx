@@ -49,7 +49,7 @@ const EditUserModal = ({ user, isOpen, onClose }: EditUserModalProps) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest w-full max-w-lg rounded-xl shadow-xl border border-outline-variant/60 dark:border-dark-outline-variant overflow-hidden">
         <div className="p-6 border-b border-outline-variant/60 dark:border-dark-outline-variant flex justify-between items-center">
-          <h3 className="text-xl font-bold text-on-surface dark:text-dark-on-surface">Kullanıcıyı Yönet</h3>
+          <h3 className="text-xl font-bold text-on-surface dark:text-dark-on-surface">Manage User</h3>
           <button onClick={onClose} className="text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface">
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -80,17 +80,17 @@ const EditUserModal = ({ user, isOpen, onClose }: EditUserModalProps) => {
           {/* Form Alanları */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">Kullanıcı Adı</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">Username</label>
               <input value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant rounded-lg px-4 py-2 text-sm text-on-surface dark:text-dark-on-surface outline-none focus:border-outline dark:focus:border-dark-outline transition-all" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">E-posta</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">Email</label>
               <input value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant rounded-lg px-4 py-2 text-sm text-on-surface dark:text-dark-on-surface outline-none focus:border-outline dark:focus:border-dark-outline transition-all" />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">Biyografi</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant dark:text-dark-on-surface-variant mb-1.5">Bio</label>
             <textarea value={formData.bio} onChange={e => setFormData({ ...formData, bio: e.target.value })} rows={3} className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant rounded-lg px-4 py-2 text-sm text-on-surface dark:text-dark-on-surface outline-none focus:border-outline dark:focus:border-dark-outline transition-all resize-none" />
           </div>
 
@@ -100,14 +100,14 @@ const EditUserModal = ({ user, isOpen, onClose }: EditUserModalProps) => {
               onClick={onClose}
               className="flex-1 px-4 py-2.5 border border-outline-variant dark:border-dark-outline-variant text-on-surface dark:text-dark-on-surface rounded-lg text-sm font-semibold hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-colors"
             >
-              İptal
+              Cancel
             </button>
             <button
               type="submit"
               disabled={updateMutation.isPending}
               className="flex-1 px-4 py-2.5 bg-on-surface dark:bg-dark-on-surface text-surface dark:text-dark-surface rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {updateMutation.isPending ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+              {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
