@@ -87,10 +87,11 @@ const RegisterPage = () => {
           title="Join your team's workspace."
           description="Registration is open, but kept safe by default — every new account starts with read-only access until an admin promotes it."
           features={REGISTER_PANEL_FEATURES}
+          showStatusPreview={false}
         />
       }
     >
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-on-surface dark:text-dark-on-surface">
           Create your account
         </h1>
@@ -100,7 +101,7 @@ const RegisterPage = () => {
       </div>
 
       <form
-        className="space-y-5 rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.06)] dark:border-dark-outline-variant dark:bg-dark-surface-container-lowest"
+        className="space-y-4 rounded-xl border border-outline bg-surface-container-lowest p-6 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.12)] dark:border-dark-outline dark:bg-dark-surface-container-lowest"
         onSubmit={handleSubmit}
         noValidate
       >
@@ -110,7 +111,6 @@ const RegisterPage = () => {
           type="text"
           autoComplete="username"
           placeholder="e.g. jane_doe"
-          hint="3–50 characters."
           icon={<User size={18} aria-hidden="true" />}
           value={username}
           onChange={(e) => {
@@ -203,7 +203,7 @@ const RegisterPage = () => {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
+      <p className="mt-5 text-center text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
         Already have an account?{" "}
         <Link
           to="/login"

@@ -18,8 +18,8 @@ interface AuthLayoutProps {
  */
 export const AuthLayout = ({ children, panel }: AuthLayoutProps) => {
   return (
-    <div className="flex min-h-screen flex-col bg-surface text-on-surface antialiased dark:bg-dark-surface dark:text-dark-on-surface">
-      <header className="shrink-0 border-b border-outline-variant px-4 dark:border-dark-outline-variant sm:px-6">
+    <div className="flex min-h-screen flex-col bg-surface-dim text-on-surface antialiased dark:bg-dark-surface-dim dark:text-dark-on-surface">
+      <header className="shrink-0 border-b border-outline bg-surface-dim px-4 dark:border-dark-outline dark:bg-dark-surface-dim sm:px-6">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between">
           <BrandLogo variant="wordmark" size="md" linkTo="/" />
 
@@ -37,11 +37,15 @@ export const AuthLayout = ({ children, panel }: AuthLayoutProps) => {
         </div>
       </header>
 
-      <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
-        <div className="mx-auto grid w-full max-w-[1200px] items-center gap-10 lg:grid-cols-[1fr_460px] lg:gap-14">
-          {panel && <div className="hidden lg:block">{panel}</div>}
-          <div className="mx-auto w-full max-w-[460px]">{children}</div>
-        </div>
+      <main className="flex flex-1 items-center justify-center px-4 py-6 sm:px-6 lg:py-8">
+        {panel ? (
+          <div className="mx-auto grid w-full max-w-300 items-start gap-10 lg:grid-cols-[1fr_440px] lg:gap-14">
+            <div className="hidden lg:block">{panel}</div>
+            <div className="mx-auto w-full max-w-110">{children}</div>
+          </div>
+        ) : (
+          <div className="mx-auto w-full max-w-110">{children}</div>
+        )}
       </main>
     </div>
   );

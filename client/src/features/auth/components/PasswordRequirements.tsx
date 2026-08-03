@@ -13,7 +13,7 @@ export const PasswordRequirements = ({ password, active }: PasswordRequirementsP
   const strength = metCount / PASSWORD_REQUIREMENTS.length;
 
   return (
-    <div className="mt-2.5">
+    <div className="mt-2">
       <div className="flex h-1 gap-1" aria-hidden="true">
         {PASSWORD_REQUIREMENTS.map((rule, index) => (
           <span
@@ -22,15 +22,15 @@ export const PasswordRequirements = ({ password, active }: PasswordRequirementsP
               "flex-1 rounded-full transition-colors",
               index < metCount
                 ? strength === 1
-                  ? "bg-accent dark:bg-dark-accent"
-                  : "bg-warning"
+                  ? "bg-accent-strong dark:bg-dark-accent"
+                  : "bg-warning-strong dark:bg-warning"
                 : "bg-outline-variant dark:bg-dark-outline-variant"
             )}
           />
         ))}
       </div>
 
-      <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+      <ul className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-2">
         {PASSWORD_REQUIREMENTS.map((rule) => {
           const met = rule.test(password);
           const showAsFailed = active && !met;
@@ -38,18 +38,18 @@ export const PasswordRequirements = ({ password, active }: PasswordRequirementsP
             <li
               key={rule.key}
               className={cn(
-                "flex items-center gap-1.5 text-xs",
+                "flex items-center gap-1.5 text-xs font-medium",
                 met
-                  ? "text-accent dark:text-dark-accent"
+                  ? "text-accent-strong dark:text-dark-accent"
                   : showAsFailed
-                    ? "text-on-surface-variant dark:text-dark-on-surface-variant"
-                    : "text-on-surface-variant/70 dark:text-dark-on-surface-variant/60"
+                    ? "text-on-surface dark:text-dark-on-surface"
+                    : "text-on-surface-variant dark:text-dark-on-surface-variant"
               )}
             >
               {met ? (
-                <Check size={13} className="shrink-0" aria-hidden="true" />
+                <Check size={13} strokeWidth={2.5} className="shrink-0" aria-hidden="true" />
               ) : (
-                <X size={13} className="shrink-0 opacity-50" aria-hidden="true" />
+                <X size={13} strokeWidth={2.5} className="shrink-0" aria-hidden="true" />
               )}
               {rule.label}
             </li>

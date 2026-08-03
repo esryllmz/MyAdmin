@@ -46,7 +46,7 @@ export const LandingFooter = () => {
                       href={link.href}
                       target={"external" in link && link.external ? "_blank" : undefined}
                       rel={"external" in link && link.external ? "noreferrer" : undefined}
-                      className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface transition-colors"
+                      className="rounded-sm text-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-on-surface-variant dark:hover:text-dark-on-surface dark:focus-visible:ring-dark-accent/60"
                     >
                       {link.label}
                     </a>

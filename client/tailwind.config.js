@@ -51,6 +51,9 @@ export default {
         success: "#3f8f5f",
         error: "#c0392b",
         warning: "#a3760f",
+        "warning-strong": "#8a5f0a",
+        "warning-soft": "rgba(163, 118, 15, 0.14)",
+        "warning-border": "rgba(163, 118, 15, 0.28)",
         info: "#4b5563",
 
         // Single controlled accent — dark emerald. Reserved for focus rings, active nav/tab
@@ -58,15 +61,23 @@ export default {
         accent: "#167A5B",
         "accent-hover": "#12684D",
         "accent-active": "#0F5942",
-        "accent-soft": "rgba(22, 122, 91, 0.10)",
+        // Small-text/icon variant — a touch darker than `accent` so 12-13px labels and thin
+        // glyphs stay legible on light surfaces without needing heavier font weight.
+        "accent-strong": "#0F684C",
+        "accent-soft": "rgba(22, 122, 91, 0.12)",
+        "accent-border": "rgba(22, 122, 91, 0.24)",
         "accent-on": "#ffffff",
 
         // Dark mode — brightened slightly for AA contrast against dark surfaces
         "dark-accent": "#22A67D",
         "dark-accent-hover": "#2BBE8F",
         "dark-accent-active": "#3ED2A2",
-        "dark-accent-soft": "rgba(34, 166, 125, 0.16)",
+        "dark-accent-strong": "#3ED2A2",
+        "dark-accent-soft": "rgba(34, 166, 125, 0.18)",
+        "dark-accent-border": "rgba(34, 166, 125, 0.32)",
         "dark-accent-on": "#052A1E",
+        "dark-warning-soft": "rgba(212, 160, 40, 0.16)",
+        "dark-warning-border": "rgba(212, 160, 40, 0.3)",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

@@ -74,7 +74,7 @@ const LoginPage = () => {
         </p>
       </div>
 
-      <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.06)] dark:border-dark-outline-variant dark:bg-dark-surface-container-lowest">
+      <div className="rounded-xl border border-outline bg-surface-container-lowest p-8 shadow-[0_20px_40px_-15px_rgba(11,28,48,0.12)] dark:border-dark-outline dark:bg-dark-surface-container-lowest">
         <form className="space-y-5" onSubmit={handleSubmit} noValidate>
           <AuthTextField
             id="email"
@@ -99,7 +99,7 @@ const LoginPage = () => {
             labelAdornment={
               <Link
                 to="/forgot-password"
-                className="text-xs font-medium text-accent transition-colors hover:text-accent-hover dark:text-dark-accent dark:hover:text-dark-accent-hover"
+                className="rounded-sm text-xs font-semibold text-accent-strong transition-colors hover:text-accent-active hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-accent dark:hover:text-dark-accent-hover"
               >
                 Forgot password?
               </Link>

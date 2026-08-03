@@ -118,8 +118,12 @@ export const apiClient = async <T>(
     }
 
     // --- Güvenli Yanıt İşleme ---
+    // login/register kendi sayfalarında (LoginPage/RegisterPage) özel, İngilizce, alan bazlı
+    // inline hata mesajları gösteriyor (bkz. features/auth/utils/authErrorMessages.ts) — bu
+    // yüzden bu iki uç için apiClient'ın kendi genel (backend kaynaklı, Türkçe) toast'ı
+    // bastırılır. Diğer tüm uygulama uçları mevcut toast davranışını korur.
     const responseText = await response.text();
-    return parseResponse<T>(responseText, response.status, options.method);
+    return parseResponse<T>(responseText, response.status, options.method, isAuthAttemptEndpoint);
 
   } catch (error: unknown) {
     const isApiResponse = (err: unknown): err is ApiResponse<T> => {
@@ -146,7 +150,12 @@ export const apiClient = async <T>(
   }
 };
 
-const parseResponse = <T>(responseText: string, statusCode: number, method?: string): ApiResponse<T> => {
+const parseResponse = <T>(
+  responseText: string,
+  statusCode: number,
+  method?: string,
+  suppressToast = false
+): ApiResponse<T> => {
   let result: ApiResponse<T>;
 
   try {
@@ -168,7 +177,9 @@ const parseResponse = <T>(responseText: string, statusCode: number, method?: str
   }
 
   if (!result.success && statusCode >= 400) {
-    handleApiError(result, method);
+    if (!suppressToast) {
+      handleApiError(result, method);
+    }
     throw result;
   }
 

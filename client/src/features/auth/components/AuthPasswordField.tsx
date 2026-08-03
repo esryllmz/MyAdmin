@@ -41,7 +41,7 @@ export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldP
           {labelAdornment}
         </div>
         <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/70 dark:text-dark-on-surface-variant/70">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant dark:text-dark-on-surface-variant">
             <Lock size={18} aria-hidden="true" />
           </div>
           <input
@@ -63,10 +63,10 @@ export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldP
               onKeyDown?.(e);
             }}
             className={cn(
-              "block h-11 w-full rounded-md border bg-surface-container-lowest pl-10 pr-11 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:bg-dark-surface-container-lowest dark:text-dark-on-surface dark:placeholder:text-dark-on-surface-variant/50 dark:focus-visible:ring-dark-accent/60",
+              "block h-11 w-full rounded-md border bg-surface-container-low pl-10 pr-11 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:bg-dark-surface-container-low dark:text-dark-on-surface dark:placeholder:text-dark-on-surface-variant dark:focus-visible:ring-dark-accent/60",
               error
                 ? "border-error focus-visible:ring-error/40 dark:border-error"
-                : "border-outline-variant dark:border-dark-outline-variant",
+                : "border-outline dark:border-dark-outline",
               className
             )}
             {...props}
@@ -76,7 +76,7 @@ export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldP
             onClick={() => setVisible((v) => !v)}
             aria-label={visible ? "Hide password" : "Show password"}
             aria-pressed={visible}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant/70 transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-on-surface-variant/70 dark:hover:text-dark-on-surface dark:focus-visible:ring-dark-accent/60"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-on-surface-variant dark:hover:text-dark-on-surface dark:focus-visible:ring-dark-accent/60"
           >
             {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
           </button>
@@ -91,7 +91,7 @@ export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldP
           </p>
         ) : null}
         {capsLockOn && (
-          <p id={capsId} role="status" className="mt-1.5 text-xs font-medium text-warning">
+          <p id={capsId} role="status" className="mt-1.5 text-xs font-semibold text-warning-strong dark:text-warning">
             Caps Lock is on.
           </p>
         )}

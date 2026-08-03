@@ -99,7 +99,7 @@ export const PublicLayout = ({
               aria-controls={menuId}
               aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
               onClick={() => setMenuOpen((v) => !v)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-on-surface-variant dark:hover:bg-dark-surface-container-high dark:hover:text-dark-on-surface dark:focus-visible:ring-dark-accent/60 md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-on-surface-variant dark:hover:bg-dark-surface-container-high dark:hover:text-dark-on-surface dark:focus-visible:ring-dark-accent/60 md:hidden"
             >
               {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
             </button>
@@ -128,7 +128,7 @@ export const PublicLayout = ({
                 <Link
                   to="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="block rounded-md px-2 py-2.5 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high dark:text-dark-on-surface dark:hover:bg-dark-surface-container-high"
+                  className="block rounded-md px-2 py-2.5 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:text-dark-on-surface dark:hover:bg-dark-surface-container-high dark:focus-visible:ring-dark-accent/60"
                 >
                   Sign in
                 </Link>

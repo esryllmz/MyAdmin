@@ -27,7 +27,7 @@ export const AuthTextField = forwardRef<HTMLInputElement, AuthTextFieldProps>(
         </label>
         <div className="relative">
           {icon && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant/70 dark:text-dark-on-surface-variant/70">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant dark:text-dark-on-surface-variant">
               {icon}
             </div>
           )}
@@ -37,11 +37,11 @@ export const AuthTextField = forwardRef<HTMLInputElement, AuthTextFieldProps>(
             aria-invalid={!!error}
             aria-describedby={error ? errorId : hint ? hintId : undefined}
             className={cn(
-              "block h-11 w-full rounded-md border bg-surface-container-lowest px-3 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:bg-dark-surface-container-lowest dark:text-dark-on-surface dark:placeholder:text-dark-on-surface-variant/50 dark:focus-visible:ring-dark-accent/60",
+              "block h-11 w-full rounded-md border bg-surface-container-low px-3 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:bg-dark-surface-container-low dark:text-dark-on-surface dark:placeholder:text-dark-on-surface-variant dark:focus-visible:ring-dark-accent/60",
               icon ? "pl-10" : "",
               error
                 ? "border-error focus-visible:ring-error/40 dark:border-error"
-                : "border-outline-variant dark:border-dark-outline-variant",
+                : "border-outline dark:border-dark-outline",
               className
             )}
             {...props}

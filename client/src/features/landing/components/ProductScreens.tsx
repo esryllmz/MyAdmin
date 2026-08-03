@@ -1,60 +1,41 @@
 import { useId, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactElement } from "react";
 import { ClipboardCheck, Eye, Search, ShieldCheck, UserPlus } from "lucide-react";
+import {
+  PRODUCT_SCREENS,
+  PROCESS_STEPS,
+  DASHBOARD_PREVIEW,
+  REPORTS_PREVIEW,
+  ROLES_PREVIEW,
+  SETTINGS_PREVIEW,
+} from "../data/landingPreviewData";
 
-const SCREENS = [
-  {
-    id: "dashboard",
-    title: "Dashboard",
-    description: "System health, recent activity, and pending reviews at a glance.",
-  },
-  {
-    id: "reports",
-    title: "Reports",
-    description: "Filterable report views with export status and history.",
-  },
-  {
-    id: "roles",
-    title: "Roles",
-    description: "Role list with a permission matrix and immediate scope preview.",
-  },
-  {
-    id: "settings",
-    title: "Settings",
-    description: "Profile, security, notifications, and integrations by module.",
-  },
-] as const;
+type ScreenId = (typeof PRODUCT_SCREENS)[number]["id"];
 
-type ScreenId = (typeof SCREENS)[number]["id"];
-
-const PROCESS_STEPS = [
-  { icon: UserPlus, label: "Invite" },
-  { icon: ShieldCheck, label: "Assign" },
-  { icon: Eye, label: "Review" },
-  { icon: Search, label: "Monitor" },
-  { icon: ClipboardCheck, label: "Audit" },
-];
+const PROCESS_ICONS: Record<(typeof PROCESS_STEPS)[number]["key"], typeof UserPlus> = {
+  invite: UserPlus,
+  assign: ShieldCheck,
+  review: Eye,
+  monitor: Search,
+  audit: ClipboardCheck,
+};
 
 const DashboardPreview = () => (
   <div className="p-5">
     <div className="grid grid-cols-3 gap-2">
-      {[
-        { label: "Health", value: "98.7%" },
-        { label: "Active", value: "12" },
-        { label: "Pending", value: "3" },
-      ].map((stat) => (
-        <div key={stat.label} className="rounded-md border border-outline-variant dark:border-dark-outline-variant p-2.5">
+      {DASHBOARD_PREVIEW.stats.map((stat) => (
+        <div key={stat.label} className="rounded-md border border-outline-variant p-2.5 dark:border-dark-outline-variant">
           <p className="text-sm font-bold text-on-surface dark:text-dark-on-surface">{stat.value}</p>
-          <p className="mt-0.5 text-[10px] uppercase tracking-wide text-on-surface-variant dark:text-dark-on-surface-variant">
+          <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-on-surface-variant dark:text-dark-on-surface-variant">
             {stat.label}
           </p>
         </div>
       ))}
     </div>
-    <div className="mt-3 space-y-1.5 rounded-md border border-outline-variant dark:border-dark-outline-variant p-3">
-      {["Role sync completed", "New user invited", "Pending access review"].map((row) => (
-        <div key={row} className="flex items-center gap-2 text-xs text-on-surface-variant dark:text-dark-on-surface-variant">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent dark:bg-dark-accent" />
+    <div className="mt-3 space-y-1.5 rounded-md border border-outline-variant p-3 dark:border-dark-outline-variant">
+      {DASHBOARD_PREVIEW.activity.map((row) => (
+        <div key={row} className="flex items-center gap-2 text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-strong dark:bg-dark-accent" />
           {row}
         </div>
       ))}
@@ -65,19 +46,19 @@ const DashboardPreview = () => (
 const ReportsPreview = () => (
   <div className="p-5">
     <div className="flex gap-2">
-      {["This week", "Activity", "Security"].map((chip) => (
-        <div key={chip} className="rounded-md border border-outline-variant dark:border-dark-outline-variant px-2.5 py-1 text-[10px] font-medium text-on-surface-variant dark:text-dark-on-surface-variant">
+      {REPORTS_PREVIEW.chips.map((chip) => (
+        <div key={chip} className="rounded-md border border-outline px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant dark:border-dark-outline dark:text-dark-on-surface-variant">
           {chip}
         </div>
       ))}
     </div>
     <div className="mt-3 space-y-1.5">
-      {[90, 74, 60, 45].map((width, i) => (
-        <div key={i} className="h-2.5 rounded-full bg-outline-variant/70 dark:bg-dark-outline-variant/70" style={{ width: `${width}%` }} />
+      {REPORTS_PREVIEW.barWidths.map((width, i) => (
+        <div key={i} className="h-2.5 rounded-full bg-outline" style={{ width: `${width}%` }} />
       ))}
     </div>
-    <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-accent dark:text-dark-accent">
-      <span className="h-1.5 w-1.5 rounded-full bg-accent dark:bg-dark-accent" />
+    <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-accent-strong dark:text-dark-accent">
+      <span className="h-1.5 w-1.5 rounded-full bg-accent-strong dark:bg-dark-accent" />
       Export ready
     </div>
   </div>
@@ -86,17 +67,17 @@ const ReportsPreview = () => (
 const RolesPreview = () => (
   <div className="p-5">
     <div className="flex gap-2">
-      {["Admin", "Editor", "Viewer"].map((role) => (
-        <div key={role} className="rounded-md border border-outline-variant dark:border-dark-outline-variant px-2.5 py-1 text-[10px] font-medium text-on-surface dark:text-dark-on-surface">
+      {ROLES_PREVIEW.roles.map((role) => (
+        <div key={role} className="rounded-md border border-outline px-2.5 py-1 text-[10px] font-semibold text-on-surface dark:border-dark-outline dark:text-dark-on-surface">
           {role}
         </div>
       ))}
     </div>
     <div className="mt-3 grid grid-cols-4 gap-1.5">
-      {Array.from({ length: 12 }).map((_, i) => (
+      {Array.from({ length: ROLES_PREVIEW.matrixCellCount }).map((_, i) => (
         <div
           key={i}
-          className={`h-5 rounded-sm ${i % 3 === 0 ? "bg-accent/70 dark:bg-dark-accent/70" : "border border-outline-variant dark:border-dark-outline-variant"}`}
+          className={`h-5 rounded-sm ${i % 3 === 0 ? "bg-accent-strong dark:bg-dark-accent" : "border border-outline dark:border-dark-outline"}`}
         />
       ))}
     </div>
@@ -105,28 +86,28 @@ const RolesPreview = () => (
 
 const SettingsPreview = () => (
   <div className="p-5">
-    <div className="flex gap-3 border-b border-outline-variant dark:border-dark-outline-variant pb-2">
-      {["Profile", "Security", "API"].map((tab, i) => (
+    <div className="flex gap-4 border-b border-outline-variant pb-2 dark:border-dark-outline-variant">
+      {SETTINGS_PREVIEW.tabs.map((tab, i) => (
         <div
           key={tab}
-          className={`text-[11px] font-medium ${i === 0 ? "text-accent dark:text-dark-accent" : "text-on-surface-variant dark:text-dark-on-surface-variant"}`}
+          className={`text-[11px] font-semibold ${i === 0 ? "text-accent-strong dark:text-dark-accent" : "text-on-surface-variant dark:text-dark-on-surface-variant"}`}
         >
           {tab}
         </div>
       ))}
     </div>
-    <div className="mt-3 space-y-2">
-      {["Two-factor authentication", "Session timeout", "Email notifications"].map((row, i) => (
-        <div key={row} className="flex items-center justify-between text-xs">
-          <span className="text-on-surface-variant dark:text-dark-on-surface-variant">{row}</span>
-          <span className={`h-4 w-7 rounded-full ${i !== 1 ? "bg-accent dark:bg-dark-accent" : "bg-outline-variant dark:bg-dark-outline-variant"}`} />
+    <div className="mt-3 space-y-2.5">
+      {SETTINGS_PREVIEW.rows.map((row) => (
+        <div key={row.label} className="flex items-center justify-between text-xs font-medium">
+          <span className="text-on-surface-variant dark:text-dark-on-surface-variant">{row.label}</span>
+          <span className={`h-4 w-7 rounded-full ${row.on ? "bg-accent-strong dark:bg-dark-accent" : "border border-outline dark:border-dark-outline"}`} />
         </div>
       ))}
     </div>
   </div>
 );
 
-const PREVIEW_BY_ID: Record<ScreenId, () => React.ReactElement> = {
+const PREVIEW_BY_ID: Record<ScreenId, () => ReactElement> = {
   dashboard: DashboardPreview,
   reports: ReportsPreview,
   roles: RolesPreview,
@@ -138,12 +119,12 @@ export const ProductScreens = () => {
   const baseId = useId();
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const activeIndex = SCREENS.findIndex((s) => s.id === active);
+  const activeIndex = PRODUCT_SCREENS.findIndex((s) => s.id === active);
   const ActivePreview = PREVIEW_BY_ID[active];
 
   const focusTab = (index: number) => {
-    const nextIndex = (index + SCREENS.length) % SCREENS.length;
-    setActive(SCREENS[nextIndex].id);
+    const nextIndex = (index + PRODUCT_SCREENS.length) % PRODUCT_SCREENS.length;
+    setActive(PRODUCT_SCREENS[nextIndex].id);
     tabRefs.current[nextIndex]?.focus();
   };
 
@@ -159,12 +140,12 @@ export const ProductScreens = () => {
       focusTab(0);
     } else if (e.key === "End") {
       e.preventDefault();
-      focusTab(SCREENS.length - 1);
+      focusTab(PRODUCT_SCREENS.length - 1);
     }
   };
 
   return (
-    <section id="platform" className="mx-auto max-w-7xl px-6 py-20 scroll-mt-16">
+    <section id="platform" className="mx-auto max-w-7xl px-6 py-14 scroll-mt-16 sm:py-20 lg:py-28">
       <div className="max-w-2xl">
         <h2 className="text-3xl font-bold tracking-tight text-on-surface dark:text-dark-on-surface md:text-4xl">
           A console for every part of the job.
@@ -174,14 +155,14 @@ export const ProductScreens = () => {
         </p>
       </div>
 
-      <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-[200px_1fr]">
+      <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-[220px_1fr] lg:items-start">
         <div
           role="tablist"
           aria-label="Product preview"
           aria-orientation="vertical"
           className="flex flex-row flex-wrap gap-1.5 lg:flex-col lg:gap-1"
         >
-          {SCREENS.map((screen, index) => {
+          {PRODUCT_SCREENS.map((screen, index) => {
             const isActive = screen.id === active;
             return (
               <button
@@ -197,10 +178,10 @@ export const ProductScreens = () => {
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActive(screen.id)}
                 onKeyDown={handleKeyDown}
-                className={`rounded-md px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:focus-visible:ring-dark-accent/60 ${
+                className={`w-full rounded-md border px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 dark:focus-visible:ring-dark-accent/60 ${
                   isActive
-                    ? "bg-accent-soft text-accent dark:bg-dark-accent-soft dark:text-dark-accent"
-                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface dark:text-dark-on-surface-variant dark:hover:bg-dark-surface-container-high dark:hover:text-dark-on-surface"
+                    ? "border-accent-border bg-accent-soft font-semibold text-accent-strong dark:border-dark-accent-border dark:bg-dark-accent-soft dark:text-dark-accent-strong"
+                    : "border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface dark:text-dark-on-surface-variant dark:hover:bg-dark-surface-container-high dark:hover:text-dark-on-surface"
                 }`}
               >
                 {screen.title}
@@ -217,25 +198,25 @@ export const ProductScreens = () => {
         >
           <div className="border-b border-outline-variant px-4 py-2.5 dark:border-dark-outline-variant">
             <span className="text-xs font-semibold text-on-surface dark:text-dark-on-surface">
-              {SCREENS[activeIndex].title}
+              {PRODUCT_SCREENS[activeIndex].title}
             </span>
           </div>
           <div aria-hidden="true">
             <ActivePreview />
           </div>
           <p className="border-t border-outline-variant px-4 py-3 text-xs text-on-surface-variant dark:border-dark-outline-variant dark:text-dark-on-surface-variant">
-            {SCREENS[activeIndex].description}
+            {PRODUCT_SCREENS[activeIndex].description}
           </p>
         </div>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-lg border border-outline-variant bg-surface-container-low px-6 py-4 dark:border-dark-outline-variant dark:bg-dark-surface-container-low">
         {PROCESS_STEPS.map((step, index) => {
-          const Icon = step.icon;
+          const Icon = PROCESS_ICONS[step.key];
           return (
-            <div key={step.label} className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant">
-                <Icon className="h-3.5 w-3.5 text-accent dark:text-dark-accent" aria-hidden="true" />
+            <div key={step.key} className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-on-surface dark:text-dark-on-surface">
+                <Icon className="h-3.5 w-3.5 text-accent-strong dark:text-dark-accent" strokeWidth={2} aria-hidden="true" />
                 {step.label}
               </div>
               {index < PROCESS_STEPS.length - 1 && (
