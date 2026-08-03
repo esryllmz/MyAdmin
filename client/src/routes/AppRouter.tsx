@@ -37,6 +37,8 @@ import SecurityOverviewPage from '@/features/security/pages/SecurityOverviewPage
 import SecuritySessionsPage from '@/features/security/pages/SecuritySessionsPage';
 import SecurityAccessReviewsPage from '@/features/security/pages/SecurityAccessReviewsPage';
 import UnauthorizedPage from '@/features/errors/pages/UnauthorizedPage';
+import NotificationsPage from '@/features/notifications/pages/NotificationsPage';
+import MyAccessPage from '@/features/access/pages/MyAccessPage';
 
 export const AppRouter = () => {
   return (
@@ -56,6 +58,23 @@ export const AppRouter = () => {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute requiredFeature="ownNotifications">
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/access"
+          element={
+            <ProtectedRoute requiredFeature="ownAccess">
+              <MyAccessPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/team"
@@ -103,7 +122,14 @@ export const AppRouter = () => {
           }
         />
 
-        <Route path="/reports" element={<ReportsLayout />}>
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute requiredFeature="reports">
+              <ReportsLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<ReportsOverviewPage />} />
           <Route path="activity" element={<ReportsActivityPage />} />
           <Route path="available" element={<ReportsAvailablePage />} />
@@ -164,7 +190,14 @@ export const AppRouter = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="audit" element={<AuditLogTab />} />
+          <Route
+            path="audit"
+            element={
+              <ProtectedRoute requiredFeature="personalAudit">
+                <AuditLogTab />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Route>
 

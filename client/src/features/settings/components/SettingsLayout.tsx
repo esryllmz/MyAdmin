@@ -14,7 +14,7 @@ const NAV_ITEMS: SettingsNavItem[] = [
   { label: 'Security', to: '/settings/security' },
   { label: 'Appearance', to: '/settings/appearance' },
   { label: 'Notifications', to: '/settings/notifications' },
-  { label: 'My Activity', to: '/settings/audit' },
+  { label: 'My Activity', to: '/settings/audit', editorOnly: true },
   { label: 'API Keys', to: '/settings/api-keys', editorOnly: true },
   { label: 'Integrations', to: '/settings/integrations', adminOnly: true },
 ];

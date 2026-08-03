@@ -29,6 +29,9 @@ export const usePersonalDashboardStats = () => {
   return {
     recentActivityCount,
     unreadNotifications,
+    // MyAdmin tracks a single active session per account (see AccountSettingsTab) — any
+    // authenticated viewer therefore always has exactly one active session, itself.
+    activeSessions: 1,
     recentActivities: activities.slice(0, 5),
     isLoading,
     isError: activitiesError,

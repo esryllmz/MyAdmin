@@ -6,6 +6,8 @@ interface PageTitleEntry {
 
 const ENTRIES: PageTitleEntry[] = [
   { match: (p) => p === '/dashboard', title: 'Dashboard' },
+  { match: (p) => p === '/notifications', title: 'Notifications' },
+  { match: (p) => p === '/access', title: 'My Access' },
   { match: (p) => p === '/team', title: 'Users', section: 'Management' },
   { match: (p) => /^\/team\/[^/]+$/.test(p), title: 'User Detail', section: 'Management' },
   { match: (p) => p === '/roles', title: 'Roles', section: 'Management' },

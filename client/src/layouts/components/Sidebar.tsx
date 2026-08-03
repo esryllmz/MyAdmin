@@ -18,23 +18,44 @@ interface NavGroup {
 }
 
 /**
- * Viewer gets a deliberately short, personal-only nav (Dashboard / My Activity / My Reports /
- * Settings) — everything else here is Admin/Editor management surface. This is presentation
- * only: the actual access control lives in route guards (AppRouter/ProtectedRoute) and backend
- * [Authorize] attributes, since hiding a link never stops someone from typing the URL directly.
+ * Viewer gets its own, fully separate information architecture — a short, personal-only nav
+ * (Dashboard / My Activity / Notifications / My Access / Settings) with no Reports module and
+ * no management surface. This is presentation only: the actual access control lives in route
+ * guards (AppRouter/ProtectedRoute) and backend [Authorize] attributes, since hiding a link
+ * never stops someone from typing the URL directly.
  */
-const buildNavGroups = (isViewer: boolean): NavGroup[] => [
+const buildViewerNavGroups = (): NavGroup[] => [
   {
     label: 'Overview',
+    items: [{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Viewer'] }],
+  },
+  {
+    label: 'Workspace',
     items: [
-      { name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Editor', 'Viewer'] },
+      { name: 'My Activity', icon: 'history', path: '/activities', roles: ['Viewer'] },
+      { name: 'Notifications', icon: 'notifications', path: '/notifications', roles: ['Viewer'] },
     ],
   },
   {
-    label: isViewer ? 'Workspace' : 'Reports & Activity',
+    label: 'Account',
     items: [
-      { name: isViewer ? 'My Reports' : 'Reports', icon: 'monitoring', path: '/reports', roles: ['Admin', 'Editor', 'Viewer'] },
-      { name: isViewer ? 'My Activity' : 'Activity', icon: 'history', path: '/activities', roles: ['Admin', 'Editor', 'Viewer'] },
+      { name: 'My Access', icon: 'verified_user', path: '/access', roles: ['Viewer'] },
+      { name: 'Settings', icon: 'settings', path: '/settings/profile', roles: ['Viewer'] },
+    ],
+  },
+];
+
+/** Admin/Editor management nav — unchanged by the Viewer information-architecture cleanup. */
+const buildManagementNavGroups = (): NavGroup[] => [
+  {
+    label: 'Overview',
+    items: [{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Editor'] }],
+  },
+  {
+    label: 'Reports & Activity',
+    items: [
+      { name: 'Reports', icon: 'monitoring', path: '/reports', roles: ['Admin', 'Editor'] },
+      { name: 'Activity', icon: 'history', path: '/activities', roles: ['Admin', 'Editor'] },
     ],
   },
   {
@@ -49,7 +70,7 @@ const buildNavGroups = (isViewer: boolean): NavGroup[] => [
   {
     label: 'System',
     items: [
-      { name: 'Settings', icon: 'settings', path: '/settings/profile', roles: ['Admin', 'Editor', 'Viewer'] },
+      { name: 'Settings', icon: 'settings', path: '/settings/profile', roles: ['Admin', 'Editor'] },
       { name: 'API Keys', icon: 'vpn_key', path: '/settings/api-keys', roles: ['Admin', 'Editor'] },
       { name: 'Integrations', icon: 'hub', path: '/integrations', roles: ['Admin'] },
       { name: 'Security', icon: 'security', path: '/security', roles: ['Admin'] },
@@ -62,7 +83,7 @@ export const Sidebar = () => {
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state: RootState) => state.ui.isSidebarCollapsed);
 
-  const navGroups = buildNavGroups(role === 'Viewer');
+  const navGroups = role === 'Viewer' ? buildViewerNavGroups() : buildManagementNavGroups();
 
   const visibleGroups = navGroups
     .map((group) => ({

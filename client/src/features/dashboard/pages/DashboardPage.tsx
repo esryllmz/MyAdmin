@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import type { RootState } from '@/core/store/store';
 import { StatCard } from '../components/StatCard';
 import { LiveActivityFeed } from '@/features/activities/components/LiveActivityFeed';
 import { SystemHealthPanel } from '../components/SystemHealthPanel';
@@ -94,7 +96,9 @@ const AdminDashboard = () => {
 /** Editor/Viewer: personal-only dashboard — no system-wide metrics, no infrastructure detail. */
 const PersonalDashboard = () => {
   const role = useCurrentRole();
-  const { recentActivityCount, unreadNotifications, recentActivities, isLoading } = usePersonalDashboardStats();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const { recentActivityCount, unreadNotifications, activeSessions, recentActivities, isLoading } =
+    usePersonalDashboardStats();
 
   return (
     <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full">
@@ -103,27 +107,40 @@ const PersonalDashboard = () => {
           Welcome back
         </h2>
         <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
-          Your account, your activity, your reports.
+          Your account, your activity, your notifications.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-        <StatCard title="My Access" value={role ?? '—'} subText="Read-only access" icon="badge" color="primary" />
-        <StatCard
-          title="Unread Notifications"
-          value={unreadNotifications.toLocaleString('en-US')}
-          subText={unreadNotifications > 0 ? 'Needs your attention' : 'All caught up'}
-          icon="notifications"
-          isLoading={isLoading}
-        />
-        <StatCard
-          title="My Recent Activity"
-          value={recentActivityCount.toLocaleString('en-US')}
-          subText="Last 7 days"
-          icon="history"
-          isLoading={isLoading}
-        />
-        <StatCard title="Available Reports" value="1" subText="Read-only" icon="description" />
+        <Link to="/access" className="block">
+          <StatCard title="My Access" value={role ?? '—'} subText="Personal workspace · Read-only access" icon="badge" color="primary" />
+        </Link>
+        <Link to="/notifications" className="block">
+          <StatCard
+            title="Unread Notifications"
+            value={unreadNotifications.toLocaleString('en-US')}
+            subText={unreadNotifications > 0 ? 'Needs your attention' : 'All caught up'}
+            icon="notifications"
+            isLoading={isLoading}
+          />
+        </Link>
+        <Link to="/settings/account" className="block">
+          <StatCard
+            title="Active Sessions"
+            value={activeSessions.toLocaleString('en-US')}
+            subText="This device"
+            icon="devices"
+          />
+        </Link>
+        <Link to="/activities" className="block">
+          <StatCard
+            title="Recent Activity"
+            value={recentActivityCount.toLocaleString('en-US')}
+            subText="Last 7 days"
+            icon="history"
+            isLoading={isLoading}
+          />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
@@ -156,14 +173,27 @@ const PersonalDashboard = () => {
         </div>
 
         <div className="xl:col-span-1 min-w-0 bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-xl border border-outline-variant/70 dark:border-dark-outline-variant p-6">
-          <h3 className="font-bold text-on-surface dark:text-dark-on-surface text-sm mb-1">Service Status</h3>
-          <p className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant mb-5">
-            Workspace availability.
-          </p>
-          <div className="flex items-center gap-2.5">
-            <span className="h-2 w-2 rounded-full bg-success shrink-0" />
-            <p className="text-sm font-medium text-on-surface dark:text-dark-on-surface">Available</p>
-          </div>
+          <h3 className="font-bold text-on-surface dark:text-dark-on-surface text-sm mb-4">Account Security Summary</h3>
+          <dl className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">Account Status</dt>
+              <dd className={`text-xs font-bold uppercase tracking-wide ${user?.isActive ? 'text-success' : 'text-error'}`}>
+                {user?.isActive ? 'Active' : 'Inactive'}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">Current Session</dt>
+              <dd className="text-xs font-medium text-on-surface dark:text-dark-on-surface">This device</dd>
+            </div>
+            {user?.createdDate && (
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">Member Since</dt>
+                <dd className="text-xs font-medium text-on-surface dark:text-dark-on-surface">
+                  {new Date(user.createdDate).toLocaleDateString('en-US')}
+                </dd>
+              </div>
+            )}
+          </dl>
         </div>
       </div>
     </div>

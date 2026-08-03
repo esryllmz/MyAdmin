@@ -51,7 +51,7 @@ export type ViewFeature =
   | "systemDashboard"
   | "ownActivity"
   | "globalActivity"
-  | "ownReports"
+  | "reports"
   | "securityReports"
   | "permissionReports"
   | "exportReports"
@@ -61,6 +61,7 @@ export type ViewFeature =
   | "security"
   | "appearance"
   | "ownNotifications"
+  | "ownAccess"
   | "apiKeys"
   | "personalAudit"
   | "users"
@@ -78,7 +79,9 @@ const VIEW_ACCESS: Record<ViewFeature, ViewLevel> = {
   systemDashboard: "editor",
   ownActivity: "any",
   globalActivity: "admin",
-  ownReports: "any",
+  // Viewer no longer gets a Reports module of its own (My Activity is the single
+  // personal activity surface) — Editor/Admin keep Reports unchanged.
+  reports: "editor",
   securityReports: "admin",
   permissionReports: "admin",
   exportReports: "admin",
@@ -88,8 +91,11 @@ const VIEW_ACCESS: Record<ViewFeature, ViewLevel> = {
   security: "any",
   appearance: "any",
   ownNotifications: "any",
+  ownAccess: "any",
   apiKeys: "editor",
-  personalAudit: "any",
+  // Settings > My Activity duplicated the dedicated /activities page for Viewer —
+  // Viewer now uses /activities only, Editor/Admin are unaffected.
+  personalAudit: "editor",
   users: "editor",
   roles: "admin",
   permissions: "admin",
