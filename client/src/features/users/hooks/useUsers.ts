@@ -2,12 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { userService } from "../services/userService";
 import type { ApiResponse } from "@/core/types/ApiResponse";
-import type { UserResponseDto } from "../types/userTypes";
+import type { PagedResult } from "@/core/types/PagedResult";
+import type { CreateViewerAccountRequest, ManageableUsersParams, UserResponseDto } from "../types/userTypes";
 import type { RoleResponseDto } from "@/features/roles/types/roleTypes";
 import type { RootState } from "@/core/store/store";
 import { realtimeEventBus } from "@/core/realtime/realtimeEventBus";
 
 const USERS_QUERY_KEY = ["users"];
+const MANAGEABLE_USERS_KEY = "manageable-users";
 
 type UsersResponse = ApiResponse<UserResponseDto[]>;
 
@@ -16,6 +18,36 @@ export const useUsers = () => {
     queryKey: USERS_QUERY_KEY,
     queryFn: userService.getAllUsers,
     select: (response) => response.data || [],
+  });
+};
+
+/** Editor workspace — server-scoped to Viewer-role accounts only (see userService.getManageableViewers). */
+export const useManageableUsers = (params: ManageableUsersParams = {}) => {
+  return useQuery<ApiResponse<PagedResult<UserResponseDto>>, ApiResponse<null>, PagedResult<UserResponseDto>>({
+    queryKey: [MANAGEABLE_USERS_KEY, params],
+    queryFn: () => userService.getManageableViewers(params),
+    select: (response) => response.data ?? { items: [], totalCount: 0, page: 1, pageSize: params.pageSize ?? 20 },
+  });
+};
+
+/** Single-user lookup (GET /users/{id}) — server enforces Editor can only look up Viewer targets. */
+export const useUserById = (id: string | undefined) => {
+  return useQuery<ApiResponse<UserResponseDto>, ApiResponse<null>, UserResponseDto | null>({
+    queryKey: ["user", id],
+    queryFn: () => userService.getUserById(id!),
+    select: (response) => response.data ?? null,
+    enabled: !!id,
+  });
+};
+
+export const useCreateViewerAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (request: CreateViewerAccountRequest) => userService.createViewerAccount(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MANAGEABLE_USERS_KEY] });
+      queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+    },
   });
 };
 
@@ -106,8 +138,10 @@ export const useUpdateUserStatus = () => {
         queryClient.setQueryData(USERS_QUERY_KEY, context.previousUsers);
       }
     },
-    onSettled: () => {
+    onSettled: (_data, _error, { id }) => {
       queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [MANAGEABLE_USERS_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
     },
   });
 };

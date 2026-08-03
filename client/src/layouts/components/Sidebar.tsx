@@ -45,45 +45,80 @@ const buildViewerNavGroups = (): NavGroup[] => [
   },
 ];
 
-/** Admin/Editor management nav — unchanged by the Viewer information-architecture cleanup. */
-const buildManagementNavGroups = (): NavGroup[] => [
+/**
+ * Editor's own operations-focused IA — Viewer account management, Teams, operational activity
+ * and reports, notifications, and personal account settings. No Roles/Permissions/API
+ * Keys/Integrations/Security — those stay Admin-only surfaces (see buildAdminNavGroups).
+ */
+const buildEditorNavGroups = (): NavGroup[] => [
   {
     label: 'Overview',
-    items: [{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Editor'] }],
+    items: [{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Editor'] }],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { name: 'Users', icon: 'group', path: '/team', roles: ['Editor'] },
+      { name: 'Teams', icon: 'diversity_3', path: '/teams', roles: ['Editor'] },
+      { name: 'Activity', icon: 'history', path: '/activities', roles: ['Editor'] },
+      { name: 'Reports', icon: 'monitoring', path: '/reports', roles: ['Editor'] },
+      { name: 'Notifications', icon: 'notifications', path: '/notifications', roles: ['Editor'] },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { name: 'My Access', icon: 'verified_user', path: '/access', roles: ['Editor'] },
+      { name: 'Settings', icon: 'settings', path: '/settings/profile', roles: ['Editor'] },
+    ],
+  },
+];
+
+/** Admin's full management nav — unchanged by the Viewer/Editor information-architecture work. */
+const buildAdminNavGroups = (): NavGroup[] => [
+  {
+    label: 'Overview',
+    items: [{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard', roles: ['Admin'] }],
   },
   {
     label: 'Reports & Activity',
     items: [
-      { name: 'Reports', icon: 'monitoring', path: '/reports', roles: ['Admin', 'Editor'] },
-      { name: 'Activity', icon: 'history', path: '/activities', roles: ['Admin', 'Editor'] },
+      { name: 'Reports', icon: 'monitoring', path: '/reports', roles: ['Admin'] },
+      { name: 'Activity', icon: 'history', path: '/activities', roles: ['Admin'] },
     ],
   },
   {
     label: 'Management',
     items: [
-      { name: 'Users', icon: 'group', path: '/team', roles: ['Admin', 'Editor'] },
+      { name: 'Users', icon: 'group', path: '/team', roles: ['Admin'] },
       { name: 'Roles', icon: 'shield_person', path: '/roles', roles: ['Admin'] },
       { name: 'Permissions', icon: 'key', path: '/permissions', roles: ['Admin'] },
-      { name: 'Teams', icon: 'diversity_3', path: '/teams', roles: ['Admin', 'Editor'] },
+      { name: 'Teams', icon: 'diversity_3', path: '/teams', roles: ['Admin'] },
     ],
   },
   {
     label: 'System',
     items: [
-      { name: 'Settings', icon: 'settings', path: '/settings/profile', roles: ['Admin', 'Editor'] },
-      { name: 'API Keys', icon: 'vpn_key', path: '/settings/api-keys', roles: ['Admin', 'Editor'] },
+      { name: 'Settings', icon: 'settings', path: '/settings/profile', roles: ['Admin'] },
+      { name: 'API Keys', icon: 'vpn_key', path: '/settings/api-keys', roles: ['Admin'] },
       { name: 'Integrations', icon: 'hub', path: '/integrations', roles: ['Admin'] },
       { name: 'Security', icon: 'security', path: '/security', roles: ['Admin'] },
     ],
   },
 ];
 
+const buildNavGroupsForRole = (role: string | null): NavGroup[] => {
+  if (role === 'Viewer') return buildViewerNavGroups();
+  if (role === 'Editor') return buildEditorNavGroups();
+  return buildAdminNavGroups();
+};
+
 export const Sidebar = () => {
   const role = useCurrentRole();
   const dispatch = useDispatch();
   const isCollapsed = useSelector((state: RootState) => state.ui.isSidebarCollapsed);
 
-  const navGroups = role === 'Viewer' ? buildViewerNavGroups() : buildManagementNavGroups();
+  const navGroups = buildNavGroupsForRole(role);
 
   const visibleGroups = navGroups
     .map((group) => ({

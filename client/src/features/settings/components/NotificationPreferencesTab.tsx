@@ -16,6 +16,9 @@ interface Preferences {
   reportCompletion: boolean;
   systemIncidents: boolean;
   productUpdates: boolean;
+  viewerAccountChanges: boolean;
+  teamMembershipChanges: boolean;
+  teamUpdates: boolean;
   email: boolean;
   inApp: boolean;
 }
@@ -32,6 +35,9 @@ const DEFAULT_PREFERENCES: Preferences = {
   reportCompletion: true,
   systemIncidents: true,
   productUpdates: false,
+  viewerAccountChanges: true,
+  teamMembershipChanges: true,
+  teamUpdates: true,
   email: true,
   inApp: true,
 };
@@ -60,12 +66,21 @@ const PERSONAL_ITEMS: Array<{ key: keyof Preferences; label: string; desc: strin
   { key: 'productUpdates', label: 'Product Updates', desc: 'New features and release announcements.' },
 ];
 
+// Admin-only — role/permission/API key/system-level events. Editor's own operational
+// categories live in OPERATIONS_ITEMS below instead.
 const MANAGEMENT_ITEMS: Array<{ key: keyof Preferences; label: string; desc: string }> = [
   { key: 'roleUpdates', label: 'Role Updates', desc: 'Role and permission changes.' },
   { key: 'invitations', label: 'User Invitations', desc: 'New user invitations.' },
   { key: 'accessRequests', label: 'Access Requests', desc: 'Access or permission requests.' },
   { key: 'apiKeyEvents', label: 'API Key Events', desc: 'Key creation, renewal, and revocation.' },
   { key: 'systemIncidents', label: 'System Incidents', desc: 'Outages or degraded system conditions.' },
+];
+
+// Editor-only — Viewer account and Team operations, not role/permission/API key/security events.
+const OPERATIONS_ITEMS: Array<{ key: keyof Preferences; label: string; desc: string }> = [
+  { key: 'viewerAccountChanges', label: 'Viewer Account Changes', desc: 'A Viewer account was created, updated, or its status changed.' },
+  { key: 'teamMembershipChanges', label: 'Team Membership Changes', desc: 'A Viewer was added to or removed from a team.' },
+  { key: 'teamUpdates', label: 'Team Updates', desc: 'A team was created, edited, or its status changed.' },
 ];
 
 const DELIVERY_ITEMS: Array<{ key: keyof Preferences; label: string; desc: string }> = [
@@ -75,7 +90,7 @@ const DELIVERY_ITEMS: Array<{ key: keyof Preferences; label: string; desc: strin
 
 const NotificationPreferencesTab = () => {
   const actor = useSelector((state: RootState) => state.auth.user?.username) ?? 'Unknown user';
-  const { isViewer } = useRolePermissions();
+  const { isAdmin, isEditor } = useRolePermissions();
   const [preferences, setPreferences] = useState<Preferences>(readStoredPreferences);
 
   useEffect(() => {
@@ -130,7 +145,8 @@ const NotificationPreferencesTab = () => {
       </p>
 
       {renderGroup(PERSONAL_ITEMS)}
-      {!isViewer && renderGroup(MANAGEMENT_ITEMS, 'Management')}
+      {isEditor && renderGroup(OPERATIONS_ITEMS, 'Operations')}
+      {isAdmin && renderGroup(MANAGEMENT_ITEMS, 'Management')}
       {renderGroup(DELIVERY_ITEMS, 'Delivery')}
     </div>
   );

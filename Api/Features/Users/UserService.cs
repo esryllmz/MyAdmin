@@ -1,7 +1,12 @@
-﻿using Api.Core.Helpers;
+﻿using Api.Core.Exceptions;
+using Api.Core.Helpers;
 using Api.Core.Repositories;
 using Api.Core.Responses;
 using Api.Core.Security;
+using Api.Features.Activities;
+using Api.Features.Roles;
+using Api.Features.Teams;
+using Api.Features.UserRoles;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,13 +16,134 @@ namespace Api.Features.Users;
 
 public class UserService(
   IUserRepository _userRepository,
+  IRoleRepository _roleRepository,
+  ITeamMemberRepository _teamMemberRepository,
   UserMapper _mapper,
   UserBusinessRules _businessRules,
+  IActivityService _activityService,
   IUnitOfWork _unitOfWork,
   IValidator<UpdateUserRequest> _updateValidator,
   IValidator<ChangePasswordRequest> _changePasswordValidator,
+  IValidator<CreateViewerAccountRequest> _createViewerValidator,
   ILogger<UserService> _logger) : IUserService
 {
+  private static readonly Func<IQueryable<User>, IQueryable<User>> IncludeRoles =
+    q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
+
+  public async Task<ReturnModel<PagedResult<UserResponseDto>>> GetManageableViewersAsync(
+    ManageableUsersQuery query,
+    CancellationToken cancellationToken = default)
+  {
+    _logger.LogInformation("Listing manageable Viewer accounts. Search: {Search}", query.Search);
+
+    var page = Math.Max(1, query.Page);
+    var pageSize = Math.Clamp(query.PageSize, 1, 100);
+    var search = query.Search?.Trim();
+
+    HashSet<Guid>? teamMemberUserIds = null;
+    if (query.TeamId != null)
+    {
+      var members = await _teamMemberRepository.GetAllAsync(
+        filter: tm => tm.TeamId == query.TeamId && tm.IsActive,
+        cancellationToken: cancellationToken);
+      teamMemberUserIds = members.Select(m => m.UserId).ToHashSet();
+    }
+
+    var all = await _userRepository.GetAllAsync(
+      filter: u =>
+        u.UserRoles.Any(ur => ur.Role.Name == "Viewer") &&
+        (string.IsNullOrEmpty(search) || u.Username.Contains(search) || u.Email.Contains(search)) &&
+        (query.IsActive == null || u.IsActive == query.IsActive) &&
+        (teamMemberUserIds == null || teamMemberUserIds.Contains(u.Id)),
+      include: IncludeRoles,
+      orderBy: q => query.Sort switch
+      {
+        "username" => q.OrderBy(u => u.Username),
+        "oldest" => q.OrderBy(u => u.CreatedDate),
+        _ => q.OrderByDescending(u => u.CreatedDate),
+      },
+      cancellationToken: cancellationToken);
+
+    var totalCount = all.Count;
+    var pageItems = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+    return new ReturnModel<PagedResult<UserResponseDto>>
+    {
+      Success = true,
+      Message = "Manageable Viewer accounts retrieved successfully.",
+      StatusCode = 200,
+      Data = new PagedResult<UserResponseDto>
+      {
+        Items = _mapper.EntityToResponseDtoList(pageItems),
+        TotalCount = totalCount,
+        Page = page,
+        PageSize = pageSize,
+      },
+    };
+  }
+
+  public async Task<ReturnModel<CreatedUserResponseDto>> CreateViewerAccountAsync(
+    CreateViewerAccountRequest request,
+    Guid createdByUserId,
+    CancellationToken cancellationToken = default)
+  {
+    _logger.LogInformation("Creating a new Viewer account. Username: {Username}, CreatedBy: {CreatedByUserId}", request.Username, createdByUserId);
+
+    var validationResult = await _createViewerValidator.ValidateAsync(request, cancellationToken);
+    if (!validationResult.IsValid)
+    {
+      throw new ValidationException(validationResult.Errors);
+    }
+
+    await _businessRules.EmailMustBeUniqueAsync(request.Email, id: null, cancellationToken);
+    await _businessRules.UsernameMustBeUniqueAsync(request.Username, id: null, cancellationToken);
+
+    var viewerRole = await _roleRepository.GetAsync(r => r.Name == "Viewer", cancellationToken: cancellationToken);
+
+    if (viewerRole == null)
+    {
+      _logger.LogError("System configuration error: the 'Viewer' role was not found in the database.");
+
+      throw new BusinessException("System configuration error: the default role was not found.");
+    }
+
+    HashingHelper.CreatePasswordHash(request.TemporaryPassword, out var passwordHash, out var passwordKey);
+
+    var createdUser = new User
+    {
+      Username = request.Username,
+      Email = request.Email,
+      PasswordHash = passwordHash,
+      PasswordKey = passwordKey,
+    };
+
+    createdUser.UserRoles.Add(new UserRole
+    {
+      User = createdUser,
+      RoleId = viewerRole.Id,
+    });
+
+    await _userRepository.AddAsync(createdUser, cancellationToken);
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+    await _activityService.AddAsync(new CreateActivityRequest(
+      Action: OperationalActivityActions.ViewerAccountCreated,
+      EntityName: OperationalActivityActions.UserEntity,
+      EntityId: createdUser.Id.ToString(),
+      NewValues: $"Viewer account '{createdUser.Username}' created.",
+      UserId: createdByUserId), cancellationToken);
+
+    _logger.LogInformation("Viewer account created successfully. ID: {UserId}", createdUser.Id);
+
+    return new ReturnModel<CreatedUserResponseDto>
+    {
+      Success = true,
+      Message = "Viewer account created successfully.",
+      StatusCode = 201,
+      Data = _mapper.EntityToCreatedResponseDto(createdUser),
+    };
+  }
+
   public async Task<ReturnModel<List<UserResponseDto>>> GetAllAsync(
     Expression<Func<User, bool>>? filter = null, 
     Func<IQueryable<User>, IQueryable<User>>? include = null, 
@@ -80,18 +206,27 @@ public class UserService(
   }
 
   public async Task<ReturnModel<UserResponseDto>> GetByIdAsync(
-    Guid id, 
-    Func<IQueryable<User>, IQueryable<User>>? include = null, 
-    bool enableTracking = false, 
+    Guid id,
+    Guid callerUserId,
+    string callerRole,
+    Func<IQueryable<User>, IQueryable<User>>? include = null,
+    bool enableTracking = false,
     CancellationToken cancellationToken = default)
   {
     _logger.LogInformation("Kullanıcı detayları getiriliyor. ID: {UserId}", id);
+
+    _businessRules.ViewerMayOnlyViewSelf(callerRole, callerUserId, id);
 
     User user = await _businessRules.GetUserIfExistAsync(
       id: id,
       include: u => u.Include(u => u.UserRoles).ThenInclude(ur => ur.Role),
       enableTracking: enableTracking,
       cancellationToken: cancellationToken);
+
+    if (id != callerUserId)
+    {
+      _businessRules.EditorMayOnlyTargetViewerUsers(callerRole, user);
+    }
 
     UserResponseDto response = _mapper.EntityToResponseDto(user);
 
@@ -143,24 +278,34 @@ public class UserService(
 
   public async Task<ReturnModel<NoData>> UpdateAsync(
     UpdateUserRequest request,
-    Guid currentUserId,
+    Guid targetUserId,
+    Guid callerUserId,
+    string callerRole,
     CancellationToken cancellationToken = default)
   {
-    _logger.LogInformation("Kullanıcı güncelleme işlemi başlatıldı. ID: {UserId}", currentUserId);
+    _logger.LogInformation("Kullanıcı güncelleme işlemi başlatıldı. ID: {UserId}", targetUserId);
 
     var validationResult = await _updateValidator.ValidateAsync(request, cancellationToken);
 
     if (!validationResult.IsValid)
     {
-      _logger.LogWarning("Kullanıcı güncelleme validasyonu başarısız oldu. ID: {UserId}", currentUserId);
+      _logger.LogWarning("Kullanıcı güncelleme validasyonu başarısız oldu. ID: {UserId}", targetUserId);
 
       throw new ValidationException(validationResult.Errors);
     }
 
     User existingUser = await _businessRules.GetUserIfExistAsync(
-      currentUserId,
+      targetUserId,
+      include: IncludeRoles,
       enableTracking: true,
       cancellationToken: cancellationToken);
+
+    var isSelfEdit = targetUserId == callerUserId;
+
+    if (!isSelfEdit)
+    {
+      _businessRules.EditorMayOnlyTargetViewerUsers(callerRole, existingUser);
+    }
 
     if (existingUser.Email != request.Email)
     {
@@ -176,7 +321,7 @@ public class UserService(
 
     if (request.ImageFile != null)
     {
-      _logger.LogInformation("Kullanıcı profil fotoğrafı güncelleniyor. ID: {UserId}", currentUserId);
+      _logger.LogInformation("Kullanıcı profil fotoğrafı güncelleniyor. ID: {UserId}", targetUserId);
     }
 
     existingUser.ProfileImageUrl = await FileHelper.ReplaceImageOnDisk(
@@ -189,7 +334,17 @@ public class UserService(
     _userRepository.Update(existingUser);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    _logger.LogInformation("Kullanıcı bilgileri başarıyla güncellendi. ID: {UserId}", currentUserId);
+    if (!isSelfEdit)
+    {
+      await _activityService.AddAsync(new CreateActivityRequest(
+        Action: OperationalActivityActions.ViewerProfileUpdated,
+        EntityName: OperationalActivityActions.UserEntity,
+        EntityId: existingUser.Id.ToString(),
+        NewValues: $"Viewer account '{existingUser.Username}' profile updated.",
+        UserId: callerUserId), cancellationToken);
+    }
+
+    _logger.LogInformation("Kullanıcı bilgileri başarıyla güncellendi. ID: {UserId}", targetUserId);
 
     return new ReturnModel<NoData>()
     {
@@ -238,23 +393,34 @@ public class UserService(
   }
 
   public async Task<ReturnModel<NoData>> UpdateStatusAsync(
-    Guid id,
+    Guid targetUserId,
     bool isActive,
-    Guid currentUserId,
+    Guid callerUserId,
+    string callerRole,
     CancellationToken cancellationToken = default)
   {
-    _logger.LogInformation("Kullanıcı durum güncelleme işlemi başlatıldı. ID: {UserId}, IsActive: {IsActive}", id, isActive);
+    _logger.LogInformation("Kullanıcı durum güncelleme işlemi başlatıldı. ID: {UserId}, IsActive: {IsActive}", targetUserId, isActive);
 
-    _businessRules.UserCannotDeactivateSelf(id, currentUserId, isActive);
+    _businessRules.UserCannotDeactivateSelf(targetUserId, callerUserId, isActive);
 
-    User user = await _businessRules.GetUserIfExistAsync(id, enableTracking: true, cancellationToken: cancellationToken);
+    User user = await _businessRules.GetUserIfExistAsync(
+      targetUserId, include: IncludeRoles, enableTracking: true, cancellationToken: cancellationToken);
+
+    _businessRules.EditorMayOnlyTargetViewerUsers(callerRole, user);
 
     user.IsActive = isActive;
 
     _userRepository.Update(user);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    _logger.LogInformation("Kullanıcı durumu güncellendi. ID: {UserId}, IsActive: {IsActive}", id, isActive);
+    await _activityService.AddAsync(new CreateActivityRequest(
+      Action: isActive ? OperationalActivityActions.ViewerStatusActivated : OperationalActivityActions.ViewerStatusDeactivated,
+      EntityName: OperationalActivityActions.UserEntity,
+      EntityId: user.Id.ToString(),
+      NewValues: $"Viewer account '{user.Username}' {(isActive ? "activated" : "deactivated")}.",
+      UserId: callerUserId), cancellationToken);
+
+    _logger.LogInformation("Kullanıcı durumu güncellendi. ID: {UserId}, IsActive: {IsActive}", targetUserId, isActive);
 
     return new ReturnModel<NoData>()
     {

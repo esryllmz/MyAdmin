@@ -17,10 +17,11 @@ const ADMIN_TABS: ReportsTab[] = [
   { label: 'Scheduled', to: '/reports/scheduled', end: false, adminOnly: true },
 ];
 
-const PERSONAL_TABS: ReportsTab[] = [
+const EDITOR_TABS: ReportsTab[] = [
   { label: 'Overview', to: '/reports', end: true },
-  { label: 'My Activity', to: '/reports/activity', end: false },
-  { label: 'Available Reports', to: '/reports/available', end: false },
+  { label: 'User Activity', to: '/reports/activity', end: false },
+  { label: 'Team Operations', to: '/reports/operations', end: false },
+  { label: 'Exports', to: '/reports/exports', end: false },
 ];
 
 const SAVED_VIEWS = ['Default View', 'Last 7 Days · Failures Only', 'This Quarter · Admin Only'];
@@ -29,7 +30,7 @@ const ReportsLayout = () => {
   const [, setSearchParams] = useSearchParams();
   const { isAdmin } = useRolePermissions();
 
-  const tabs = isAdmin ? ADMIN_TABS : PERSONAL_TABS;
+  const tabs = isAdmin ? ADMIN_TABS : EDITOR_TABS;
 
   return (
     <div className="p-6 md:p-8 lg:px-12 max-w-7xl mx-auto w-full">
@@ -39,7 +40,7 @@ const ReportsLayout = () => {
           <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant mt-1">
             {isAdmin
               ? 'Build, review, and schedule reports across the platform.'
-              : 'Review your own activity and the reports available to you.'}
+              : 'Review Viewer account activity, team operations, and your own exports.'}
           </p>
         </div>
 

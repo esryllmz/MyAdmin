@@ -8,6 +8,7 @@ using Api.Features.Notifications;
 using Api.Features.Permissions;
 using Api.Features.RolePermissions;
 using Api.Features.Roles;
+using Api.Features.Teams;
 using Api.Features.UserRoles;
 using Api.Features.Users;
 using FluentValidation;
@@ -69,6 +70,7 @@ builder.Services.AddRolePermissionDependencies();
 builder.Services.AddAuthenticationDependencies();
 builder.Services.AddActivityDependencies();
 builder.Services.AddNotificationDependencies();
+builder.Services.AddTeamDependencies();
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

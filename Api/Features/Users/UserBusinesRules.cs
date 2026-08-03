@@ -61,6 +61,51 @@ public class UserBusinessRules(
     }
   }
 
+  /// <summary>
+  /// Viewer has no management mandate over any other account — GetById previously had no
+  /// ownership check at all, letting any authenticated Viewer read any other user's profile by
+  /// guessing an ID. Editor/Admin are exempt (they have their own, separate target-role checks).
+  /// </summary>
+  public void ViewerMayOnlyViewSelf(string callerRole, Guid callerUserId, Guid targetUserId)
+  {
+    if (callerRole != "Viewer" || targetUserId == callerUserId)
+    {
+      return;
+    }
+
+    _logger.LogWarning(
+      "Viewer attempted to view another user's profile. Requester: {CallerUserId}, Target: {TargetUserId}",
+      callerUserId, targetUserId);
+
+    throw new ForbiddenException("You can only view your own profile.");
+  }
+
+  /// <summary>
+  /// Editor's mandate is Viewer-account operations only. When an Editor targets someone other
+  /// than themselves (edit profile, activate/deactivate), the target must hold the Viewer
+  /// application role — this blocks an Editor from editing or deactivating an Admin or another
+  /// Editor account, which is a real privilege-escalation/denial-of-service vector otherwise.
+  /// Admin is exempt; self-targeting is always exempt (handled by the caller).
+  /// </summary>
+  public void EditorMayOnlyTargetViewerUsers(string callerRole, User targetUser)
+  {
+    if (callerRole != "Editor")
+    {
+      return;
+    }
+
+    var targetApplicationRole = targetUser.UserRoles?.Select(ur => ur.Role?.Name).FirstOrDefault(name => name != null);
+
+    if (targetApplicationRole != "Viewer")
+    {
+      _logger.LogWarning(
+        "Editor attempted to manage a non-Viewer account. Target: {TargetUserId}, TargetRole: {TargetRole}",
+        targetUser.Id, targetApplicationRole);
+
+      throw new ForbiddenException("Editors can only manage Viewer accounts.");
+    }
+  }
+
   public void UserMustBeOwnerOrAdmin(Guid requestTargetId, Guid currentUserId, string userRole)
   {
     if (requestTargetId != currentUserId && userRole != "Admin")

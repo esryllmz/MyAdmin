@@ -26,6 +26,8 @@ const EditUserModal = ({ user, isOpen, onClose }: EditUserModalProps) => {
     onSuccess: (res) => {
       if (res.success) {
         queryClient.invalidateQueries({ queryKey: ["users"] });
+        queryClient.invalidateQueries({ queryKey: ["manageable-users"] });
+        queryClient.invalidateQueries({ queryKey: ["user", user!.id] });
         onClose();
       }
     }

@@ -4,7 +4,6 @@ import { useRolePermissions } from '@/core/hooks/useRolePermissions';
 interface SettingsNavItem {
   label: string;
   to: string;
-  editorOnly?: boolean;
   adminOnly?: boolean;
 }
 
@@ -14,16 +13,15 @@ const NAV_ITEMS: SettingsNavItem[] = [
   { label: 'Security', to: '/settings/security' },
   { label: 'Appearance', to: '/settings/appearance' },
   { label: 'Notifications', to: '/settings/notifications' },
-  { label: 'My Activity', to: '/settings/audit', editorOnly: true },
-  { label: 'API Keys', to: '/settings/api-keys', editorOnly: true },
+  { label: 'My Activity', to: '/settings/audit', adminOnly: true },
+  { label: 'API Keys', to: '/settings/api-keys', adminOnly: true },
   { label: 'Integrations', to: '/settings/integrations', adminOnly: true },
 ];
 
 const SettingsLayout = () => {
-  const { isAdmin, isEditor } = useRolePermissions();
+  const { isAdmin } = useRolePermissions();
   const items = NAV_ITEMS.filter((item) => {
     if (item.adminOnly) return isAdmin;
-    if (item.editorOnly) return isAdmin || isEditor;
     return true;
   });
 

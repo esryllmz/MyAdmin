@@ -98,10 +98,10 @@ const UserTable = () => {
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-container-low/50 text-on-surface-variant font-semibold uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="px-6 py-4 border-b border-outline-variant/10">Kullanıcı Bilgileri</th>
-                <th className="px-6 py-4 border-b border-outline-variant/10">Hesap Durumu</th>
-                <th className="px-6 py-4 border-b border-outline-variant/10">Yetki Grupları</th>
-                <th className="px-6 py-4 border-b border-outline-variant/10 text-right">Eylemler</th>
+                <th className="px-6 py-4 border-b border-outline-variant/10">User Info</th>
+                <th className="px-6 py-4 border-b border-outline-variant/10">Account Status</th>
+                <th className="px-6 py-4 border-b border-outline-variant/10">Roles</th>
+                <th className="px-6 py-4 border-b border-outline-variant/10 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
@@ -148,14 +148,14 @@ const UserTable = () => {
     return (
       <div className="bg-error/5 border border-error/20 rounded-xl p-10 text-center max-w-2xl mx-auto my-4">
         <span className="material-symbols-outlined text-error text-5xl mb-4">report_problem</span>
-        <h3 className="text-on-surface font-bold text-xl mb-2">Sistem Hatası</h3>
+        <h3 className="text-on-surface font-bold text-xl mb-2">System Error</h3>
         <p className="text-on-surface-variant text-sm mb-6">
-          {apiError?.message || "Sunucuyla bağlantı kurulurken teknik bir sorun oluştu."}
+          {apiError?.message || "A technical issue occurred while connecting to the server."}
         </p>
 
         {apiError?.errors && apiError.errors.length > 0 && (
           <div className="bg-white/40 backdrop-blur-sm rounded-lg p-4 text-left border border-error/10">
-            <p className="text-[10px] font-black text-error/60 mb-2 uppercase tracking-widest">Hata Detayları</p>
+            <p className="text-[10px] font-black text-error/60 mb-2 uppercase tracking-widest">Error Details</p>
             <ul className="space-y-1.5">
               {apiError.errors.map((err, index) => (
                 <li key={index} className="flex items-start gap-2 text-xs text-error/90 font-medium">
@@ -182,14 +182,14 @@ const UserTable = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Kullanıcı ara veya filtrele..."
+            placeholder="Search or filter users..."
             className="w-full pl-10 pr-4 py-2 bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant rounded-lg text-sm text-on-surface dark:text-dark-on-surface focus:outline-none focus:border-outline dark:focus:border-dark-outline transition-all outline-none"
           />
         </div>
         <div className="flex items-center gap-2 text-sm text-on-surface-variant dark:text-dark-on-surface-variant">
           <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-          <span className="font-semibold text-on-surface dark:text-dark-on-surface">{filteredUsers.length}</span> kullanıcı
-          {search && <span className="text-on-surface-variant/60 dark:text-dark-on-surface-variant/60">/ {users?.length || 0} toplam</span>}
+          <span className="font-semibold text-on-surface dark:text-dark-on-surface">{filteredUsers.length}</span> users
+          {search && <span className="text-on-surface-variant/60 dark:text-dark-on-surface-variant/60">/ {users?.length || 0} total</span>}
         </div>
       </div>
 
@@ -198,10 +198,10 @@ const UserTable = () => {
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-surface-container-low/50 dark:bg-dark-surface-container-low/50 text-on-surface-variant dark:text-dark-on-surface-variant font-semibold uppercase tracking-wider text-[11px]">
             <tr>
-              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant">Kullanıcı Bilgileri</th>
-              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant">Hesap Durumu</th>
-              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant">Yetki Grupları</th>
-              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant text-right">Eylemler</th>
+              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant">User Info</th>
+              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant">Account Status</th>
+              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant">Roles</th>
+              <th className="px-6 py-4 border-b border-outline-variant/60 dark:border-dark-outline-variant text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/60 dark:divide-dark-outline-variant">
@@ -231,7 +231,7 @@ const UserTable = () => {
                       onClick={() => handleToggleStatus(user)}
                       disabled={!toggleStatusPermission.allowed || (updateStatus.isPending && updateStatus.variables?.id === user.id)}
                       className="flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={toggleStatusPermission.allowed ? 'Durumu değiştir' : toggleStatusPermission.reason}
+                      title={toggleStatusPermission.allowed ? 'Toggle status' : toggleStatusPermission.reason}
                     >
                       {updateStatus.isPending && updateStatus.variables?.id === user.id ? (
                         <Loader2 className="w-3 h-3 animate-spin text-on-surface-variant dark:text-dark-on-surface-variant" />
@@ -242,7 +242,7 @@ const UserTable = () => {
                           ? 'bg-success/10 text-success hover:bg-success/20'
                           : 'bg-surface-dim dark:bg-dark-surface-dim text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high'
                         }`}>
-                        {user.isActive ? 'Aktif' : 'Pasif'}
+                        {user.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </button>
                   </td>
@@ -254,7 +254,7 @@ const UserTable = () => {
                         disabled={syncRole.isPending && syncRole.variables?.userId === user.id}
                         className="bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant text-on-surface dark:text-dark-on-surface rounded-md text-[11px] font-bold uppercase tracking-wider px-2 py-1 outline-none focus:border-outline dark:focus:border-dark-outline transition-all disabled:opacity-50"
                       >
-                        {!user.roles?.[0] && <option value="">Rol Tanımsız</option>}
+                        {!user.roles?.[0] && <option value="">No role assigned</option>}
                         {roles.map((role) => (
                           <option key={role.id} value={role.name}>
                             {role.name}
@@ -273,7 +273,7 @@ const UserTable = () => {
                             </span>
                           ))
                         ) : (
-                          <span className="text-[10px] text-on-surface-variant/40 dark:text-dark-on-surface-variant/40 italic">Rol Tanımsız</span>
+                          <span className="text-[10px] text-on-surface-variant/40 dark:text-dark-on-surface-variant/40 italic">No role assigned</span>
                         )}
                       </div>
                     )}
@@ -286,7 +286,7 @@ const UserTable = () => {
                         className="inline-flex items-center gap-1.5 text-on-surface dark:text-dark-on-surface hover:text-on-surface-variant dark:hover:text-dark-on-surface-variant font-semibold text-xs px-4 py-2 rounded-lg hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-all active:scale-95"
                       >
                         <span className="material-symbols-outlined text-[16px]">edit_note</span>
-                        Yönet
+                        Manage
                       </button>
                       <button
                         type="button"
@@ -297,7 +297,7 @@ const UserTable = () => {
                         }
                         title={
                           deleteUserPermission.allowed || currentUser?.id === user.id
-                            ? 'Kullanıcıyı sil'
+                            ? 'Delete user'
                             : deleteUserPermission.reason
                         }
                         className={`inline-flex items-center gap-1.5 font-bold text-xs px-3 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-50 ${confirmDeleteId === user.id
@@ -310,7 +310,7 @@ const UserTable = () => {
                         ) : (
                           <Trash2 className="w-3.5 h-3.5" />
                         )}
-                        {confirmDeleteId === user.id ? 'Emin misiniz?' : ''}
+                        {confirmDeleteId === user.id ? 'Are you sure?' : ''}
                       </button>
                     </div>
                   </td>
@@ -322,7 +322,7 @@ const UserTable = () => {
                   <div className="flex flex-col items-center gap-3">
                     <span className="material-symbols-outlined text-4xl text-on-surface-variant/20 dark:text-dark-on-surface-variant/20">person_off</span>
                     <p className="text-on-surface-variant dark:text-dark-on-surface-variant font-medium">
-                      {search ? `"${search}" ile eşleşen kullanıcı bulunamadı.` : 'Sistemde kayıtlı kullanıcı bulunamadı.'}
+                      {search ? `No users match "${search}".` : 'No users registered in the system.'}
                     </p>
                   </div>
                 </td>
@@ -336,7 +336,7 @@ const UserTable = () => {
       {filteredUsers.length > 0 && (
         <div className="px-5 py-3 border-t border-outline-variant/60 dark:border-dark-outline-variant flex items-center justify-between bg-surface-container-low/30 dark:bg-dark-surface-container-low/30">
           <span className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">
-            Sayfa <span className="font-semibold text-on-surface dark:text-dark-on-surface">{currentPage}</span> / {totalPages}
+            Page <span className="font-semibold text-on-surface dark:text-dark-on-surface">{currentPage}</span> of {totalPages}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -346,7 +346,7 @@ const UserTable = () => {
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
-              Önceki
+              Previous
             </button>
             <button
               type="button"
@@ -354,7 +354,7 @@ const UserTable = () => {
               disabled={currentPage >= totalPages}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
             >
-              Sonraki
+              Next
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>

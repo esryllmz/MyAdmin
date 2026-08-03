@@ -8,8 +8,25 @@ import {
   updateMockUserStatus,
 } from "./userService.mock";
 import type { ApiResponse } from "@/core/types/ApiResponse";
-import type { RegisterUserRequest, CreatedUserResponseDto } from "@/features/auth/types/authTypes";
-import type { ChangePasswordRequest, UserResponseDto } from "../types/userTypes";
+import type { PagedResult } from "@/core/types/PagedResult";
+import type { CreatedUserResponseDto } from "@/features/auth/types/authTypes";
+import type {
+  ChangePasswordRequest,
+  CreateViewerAccountRequest,
+  ManageableUsersParams,
+  UserResponseDto,
+} from "../types/userTypes";
+
+const buildQuery = (params: Record<string, string | number | boolean | undefined>): string => {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      search.set(key, String(value));
+    }
+  });
+  const query = search.toString();
+  return query ? `?${query}` : "";
+};
 
 export const userService = {
 
@@ -20,15 +37,47 @@ export const userService = {
     return await apiClient<UserResponseDto[]>("/users");
   },
 
-  inviteUser: async (request: RegisterUserRequest): Promise<ApiResponse<CreatedUserResponseDto>> => {
+  /** Editor workspace's user list — server-scoped to Viewer-role accounts only. */
+  getManageableViewers: async (params: ManageableUsersParams = {}): Promise<ApiResponse<PagedResult<UserResponseDto>>> => {
     if (isDemoModeActive()) {
-      const newUser = addMockUser(request);
-      return createMockResponse<CreatedUserResponseDto>(
-        { id: newUser.id, username: newUser.username, email: newUser.email },
-        `${newUser.username} demo ekibe eklendi.`
+      const viewers = getMockUsers().filter((u) => u.roles?.[0]?.name === "Viewer");
+      return createMockResponse(
+        { items: viewers, totalCount: viewers.length, page: 1, pageSize: params.pageSize ?? 20 },
+        "Demo Viewer listesi görüntüleniyor."
       );
     }
-    return await apiClient<CreatedUserResponseDto>("/authentication/register", {
+    const query = buildQuery({
+      search: params.search,
+      isActive: params.isActive,
+      teamId: params.teamId,
+      page: params.page,
+      pageSize: params.pageSize,
+      sort: params.sort,
+    });
+    return await apiClient<PagedResult<UserResponseDto>>(`/users/manageable${query}`);
+  },
+
+  getUserById: async (id: string): Promise<ApiResponse<UserResponseDto>> => {
+    if (isDemoModeActive()) {
+      const user = getMockUsers().find((u) => u.id === id) ?? null;
+      return createMockResponse(user as UserResponseDto, "Demo kullanıcı görüntüleniyor.");
+    }
+    return await apiClient<UserResponseDto>(`/users/${id}`);
+  },
+
+  createViewerAccount: async (request: CreateViewerAccountRequest): Promise<ApiResponse<CreatedUserResponseDto>> => {
+    if (isDemoModeActive()) {
+      const newUser = addMockUser({
+        username: request.username,
+        email: request.email,
+        password: request.temporaryPassword,
+      });
+      return createMockResponse<CreatedUserResponseDto>(
+        { id: newUser.id, username: newUser.username, email: newUser.email },
+        `${newUser.username} demo Viewer olarak oluşturuldu.`
+      );
+    }
+    return await apiClient<CreatedUserResponseDto>("/users/viewers", {
       method: "POST",
       body: JSON.stringify(request),
     });

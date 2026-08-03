@@ -8,7 +8,9 @@ export type MutationAction =
   | "newRole"
   | "syncRolePermissions"
   | "manageApiKeys"
-  | "viewSensitiveData";
+  | "viewSensitiveData"
+  | "deleteTeam"
+  | "assignTeamOwner";
 
 type RequiredLevel = "editor" | "admin";
 
@@ -21,6 +23,8 @@ const ACTION_REQUIREMENT: Record<MutationAction, RequiredLevel> = {
   syncRolePermissions: "admin",
   manageApiKeys: "admin",
   viewSensitiveData: "admin",
+  deleteTeam: "admin",
+  assignTeamOwner: "admin",
 };
 
 const REASON: Record<RequiredLevel, string> = {
@@ -92,10 +96,13 @@ const VIEW_ACCESS: Record<ViewFeature, ViewLevel> = {
   appearance: "any",
   ownNotifications: "any",
   ownAccess: "any",
-  apiKeys: "editor",
-  // Settings > My Activity duplicated the dedicated /activities page for Viewer —
-  // Viewer now uses /activities only, Editor/Admin are unaffected.
-  personalAudit: "editor",
+  // API Keys is Admin-only — Editor's mandate is Viewer/Team operations, not credential
+  // management.
+  apiKeys: "admin",
+  // Settings > My Activity is redundant for every role that has its own dedicated activity
+  // page: Viewer uses /activities (My Activity), Editor uses /activities (Operations Activity).
+  // Only Admin still lacks a dedicated personal-activity page, so only Admin keeps this tab.
+  personalAudit: "admin",
   users: "editor",
   roles: "admin",
   permissions: "admin",

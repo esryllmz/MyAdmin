@@ -19,7 +19,7 @@ const ENTRIES: PageTitleEntry[] = [
   { match: (p) => /^\/activities\/[^/]+$/.test(p), title: 'Activity Detail' },
   { match: (p) => p === '/reports', title: 'Reports Overview', section: 'Reports' },
   { match: (p) => p === '/reports/activity', title: 'Activity', section: 'Reports' },
-  { match: (p) => p === '/reports/available', title: 'Available Reports', section: 'Reports' },
+  { match: (p) => p === '/reports/operations', title: 'Team Operations', section: 'Reports' },
   { match: (p) => p === '/reports/security', title: 'Security Events', section: 'Reports' },
   { match: (p) => p === '/reports/permissions', title: 'Permission Reports', section: 'Reports' },
   { match: (p) => p === '/reports/exports', title: 'Export History', section: 'Reports' },

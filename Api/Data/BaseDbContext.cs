@@ -3,6 +3,7 @@ using Api.Features.Notifications;
 using Api.Features.Permissions;
 using Api.Features.RolePermissions;
 using Api.Features.Roles;
+using Api.Features.Teams;
 using Api.Features.UserRoles;
 using Api.Features.Users;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,8 @@ public class BaseDbContext : DbContext
   public DbSet<RolePermission> RolePermissions { get; set; }
   public DbSet<Notification> Notifications { get; set; }
   public DbSet<Activity> Activities { get; set; }
+  public DbSet<Team> Teams { get; set; }
+  public DbSet<TeamMember> TeamMembers { get; set; }
 
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)

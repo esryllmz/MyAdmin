@@ -44,3 +44,19 @@ export interface ChangePasswordRequest {
   newPassword: string;
   confirmNewPassword: string;
 }
+
+/** Editor/Admin-only Viewer account creation — no role field, backend always assigns Viewer. */
+export interface CreateViewerAccountRequest {
+  username: string;
+  email: string;
+  temporaryPassword: string;
+}
+
+export interface ManageableUsersParams {
+  search?: string;
+  isActive?: boolean;
+  teamId?: string;
+  page?: number;
+  pageSize?: number;
+  sort?: string;
+}

@@ -18,7 +18,7 @@ import ReportsSecurityPage from '@/features/reports/pages/ReportsSecurityPage';
 import ReportsPermissionsPage from '@/features/reports/pages/ReportsPermissionsPage';
 import ReportsExportsPage from '@/features/reports/pages/ReportsExportsPage';
 import ReportsScheduledPage from '@/features/reports/pages/ReportsScheduledPage';
-import ReportsAvailablePage from '@/features/reports/pages/ReportsAvailablePage';
+import ReportsOperationsPage from '@/features/reports/pages/ReportsOperationsPage';
 import SettingsLayout from '@/features/settings/components/SettingsLayout';
 import ProfileSettingsTab from '@/features/settings/components/ProfileSettingsTab';
 import AccountSettingsTab from '@/features/settings/components/AccountSettingsTab';
@@ -132,7 +132,12 @@ export const AppRouter = () => {
         >
           <Route index element={<ReportsOverviewPage />} />
           <Route path="activity" element={<ReportsActivityPage />} />
-          <Route path="available" element={<ReportsAvailablePage />} />
+          {/* Editor-only tab; Admin never sees "operations" data it doesn't already get from
+              Reports Overview/Activity, so the tab itself is hidden from Admin in ReportsLayout. */}
+          <Route path="operations" element={<ReportsOperationsPage />} />
+          {/* Own-exports for Editor, full export history for Admin — branches internally,
+              no per-tab gate needed since the outer /reports route already blocks Viewer. */}
+          <Route path="exports" element={<ReportsExportsPage />} />
           <Route
             path="security"
             element={
@@ -146,14 +151,6 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute requiredFeature="permissionReports">
                 <ReportsPermissionsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="exports"
-            element={
-              <ProtectedRoute requiredFeature="exportReports">
-                <ReportsExportsPage />
               </ProtectedRoute>
             }
           />

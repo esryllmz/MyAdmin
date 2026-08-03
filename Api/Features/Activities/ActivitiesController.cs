@@ -35,6 +35,38 @@ public class ActivitiesController(IActivityService _activityService) : CustomBas
     return CreateActionResult(result);
   }
 
+  /// <summary>
+  /// Editor's "Operations Activity"/"Reports > User Activity"/"Reports > Team Operations" data
+  /// source — Action is restricted to the OperationalActivityActions whitelist (Viewer account
+  /// lifecycle + Team/membership events only), so role/permission/API-key/security-policy rows
+  /// never reach an Editor session no matter what filters are passed.
+  /// </summary>
+  [HttpGet("operations")]
+  [Authorize(Roles = "Admin,Editor")]
+  public async Task<IActionResult> GetOperationalActivities(
+    [FromQuery] string? entityName,
+    [FromQuery] DateTime? from,
+    [FromQuery] DateTime? to,
+    [FromQuery] bool? isSuccess,
+    [FromQuery] Guid? userId,
+    CancellationToken cancellationToken)
+  {
+    var allowedActions = OperationalActivityActions.All;
+
+    var result = await _activityService.GetAllAsync(
+      filter: a =>
+        allowedActions.Contains(a.Action) &&
+        (string.IsNullOrEmpty(entityName) || a.EntityName == entityName) &&
+        (from == null || a.CreatedDate >= from) &&
+        (to == null || a.CreatedDate <= to) &&
+        (isSuccess == null || a.IsSuccess == isSuccess) &&
+        (userId == null || a.UserId == userId),
+      orderBy: q => q.OrderByDescending(a => a.CreatedDate),
+      cancellationToken: cancellationToken);
+
+    return CreateActionResult(result);
+  }
+
   [HttpGet("{id:guid}")]
   [Authorize(Roles = "Admin")]
   public async Task<IActionResult> GetById(

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { activityService } from "../services/activityService";
+import { activityService, type OperationalActivityParams } from "../services/activityService";
 import type { ApiResponse } from "@/core/types/ApiResponse";
 import type { ActivityResponseDto } from "../types/activityTypes";
 
@@ -16,6 +16,15 @@ export const useMyActivities = () => {
   return useQuery<ApiResponse<ActivityResponseDto[]>, ApiResponse<null>, ActivityResponseDto[]>({
     queryKey: ["activities", "me"],
     queryFn: activityService.getMyActivities,
+    select: (response) => response.data || [],
+  });
+};
+
+/** Editor's operations feed (GET /activities/operations) — Viewer account + Team events only. */
+export const useOperationalActivities = (params: OperationalActivityParams = {}) => {
+  return useQuery<ApiResponse<ActivityResponseDto[]>, ApiResponse<null>, ActivityResponseDto[]>({
+    queryKey: ["activities", "operations", params],
+    queryFn: () => activityService.getOperationalActivities(params),
     select: (response) => response.data || [],
   });
 };
