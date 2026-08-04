@@ -13,7 +13,7 @@ import { useCurrentRole } from '@/core/hooks/useCurrentRole';
 import { formatRelativeTime } from '@/core/utils/formatRelativeTime';
 import { exportToCsv } from '@/core/utils/exportUtils';
 import { useManageableUsers } from '@/features/users/hooks/useUsers';
-import { useTeams } from '@/features/teams/hooks/useTeams';
+import { useMyTeams, useTeams } from '@/features/teams/hooks/useTeams';
 import { useOperationalActivities } from '@/features/activities/hooks/useActivities';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 
@@ -103,6 +103,7 @@ const PersonalDashboard = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const { recentActivityCount, unreadNotifications, activeSessions, recentActivities, isLoading } =
     usePersonalDashboardStats();
+  const { data: myTeams = [] } = useMyTeams();
 
   return (
     <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full">
@@ -199,6 +200,38 @@ const PersonalDashboard = () => {
             )}
           </dl>
         </div>
+      </div>
+
+      <div className="mt-5 bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-xl border border-outline-variant/70 dark:border-dark-outline-variant overflow-hidden">
+        <div className="p-5 border-b border-outline-variant/70 dark:border-dark-outline-variant flex items-center justify-between gap-3">
+          <h3 className="font-bold text-on-surface dark:text-dark-on-surface">My Teams</h3>
+          <Link to="/my-teams" className="text-xs font-medium text-primary flex items-center gap-1 shrink-0">
+            View all <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+          </Link>
+        </div>
+        {myTeams.length === 0 ? (
+          <div className="min-h-[100px] flex flex-col items-center justify-center gap-2 text-center px-6 py-8">
+            <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant max-w-xs">
+              You are not a member of any teams yet.
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-outline-variant/70 dark:divide-dark-outline-variant">
+            {myTeams.slice(0, 3).map((team) => (
+              <li key={team.id}>
+                <Link
+                  to={`/my-teams/${team.id}`}
+                  className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-surface-container-high/40 dark:hover:bg-dark-surface-container-high/40 transition-colors"
+                >
+                  <span className="text-sm font-medium text-on-surface dark:text-dark-on-surface truncate">{team.name}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant dark:text-dark-on-surface-variant shrink-0">
+                    {team.membershipRole}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -19,10 +19,12 @@ interface NavGroup {
 
 /**
  * Viewer gets its own, fully separate information architecture — a short, personal-only nav
- * (Dashboard / My Activity / Notifications / My Access / Settings) with no Reports module and
- * no management surface. This is presentation only: the actual access control lives in route
- * guards (AppRouter/ProtectedRoute) and backend [Authorize] attributes, since hiding a link
- * never stops someone from typing the URL directly.
+ * (Dashboard / My Activity / My Teams / My Access / Settings) with no Reports module and no
+ * management surface. Notifications has no sidebar entry for any role — the header notification
+ * bell's "View all" is the only nav path to /notifications (see NotificationCenter). This is
+ * presentation only: the actual access control lives in route guards (AppRouter/ProtectedRoute)
+ * and backend [Authorize] attributes, since hiding a link never stops someone from typing the
+ * URL directly.
  */
 const buildViewerNavGroups = (): NavGroup[] => [
   {
@@ -33,7 +35,7 @@ const buildViewerNavGroups = (): NavGroup[] => [
     label: 'Workspace',
     items: [
       { name: 'My Activity', icon: 'history', path: '/activities', roles: ['Viewer'] },
-      { name: 'Notifications', icon: 'notifications', path: '/notifications', roles: ['Viewer'] },
+      { name: 'My Teams', icon: 'diversity_3', path: '/my-teams', roles: ['Viewer'] },
     ],
   },
   {
@@ -47,8 +49,8 @@ const buildViewerNavGroups = (): NavGroup[] => [
 
 /**
  * Editor's own operations-focused IA — Viewer account management, Teams, operational activity
- * and reports, notifications, and personal account settings. No Roles/Permissions/API
- * Keys/Integrations/Security — those stay Admin-only surfaces (see buildAdminNavGroups).
+ * and reports, and personal account settings. No Roles/Permissions/API Keys/Integrations/Security
+ * — those stay Admin-only surfaces (see buildAdminNavGroups).
  */
 const buildEditorNavGroups = (): NavGroup[] => [
   {
@@ -62,7 +64,6 @@ const buildEditorNavGroups = (): NavGroup[] => [
       { name: 'Teams', icon: 'diversity_3', path: '/teams', roles: ['Editor'] },
       { name: 'Activity', icon: 'history', path: '/activities', roles: ['Editor'] },
       { name: 'Reports', icon: 'monitoring', path: '/reports', roles: ['Editor'] },
-      { name: 'Notifications', icon: 'notifications', path: '/notifications', roles: ['Editor'] },
     ],
   },
   {

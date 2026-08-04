@@ -32,6 +32,8 @@ import IntegrationsPage from '@/features/settings/pages/IntegrationsPage';
 import PermissionsPage from '@/features/permissions/pages/PermissionsPage';
 import TeamsPage from '@/features/teams/pages/TeamsPage';
 import TeamDetailPage from '@/features/teams/pages/TeamDetailPage';
+import MyTeamsPage from '@/features/teams/pages/MyTeamsPage';
+import MyTeamDetailPage from '@/features/teams/pages/MyTeamDetailPage';
 import SecurityLayout from '@/features/security/components/SecurityLayout';
 import SecurityOverviewPage from '@/features/security/pages/SecurityOverviewPage';
 import SecuritySessionsPage from '@/features/security/pages/SecuritySessionsPage';
@@ -118,6 +120,23 @@ export const AppRouter = () => {
           element={
             <ProtectedRoute requiredFeature="teams">
               <TeamDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-teams"
+          element={
+            <ProtectedRoute requiredFeature="myTeams">
+              <MyTeamsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-teams/:id"
+          element={
+            <ProtectedRoute requiredFeature="myTeams">
+              <MyTeamDetailPage />
             </ProtectedRoute>
           }
         />

@@ -1,6 +1,8 @@
+using Api.Core.Exceptions;
 using Api.Core.Repositories;
 using Api.Core.Responses;
 using Api.Features.Activities;
+using Api.Features.Notifications;
 using Api.Features.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ public class TeamService(
   TeamMapper _mapper,
   TeamBusinessRules _businessRules,
   IActivityService _activityService,
+  INotificationService _notificationService,
   IUnitOfWork _unitOfWork,
   IValidator<CreateTeamRequest> _createValidator,
   IValidator<UpdateTeamRequest> _updateValidator,
@@ -147,6 +150,8 @@ public class TeamService(
     await LogActivityAsync(OperationalActivityActions.TeamUpdated, OperationalActivityActions.TeamEntity,
       team.Id.ToString(), callerUserId, $"Team '{team.Name}' updated.", cancellationToken);
 
+    await NotifyActiveViewerMembersAsync(team.Id, $"\"{team.Name}\" was updated.", $"/my-teams/{team.Id}", cancellationToken);
+
     return new ReturnModel<NoData>
     {
       Success = true,
@@ -172,6 +177,12 @@ public class TeamService(
       isActive ? OperationalActivityActions.TeamStatusActivated : OperationalActivityActions.TeamStatusDeactivated,
       OperationalActivityActions.TeamEntity, team.Id.ToString(), callerUserId,
       $"Team '{team.Name}' {(isActive ? "activated" : "deactivated")}.", cancellationToken);
+
+    await NotifyActiveViewerMembersAsync(
+      team.Id,
+      isActive ? $"\"{team.Name}\" was reactivated." : $"\"{team.Name}\" was deactivated.",
+      $"/my-teams/{team.Id}",
+      cancellationToken);
 
     return new ReturnModel<NoData>
     {
@@ -257,8 +268,15 @@ public class TeamService(
     await _teamMemberRepository.AddAsync(member, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+    var team = await _businessRules.GetTeamIfExistAsync(teamId, cancellationToken: cancellationToken);
+
     await LogActivityAsync(OperationalActivityActions.TeamMemberAdded, OperationalActivityActions.TeamMemberEntity,
       teamId.ToString(), callerUserId, $"{targetUser.Username} added to team as {request.MembershipRole}.", cancellationToken);
+
+    await LogActivityAsync(OperationalActivityActions.ViewerAddedToTeam, OperationalActivityActions.TeamMemberEntity,
+      teamId.ToString(), targetUser.Id, $"Added to team as {request.MembershipRole}.", cancellationToken);
+
+    await NotifyMemberAsync(targetUser.Id, $"You were added to \"{team.Name}\".", $"/my-teams/{teamId}", cancellationToken);
 
     member.User = targetUser;
 
@@ -300,8 +318,16 @@ public class TeamService(
     _teamMemberRepository.Update(member);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+    var teamForRoleChange = await _businessRules.GetTeamIfExistAsync(teamId, cancellationToken: cancellationToken);
+
     await LogActivityAsync(OperationalActivityActions.TeamMemberRoleChanged, OperationalActivityActions.TeamMemberEntity,
       teamId.ToString(), callerUserId, $"{member.User?.Username} membership role changed to {request.MembershipRole}.", cancellationToken);
+
+    await LogActivityAsync(OperationalActivityActions.ViewerTeamRoleChanged, OperationalActivityActions.TeamMemberEntity,
+      teamId.ToString(), userId, $"Team role changed to {request.MembershipRole}.", cancellationToken);
+
+    await NotifyMemberAsync(userId, $"Your team role in \"{teamForRoleChange.Name}\" changed to {request.MembershipRole}.",
+      $"/my-teams/{teamId}", cancellationToken);
 
     return new ReturnModel<NoData>
     {
@@ -328,12 +354,18 @@ public class TeamService(
     _businessRules.EditorCannotManageExistingOwner(callerRole, member);
 
     var targetUsername = member.User?.Username;
+    var team = await _businessRules.GetTeamIfExistAsync(teamId, cancellationToken: cancellationToken);
 
     _teamMemberRepository.Delete(member);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     await LogActivityAsync(OperationalActivityActions.TeamMemberRemoved, OperationalActivityActions.TeamMemberEntity,
       teamId.ToString(), callerUserId, $"{targetUsername} removed from team.", cancellationToken);
+
+    await LogActivityAsync(OperationalActivityActions.ViewerRemovedFromTeam, OperationalActivityActions.TeamMemberEntity,
+      teamId.ToString(), userId, "Removed from team.", cancellationToken);
+
+    await NotifyMemberAsync(userId, $"You were removed from \"{team.Name}\".", "/my-teams", cancellationToken);
 
     return new ReturnModel<NoData>
     {
@@ -358,10 +390,11 @@ public class TeamService(
 
     var memberships = await _teamMemberRepository.GetAllAsync(
       filter: tm => tm.UserId == targetUserId && tm.IsActive,
-      include: q => q.Include(tm => tm.Team).ThenInclude(t => t.CreatedByUser).Include(tm => tm.Team).ThenInclude(t => t.Members),
+      include: q => q.Include(tm => tm.Team).ThenInclude(t => t.CreatedByUser),
       cancellationToken: cancellationToken);
 
     var teams = memberships.Select(m => m.Team).DistinctBy(t => t.Id).ToList();
+    await AttachActiveMembersAsync(teams, cancellationToken);
 
     return new ReturnModel<List<TeamResponseDto>>
     {
@@ -370,6 +403,166 @@ public class TeamService(
       StatusCode = 200,
       Data = _mapper.EntityToResponseDtoList(teams),
     };
+  }
+
+  public async Task<ReturnModel<List<MyTeamResponseDto>>> GetMyTeamsAsync(
+    Guid callerUserId,
+    CancellationToken cancellationToken = default)
+  {
+    var memberships = await _teamMemberRepository.GetAllAsync(
+      filter: tm => tm.UserId == callerUserId && tm.IsActive,
+      include: q => q.Include(tm => tm.Team),
+      orderBy: q => q.OrderByDescending(tm => tm.Team.UpdatedDate ?? tm.Team.CreatedDate),
+      cancellationToken: cancellationToken);
+
+    await AttachActiveMembersAsync(memberships.Select(m => m.Team).ToList(), cancellationToken);
+
+    return new ReturnModel<List<MyTeamResponseDto>>
+    {
+      Success = true,
+      Message = "Your teams retrieved successfully.",
+      StatusCode = 200,
+      Data = memberships.Select(ToMyTeamResponseDto).ToList(),
+    };
+  }
+
+  public async Task<ReturnModel<MyTeamResponseDto>> GetMyTeamDetailAsync(
+    Guid teamId,
+    Guid callerUserId,
+    CancellationToken cancellationToken = default)
+  {
+    var membership = await _teamMemberRepository.GetAsync(
+      predicate: tm => tm.TeamId == teamId && tm.UserId == callerUserId && tm.IsActive,
+      include: q => q.Include(tm => tm.Team),
+      cancellationToken: cancellationToken);
+
+    if (membership == null)
+    {
+      _logger.LogWarning("User attempted to view a team they don't belong to. Team: {TeamId}, User: {UserId}", teamId, callerUserId);
+
+      throw new NotFoundException("Team not found.");
+    }
+
+    await AttachActiveMembersAsync([membership.Team], cancellationToken);
+
+    return new ReturnModel<MyTeamResponseDto>
+    {
+      Success = true,
+      Message = "Team retrieved successfully.",
+      StatusCode = 200,
+      Data = ToMyTeamResponseDto(membership),
+    };
+  }
+
+  public async Task<ReturnModel<List<MyTeamMemberResponseDto>>> GetMyTeamMembersAsync(
+    Guid teamId,
+    Guid callerUserId,
+    CancellationToken cancellationToken = default)
+  {
+    var isMember = await _teamMemberRepository.AnyAsync(
+      tm => tm.TeamId == teamId && tm.UserId == callerUserId && tm.IsActive,
+      cancellationToken);
+
+    if (!isMember)
+    {
+      _logger.LogWarning("User attempted to list members of a team they don't belong to. Team: {TeamId}, User: {UserId}", teamId, callerUserId);
+
+      throw new NotFoundException("Team not found.");
+    }
+
+    var members = await _teamMemberRepository.GetAllAsync(
+      filter: tm => tm.TeamId == teamId && tm.IsActive,
+      include: q => q.Include(tm => tm.User),
+      orderBy: q => q.OrderBy(tm => tm.CreatedDate),
+      cancellationToken: cancellationToken);
+
+    return new ReturnModel<List<MyTeamMemberResponseDto>>
+    {
+      Success = true,
+      Message = "Team members retrieved successfully.",
+      StatusCode = 200,
+      Data = members.Select(m => new MyTeamMemberResponseDto(
+        m.UserId,
+        m.User?.Username ?? string.Empty,
+        m.User?.ProfileImageUrl,
+        m.MembershipRole,
+        m.IsActive)).ToList(),
+    };
+  }
+
+  /// <summary>
+  /// Populates Team.Members in-memory from a separate, flat query instead of
+  /// `.Include(tm => tm.Team).ThenInclude(t => t.Members)` — that chain closes a
+  /// TeamMember→Team→Members(TeamMember) loop that EF Core's no-tracking cycle detection
+  /// rejects outright ("The Include path 'Team->Members' results in a cycle"), which is exactly
+  /// what was turning every GetTeamsForUserAsync/GetMyTeamsAsync call into an unconditional 500.
+  /// </summary>
+  private async Task AttachActiveMembersAsync(List<Team> teams, CancellationToken cancellationToken)
+  {
+    if (teams.Count == 0)
+    {
+      return;
+    }
+
+    var teamIds = teams.Select(t => t.Id).ToList();
+
+    var members = await _teamMemberRepository.GetAllAsync(
+      filter: tm => teamIds.Contains(tm.TeamId) && tm.IsActive,
+      cancellationToken: cancellationToken);
+
+    var membersByTeamId = members.GroupBy(m => m.TeamId).ToDictionary(g => g.Key, g => (ICollection<TeamMember>)g.ToList());
+
+    foreach (var team in teams)
+    {
+      team.Members = membersByTeamId.TryGetValue(team.Id, out var teamMembers) ? teamMembers : [];
+    }
+  }
+
+  private static MyTeamResponseDto ToMyTeamResponseDto(TeamMember membership)
+  {
+    var team = membership.Team;
+    var activeMemberCount = team.Members.Count(m => m.IsActive);
+
+    return new MyTeamResponseDto(
+      team.Id,
+      team.Name,
+      team.Description,
+      team.IsActive,
+      membership.MembershipRole,
+      membership.JoinedDate,
+      activeMemberCount,
+      team.UpdatedDate);
+  }
+
+  private async Task NotifyMemberAsync(Guid userId, string message, string linkUrl, CancellationToken cancellationToken)
+  {
+    await _notificationService.AddAsync(new CreateNotificationRequest(
+      Title: "Team update",
+      Message: message,
+      UserId: userId,
+      Type: "INFO",
+      LinkUrl: linkUrl), cancellationToken);
+  }
+
+  /// <summary>
+  /// Notifies active Viewer-role members only — Editor/Admin members (e.g. an Owner/Manager who
+  /// isn't a Viewer) don't get a Viewer-workspace notification for their own team actions.
+  /// </summary>
+  private async Task NotifyActiveViewerMembersAsync(Guid teamId, string message, string linkUrl, CancellationToken cancellationToken)
+  {
+    var members = await _teamMemberRepository.GetAllAsync(
+      filter: tm => tm.TeamId == teamId && tm.IsActive,
+      include: q => q.Include(tm => tm.User).ThenInclude(u => u.UserRoles).ThenInclude(ur => ur.Role),
+      cancellationToken: cancellationToken);
+
+    var viewerMemberIds = members
+      .Where(m => m.User?.UserRoles?.Any(ur => ur.Role?.Name == "Viewer") == true)
+      .Select(m => m.UserId);
+
+    foreach (var viewerId in viewerMemberIds)
+    {
+      await NotifyMemberAsync(viewerId, message, linkUrl, cancellationToken);
+    }
   }
 
   private async Task LogActivityAsync(

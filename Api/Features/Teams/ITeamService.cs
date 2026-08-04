@@ -75,4 +75,21 @@ public interface ITeamService
     Guid callerUserId,
     string callerRole,
     CancellationToken cancellationToken = default);
+
+  /// <summary>Viewer-safe "My Teams" list — always scoped to the caller's own active memberships.</summary>
+  Task<ReturnModel<List<MyTeamResponseDto>>> GetMyTeamsAsync(
+    Guid callerUserId,
+    CancellationToken cancellationToken = default);
+
+  /// <summary>Viewer-safe single team detail — 404 unless the caller is an active member.</summary>
+  Task<ReturnModel<MyTeamResponseDto>> GetMyTeamDetailAsync(
+    Guid teamId,
+    Guid callerUserId,
+    CancellationToken cancellationToken = default);
+
+  /// <summary>Viewer-safe member list (no email/application role) — 404 unless the caller is an active member.</summary>
+  Task<ReturnModel<List<MyTeamMemberResponseDto>>> GetMyTeamMembersAsync(
+    Guid teamId,
+    Guid callerUserId,
+    CancellationToken cancellationToken = default);
 }

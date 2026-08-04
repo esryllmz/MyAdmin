@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Bell, CheckCircle2, Info, XCircle } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle2, Info, Settings, XCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Popover,
@@ -48,6 +48,11 @@ export const NotificationCenter = () => {
   const handleViewAll = () => {
     dispatch(setNotificationCenterOpen(false));
     navigate("/notifications");
+  };
+
+  const handleSettings = () => {
+    dispatch(setNotificationCenterOpen(false));
+    navigate("/settings/notifications");
   };
 
   return (
@@ -139,13 +144,22 @@ export const NotificationCenter = () => {
           )}
         </div>
 
-        <div className="p-2 border-t border-outline-variant/60 dark:border-dark-outline-variant">
+        <div className="p-2 border-t border-outline-variant/60 dark:border-dark-outline-variant flex items-center gap-1">
           <button
             type="button"
             onClick={handleViewAll}
-            className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-on-surface dark:text-dark-on-surface hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high px-3 py-2 rounded-md transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-on-surface dark:text-dark-on-surface hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high px-3 py-2 rounded-md transition-colors"
           >
             View all notifications
+          </button>
+          <button
+            type="button"
+            onClick={handleSettings}
+            title="Notification settings"
+            aria-label="Notification settings"
+            className="p-2 rounded-md text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high hover:text-on-surface dark:hover:text-dark-on-surface transition-colors"
+          >
+            <Settings className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </PopoverContent>

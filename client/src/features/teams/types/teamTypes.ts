@@ -58,3 +58,24 @@ export interface TeamListParams {
   pageSize?: number;
   sort?: string;
 }
+
+/** Viewer-safe "My Teams" projection — no created-by/owner identifiers. */
+export interface MyTeamResponseDto {
+  id: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  membershipRole: TeamMembershipRole;
+  joinedDate: string;
+  memberCount: number;
+  updatedDate: string | null;
+}
+
+/** Viewer-safe team member row — no email, no application role. */
+export interface MyTeamMemberResponseDto {
+  userId: string;
+  username: string;
+  profileImageUrl: string | null;
+  membershipRole: TeamMembershipRole;
+  isActive: boolean;
+}

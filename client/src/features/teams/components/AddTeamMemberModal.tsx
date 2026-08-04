@@ -26,19 +26,22 @@ interface AddTeamMemberModalProps {
 export const AddTeamMemberModal = ({ isOpen, onClose, teamId, existingMembers }: AddTeamMemberModalProps) => {
   const { isAdmin } = useRolePermissions();
   const [search, setSearch] = useState('');
+  const [visibleCount, setVisibleCount] = useState(20);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [membershipRole, setMembershipRole] = useState<TeamMembershipRole>('Member');
 
-  const { data, isLoading } = useManageableUsers({ search: search || undefined, isActive: true, pageSize: 20 });
+  const { data, isLoading } = useManageableUsers({ search: search || undefined, isActive: true, pageSize: visibleCount });
   const addMember = useAddTeamMember(teamId);
 
   const existingIds = useMemo(() => new Set(existingMembers.map((m) => m.userId)), [existingMembers]);
   const candidates = (data?.items ?? []).filter((user) => !existingIds.has(user.id));
+  const hasMore = (data?.totalCount ?? 0) > (data?.items.length ?? 0);
 
   const availableRoles = isAdmin ? TEAM_MEMBERSHIP_ROLES : TEAM_MEMBERSHIP_ROLES.filter((role) => role !== 'Owner');
 
   const reset = () => {
     setSearch('');
+    setVisibleCount(20);
     setSelectedUserId(null);
     setMembershipRole('Member');
   };
@@ -74,6 +77,7 @@ export const AddTeamMemberModal = ({ isOpen, onClose, teamId, existingMembers }:
               onChange={(e) => {
                 setSearch(e.target.value);
                 setSelectedUserId(null);
+                setVisibleCount(20);
               }}
               placeholder="Search Viewer accounts..."
               className="w-full bg-surface dark:bg-dark-surface border border-outline-variant/60 dark:border-dark-outline-variant rounded-lg px-3.5 py-2 text-sm text-on-surface dark:text-dark-on-surface outline-none focus:border-outline dark:focus:border-dark-outline transition-all"
@@ -101,6 +105,15 @@ export const AddTeamMemberModal = ({ isOpen, onClose, teamId, existingMembers }:
                 ))
               )}
             </div>
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => count + 20)}
+                className="mt-2 w-full text-center text-xs font-semibold text-on-surface dark:text-dark-on-surface hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high rounded-lg py-1.5 transition-colors"
+              >
+                Load more
+              </button>
+            )}
           </div>
 
           <div>

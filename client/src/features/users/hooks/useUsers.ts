@@ -32,7 +32,7 @@ export const useManageableUsers = (params: ManageableUsersParams = {}) => {
 
 /** Single-user lookup (GET /users/{id}) — server enforces Editor can only look up Viewer targets. */
 export const useUserById = (id: string | undefined) => {
-  return useQuery<ApiResponse<UserResponseDto>, ApiResponse<null>, UserResponseDto | null>({
+  return useQuery<ApiResponse<UserResponseDto>, ApiResponse<UserResponseDto>, UserResponseDto | null>({
     queryKey: ["user", id],
     queryFn: () => userService.getUserById(id!),
     select: (response) => response.data ?? null,

@@ -6,6 +6,8 @@ import type {
   AddTeamMemberRequest,
   CreatedTeamResponseDto,
   CreateTeamRequest,
+  MyTeamMemberResponseDto,
+  MyTeamResponseDto,
   TeamListParams,
   TeamMemberResponseDto,
   TeamResponseDto,
@@ -97,5 +99,18 @@ export const teamService = {
 
   getTeamsForUser: async (userId: string): Promise<ApiResponse<TeamResponseDto[]>> => {
     return await apiClient<TeamResponseDto[]>(`/users/${userId}/teams`);
+  },
+
+  /** Viewer's own "My Teams" — server scopes to the caller's active memberships via the JWT. */
+  getMyTeams: async (): Promise<ApiResponse<MyTeamResponseDto[]>> => {
+    return await apiClient<MyTeamResponseDto[]>("/teams/mine");
+  },
+
+  getMyTeamById: async (id: string): Promise<ApiResponse<MyTeamResponseDto>> => {
+    return await apiClient<MyTeamResponseDto>(`/teams/mine/${id}`);
+  },
+
+  getMyTeamMembers: async (id: string): Promise<ApiResponse<MyTeamMemberResponseDto[]>> => {
+    return await apiClient<MyTeamMemberResponseDto[]>(`/teams/mine/${id}/members`);
   },
 };

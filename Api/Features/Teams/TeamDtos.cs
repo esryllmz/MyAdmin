@@ -55,3 +55,28 @@ public sealed record TeamActivityResponseDto(
   string? ActorUsername,
   string? TargetUsername,
   DateTime CreatedDate);
+
+/// <summary>
+/// Viewer-facing "My Teams" projection — deliberately excludes CreatedByUserId/Username, manager
+/// counts and other management-oriented fields that TeamResponseDto carries for Admin/Editor.
+/// A Viewer only ever sees teams they actively belong to (see TeamService.GetMyTeamsAsync).
+/// </summary>
+public sealed record MyTeamResponseDto(
+  Guid Id,
+  string Name,
+  string? Description,
+  bool IsActive,
+  string MembershipRole,
+  DateTime JoinedDate,
+  int MemberCount,
+  DateTime? UpdatedDate);
+
+/// <summary>
+/// Viewer-facing team member row — no email, no application role, no internal/added-by IDs.
+/// </summary>
+public sealed record MyTeamMemberResponseDto(
+  Guid UserId,
+  string Username,
+  string? ProfileImageUrl,
+  string MembershipRole,
+  bool IsActive);

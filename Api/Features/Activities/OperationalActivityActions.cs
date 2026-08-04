@@ -39,4 +39,15 @@ public static class OperationalActivityActions
   public const string UserEntity = "User";
   public const string TeamEntity = "Team";
   public const string TeamMemberEntity = "TeamMember";
+
+  /// <summary>
+  /// Personal-activity-only actions: logged with UserId = the affected Viewer (subject), not the
+  /// acting Editor, so they surface in that Viewer's own "My Activity" feed (GET /activities/me).
+  /// Deliberately excluded from `All` above — the Editor-facing "Operations Activity" whitelist
+  /// already gets its own row per event (UserId = acting Editor); including these too would show
+  /// the same event twice in that shared, unfiltered feed.
+  /// </summary>
+  public const string ViewerAddedToTeam = "ViewerAddedToTeam";
+  public const string ViewerRemovedFromTeam = "ViewerRemovedFromTeam";
+  public const string ViewerTeamRoleChanged = "ViewerTeamRoleChanged";
 }

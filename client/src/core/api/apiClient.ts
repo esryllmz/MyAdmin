@@ -228,7 +228,10 @@ const handleApiError = (errorResponse: ApiResponse<unknown>, method?: string) =>
       toast.warning(message || "Kayıt bulunamadı.");
       break;
     case 500:
-      toast.error("Sunucu tarafında bir hata oluştu.");
+      // Sabit toastId: TanStack Query'nin 5xx için tek seferlik retry'ı aynı
+      // istek için ikinci bir istek daha atar — toastId olmadan bu iki toast
+      // üretir (toast spam).
+      toast.error("Sunucu tarafında bir hata oluştu.", { toastId: "server-error" });
       break;
     default:
       toast.error(message || "Bir hata oluştu.");

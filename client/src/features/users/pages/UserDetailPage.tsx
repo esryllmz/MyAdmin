@@ -312,7 +312,7 @@ const EDITOR_TABS: Array<{ key: EditorTabKey; label: string }> = [
 /** Editor's Viewer detail — backend enforces the target must actually be a Viewer (GetById/UpdateStatus). */
 const EditorUserDetail = ({ id }: { id: string }) => {
   const navigate = useNavigate();
-  const { data: user, isLoading } = useUserById(id);
+  const { data: user, isLoading, isError, error, refetch, isFetching } = useUserById(id);
   const { data: teams = [], isLoading: teamsLoading } = useTeamsForUser(id);
   const { data: operational = [], isLoading: activityLoading } = useOperationalActivities({ entityName: 'User', userId: id });
   const [tab, setTab] = useSearchParamState('tab', 'profile');
@@ -323,6 +323,41 @@ const EditorUserDetail = ({ id }: { id: string }) => {
     return (
       <div className="p-8 max-w-5xl mx-auto w-full flex items-center justify-center h-64">
         <Loader2 className="w-6 h-6 animate-spin text-on-surface-variant dark:text-dark-on-surface-variant" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    const statusCode = error?.statusCode;
+    const isUnauthorized = statusCode === 401 || statusCode === 403;
+    const isNotFound = statusCode === 404;
+
+    return (
+      <div className="p-8 max-w-5xl mx-auto w-full text-center py-24">
+        <span className="material-symbols-outlined text-4xl text-on-surface-variant/30 dark:text-dark-on-surface-variant/30">
+          {isUnauthorized ? 'lock' : isNotFound ? 'person_off' : 'error'}
+        </span>
+        <p className="mt-3 text-on-surface-variant dark:text-dark-on-surface-variant">
+          {isUnauthorized
+            ? "You don't have access to this user."
+            : isNotFound
+              ? 'User not found.'
+              : "We couldn't load this user."}
+        </p>
+        <div className="mt-4 flex items-center justify-center gap-3">
+          {!isUnauthorized && !isNotFound && (
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="text-sm font-semibold text-on-surface dark:text-dark-on-surface border border-outline-variant dark:border-dark-outline-variant px-3 py-1.5 rounded-lg hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-colors disabled:opacity-50"
+            >
+              Try again
+            </button>
+          )}
+          <button onClick={() => navigate('/team')} className="text-sm font-semibold text-on-surface dark:text-dark-on-surface hover:underline">
+            Back to Users
+          </button>
+        </div>
       </div>
     );
   }

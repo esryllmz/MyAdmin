@@ -19,12 +19,18 @@ const ACCESS_BY_ROLE: Record<string, AccessCapability> = {
     you_can: [
       "View your personal dashboard",
       "Review your own activity",
+      "View teams you belong to",
+      "Review your own team membership",
       "Manage your profile",
       "Manage your appearance preferences",
       "Review your active sessions",
       "Manage your own notifications",
     ],
     restricted: [
+      "Create or edit teams",
+      "Manage team members",
+      "Change team roles",
+      "Delete teams",
       "User management",
       "Role management",
       "Permission management",

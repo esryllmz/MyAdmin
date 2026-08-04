@@ -83,6 +83,11 @@ const OPERATIONS_ITEMS: Array<{ key: keyof Preferences; label: string; desc: str
   { key: 'teamUpdates', label: 'Team Updates', desc: 'A team was created, edited, or its status changed.' },
 ];
 
+// Viewer-only — their own team membership standing, not the Editor's broader operations view.
+const VIEWER_TEAM_ITEMS: Array<{ key: keyof Preferences; label: string; desc: string }> = [
+  { key: 'teamMembershipChanges', label: 'Team Membership Changes', desc: 'You were added to, removed from, or your role changed in a team.' },
+];
+
 const DELIVERY_ITEMS: Array<{ key: keyof Preferences; label: string; desc: string }> = [
   { key: 'email', label: 'Email Notifications', desc: 'Send an email for the events above.' },
   { key: 'inApp', label: 'In-App Notifications', desc: 'Show the events above in the notification center.' },
@@ -90,7 +95,7 @@ const DELIVERY_ITEMS: Array<{ key: keyof Preferences; label: string; desc: strin
 
 const NotificationPreferencesTab = () => {
   const actor = useSelector((state: RootState) => state.auth.user?.username) ?? 'Unknown user';
-  const { isAdmin, isEditor } = useRolePermissions();
+  const { isAdmin, isEditor, isViewer } = useRolePermissions();
   const [preferences, setPreferences] = useState<Preferences>(readStoredPreferences);
 
   useEffect(() => {
@@ -145,6 +150,7 @@ const NotificationPreferencesTab = () => {
       </p>
 
       {renderGroup(PERSONAL_ITEMS)}
+      {isViewer && renderGroup(VIEWER_TEAM_ITEMS, 'Teams')}
       {isEditor && renderGroup(OPERATIONS_ITEMS, 'Operations')}
       {isAdmin && renderGroup(MANAGEMENT_ITEMS, 'Management')}
       {renderGroup(DELIVERY_ITEMS, 'Delivery')}

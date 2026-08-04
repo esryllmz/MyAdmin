@@ -66,6 +66,7 @@ export type ViewFeature =
   | "appearance"
   | "ownNotifications"
   | "ownAccess"
+  | "myTeams"
   | "apiKeys"
   | "personalAudit"
   | "users"
@@ -96,6 +97,7 @@ const VIEW_ACCESS: Record<ViewFeature, ViewLevel> = {
   appearance: "any",
   ownNotifications: "any",
   ownAccess: "any",
+  myTeams: "any",
   // API Keys is Admin-only — Editor's mandate is Viewer/Team operations, not credential
   // management.
   apiKeys: "admin",

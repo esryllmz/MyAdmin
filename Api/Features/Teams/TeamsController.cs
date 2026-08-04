@@ -48,6 +48,38 @@ public class TeamsController(ITeamService _teamService, IActivityService _activi
     return CreateActionResult(result);
   }
 
+  /// <summary>
+  /// "My Teams" — always scoped to the caller's own active memberships via the JWT, and returns
+  /// the privacy-safe MyTeamResponseDto (no created-by ID, no owner details). This is the only
+  /// Teams surface a Viewer's frontend uses.
+  /// </summary>
+  [HttpGet("mine")]
+  [Authorize]
+  public async Task<IActionResult> GetMine(CancellationToken cancellationToken)
+  {
+    var result = await _teamService.GetMyTeamsAsync(GetUserId(), cancellationToken);
+
+    return CreateActionResult(result);
+  }
+
+  [HttpGet("mine/{id:guid}")]
+  [Authorize]
+  public async Task<IActionResult> GetMineById(Guid id, CancellationToken cancellationToken)
+  {
+    var result = await _teamService.GetMyTeamDetailAsync(id, GetUserId(), cancellationToken);
+
+    return CreateActionResult(result);
+  }
+
+  [HttpGet("mine/{id:guid}/members")]
+  [Authorize]
+  public async Task<IActionResult> GetMineMembers(Guid id, CancellationToken cancellationToken)
+  {
+    var result = await _teamService.GetMyTeamMembersAsync(id, GetUserId(), cancellationToken);
+
+    return CreateActionResult(result);
+  }
+
   [HttpPost]
   [Authorize(Roles = "Admin,Editor")]
   public async Task<IActionResult> Create([FromBody] CreateTeamRequest request, CancellationToken cancellationToken)
@@ -124,8 +156,14 @@ public class TeamsController(ITeamService _teamService, IActivityService _activi
     return CreateActionResult(result);
   }
 
+  /// <summary>
+  /// Admin/Editor-only — this is the raw Team/TeamMember audit trail (actor usernames included),
+  /// not the Viewer-safe surface. A Viewer, even an active member of the team, has no view into
+  /// Team activity per the task spec ("Team activity endpoint'ini kullanamaz") — My Teams exposes
+  /// Overview/My Membership/Members only, never operational activity.
+  /// </summary>
   [HttpGet("{id:guid}/activities")]
-  [Authorize]
+  [Authorize(Roles = "Admin,Editor")]
   public async Task<IActionResult> GetActivities(Guid id, CancellationToken cancellationToken)
   {
     var result = await _activityService.GetAllAsync(
