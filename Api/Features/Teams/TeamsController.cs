@@ -34,7 +34,9 @@ public class TeamsController(ITeamService _teamService, IActivityService _activi
     [FromQuery] string? sort = null,
     CancellationToken cancellationToken = default)
   {
-    var result = await _teamService.GetAllAsync(new TeamListQuery(search, isActive, page, pageSize, sort), cancellationToken);
+    var result = await _teamService.GetAllAsync(
+      new TeamListQuery(Search: search, IsActive: isActive, Page: page, PageSize: pageSize, Sort: sort),
+      cancellationToken);
 
     return CreateActionResult(result);
   }

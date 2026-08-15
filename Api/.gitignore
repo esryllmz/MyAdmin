@@ -3,8 +3,10 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
-.env
+# dotenv and local secret files
+.env*
+!.env.example
+secrets.json
 
 # User-specific files
 *.rsuser
@@ -480,9 +482,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-# Local development settings
-**/appsettings.Development.json
 
 # Serilog Logs
 Logs/

@@ -5,6 +5,7 @@ namespace Api.Features.Teams;
 public sealed record TeamListQuery(
   string? Search = null,
   bool? IsActive = null,
+  bool? HasMembers = null,
   int Page = 1,
   int PageSize = 20,
   string? Sort = null);

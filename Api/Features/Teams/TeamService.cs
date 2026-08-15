@@ -43,7 +43,8 @@ public class TeamService(
     var all = await _teamRepository.GetAllAsync(
       filter: t =>
         (string.IsNullOrEmpty(search) || t.Name.Contains(search)) &&
-        (query.IsActive == null || t.IsActive == query.IsActive),
+        (query.IsActive == null || t.IsActive == query.IsActive) &&
+        (query.HasMembers == null || t.Members.Any(m => m.IsActive) == query.HasMembers),
       include: IncludeForResponse,
       orderBy: q => query.Sort switch
       {

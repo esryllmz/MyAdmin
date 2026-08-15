@@ -3,8 +3,12 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
-.env
+# dotenv and local secret files
+.env*
+!.env.example
+!**/.env.example
+secrets.json
+**/secrets.json
 
 # User-specific files
 *.rsuser
