@@ -47,7 +47,7 @@ if (!Uri.TryCreate(frontendUrl, UriKind.Absolute, out var frontendUri) ||
     frontendUri.AbsolutePath != "/")
 {
   throw new InvalidOperationException(
-    "FrontendUrl must be an absolute HTTP(S) origin without a path, query string, or fragment (for example, https://myadmin.vercel.app)."
+    "FrontendUrl must be an absolute HTTP(S) origin without a path, query string, or fragment (for example, http://localhost:3000)."
   );
 }
 
