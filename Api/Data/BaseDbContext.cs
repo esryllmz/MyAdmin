@@ -1,4 +1,5 @@
 ﻿using Api.Features.Activities;
+using Api.Features.Authentication;
 using Api.Features.Notifications;
 using Api.Features.Permissions;
 using Api.Features.RolePermissions;
@@ -27,6 +28,7 @@ public class BaseDbContext : DbContext
   public DbSet<Activity> Activities { get; set; }
   public DbSet<Team> Teams { get; set; }
   public DbSet<TeamMember> TeamMembers { get; set; }
+  public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)

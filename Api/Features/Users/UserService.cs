@@ -4,6 +4,7 @@ using Api.Core.Repositories;
 using Api.Core.Responses;
 using Api.Core.Security;
 using Api.Features.Activities;
+using Api.Features.Authentication;
 using Api.Features.Roles;
 using Api.Features.Teams;
 using Api.Features.UserRoles;
@@ -21,6 +22,8 @@ public class UserService(
   UserMapper _mapper,
   UserBusinessRules _businessRules,
   IActivityService _activityService,
+  IPasswordService<User> _passwordService,
+  IRefreshTokenService _refreshTokenService,
   IUnitOfWork _unitOfWork,
   IValidator<UpdateUserRequest> _updateValidator,
   IValidator<ChangePasswordRequest> _changePasswordValidator,
@@ -107,15 +110,14 @@ public class UserService(
       throw new BusinessException("System configuration error: the default role was not found.");
     }
 
-    HashingHelper.CreatePasswordHash(request.TemporaryPassword, out var passwordHash, out var passwordKey);
-
     var createdUser = new User
     {
       Username = request.Username,
       Email = request.Email,
-      PasswordHash = passwordHash,
-      PasswordKey = passwordKey,
+      PasswordHash = string.Empty,
     };
+
+    createdUser.PasswordHash = _passwordService.HashPassword(createdUser, request.TemporaryPassword);
 
     createdUser.UserRoles.Add(new UserRole
     {
@@ -373,13 +375,21 @@ public class UserService(
 
     User user = await _businessRules.GetUserIfExistAsync(userId, enableTracking: true, cancellationToken: cancellationToken);
 
-    _businessRules.PasswordMustMatch(request.CurrentPassword, user.PasswordHash, user.PasswordKey);
+    var currentPasswordOutcome = _businessRules.VerifyPassword(user, request.CurrentPassword);
+    _businessRules.PasswordMustMatch(currentPasswordOutcome);
 
-    HashingHelper.CreatePasswordHash(request.NewPassword, out string newHash, out string newKey);
-    user.PasswordHash = newHash;
-    user.PasswordKey = newKey;
+    var newPasswordOutcome = _businessRules.VerifyPassword(user, request.NewPassword);
+    _businessRules.NewPasswordCannotBeSameAsOld(newPasswordOutcome);
+
+    user.PasswordHash = _passwordService.HashPassword(user, request.NewPassword);
+    user.PasswordKey = null;
 
     _userRepository.Update(user);
+
+    // A password change invalidates every existing session, everywhere — otherwise a stolen
+    // refresh token would survive the very action meant to lock an attacker out.
+    await _refreshTokenService.RevokeAllActiveFamiliesForUserAsync(userId, "PasswordChanged", cancellationToken);
+
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     _logger.LogInformation("Kullanıcı şifresi başarıyla güncellendi. ID: {UserId}", userId);
@@ -411,6 +421,14 @@ public class UserService(
     user.IsActive = isActive;
 
     _userRepository.Update(user);
+
+    if (!isActive)
+    {
+      // Deactivation must end every session immediately — a stale refresh token must not let a
+      // frozen account keep renewing access tokens indefinitely.
+      await _refreshTokenService.RevokeAllActiveFamiliesForUserAsync(targetUserId, "UserDeactivated", cancellationToken);
+    }
+
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     await _activityService.AddAsync(new CreateActivityRequest(

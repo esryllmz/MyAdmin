@@ -5,8 +5,26 @@ namespace Api.Features.Users;
 
 public class UserBusinessRules(
   IUserRepository _userRepository,
+  IPasswordService<User> _passwordService,
   ILogger<UserBusinessRules> _logger)
 {
+  /// <summary>
+  /// Verifies a password against whichever scheme the user's row is currently on. Pure
+  /// verification only — never mutates or persists. The caller (application service) decides
+  /// what to do with a LegacyUpgradeNeeded/SuccessRehashNeeded outcome.
+  /// </summary>
+  public PasswordVerificationOutcome VerifyPassword(User user, string password)
+  {
+    if (user.PasswordKey != null)
+    {
+      return LegacyPasswordHasher.VerifyPasswordHash(password, user.PasswordHash, user.PasswordKey)
+        ? PasswordVerificationOutcome.LegacyUpgradeNeeded
+        : PasswordVerificationOutcome.Failed;
+    }
+
+    return _passwordService.VerifyModern(user, user.PasswordHash, password);
+  }
+
   public async Task<User> GetUserIfExistAsync(
     Guid id,
     Func<IQueryable<User>, IQueryable<User>>? include = null,
@@ -117,9 +135,9 @@ public class UserBusinessRules(
     }
   }
 
-  public void PasswordMustMatch(string password, string storedHash, string storedKey)
+  public void PasswordMustMatch(PasswordVerificationOutcome outcome)
   {
-    if (!HashingHelper.VerifyPasswordHash(password, storedHash, storedKey))
+    if (outcome == PasswordVerificationOutcome.Failed)
     {
       _logger.LogWarning("Hatalı mevcut şifre denemesi yapıldı.");
 
@@ -146,9 +164,9 @@ public class UserBusinessRules(
       throw new AuthorizationException("Hesabınız dondurulmuştur. Lütfen sistem yöneticisi ile iletişime geçin.");
     }
   }
-  public void NewPasswordCannotBeSameAsOld(string newPassword, string storedHash, string storedKey)
+  public void NewPasswordCannotBeSameAsOld(PasswordVerificationOutcome outcomeForNewPasswordAgainstOldHash)
   {
-    if (HashingHelper.VerifyPasswordHash(newPassword, storedHash, storedKey))
+    if (outcomeForNewPasswordAgainstOldHash != PasswordVerificationOutcome.Failed)
     {
       _logger.LogWarning("Kullanıcı yeni şifresini eskisiyle aynı yapmaya çalıştı.");
 

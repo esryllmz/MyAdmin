@@ -13,6 +13,7 @@ using Api.Features.Users;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -20,6 +21,7 @@ using Serilog.Events;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using TokenOptions = Api.Core.Security.TokenOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +94,16 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
   options.SuppressModelStateInvalidFilter = true;
 });
 
+// PBKDF2-HMAC-SHA256 via the first-party ASP.NET Core Identity password hasher — no third-party
+// crypto dependency. 210,000 iterations aligns with OWASP's 2023 PBKDF2-SHA256 guidance and is
+// set explicitly rather than relying on whatever the framework's shipped default happens to be.
+builder.Services.Configure<PasswordHasherOptions>(options =>
+{
+  options.IterationCount = 210_000;
+});
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddSingleton<IPasswordService<User>, PasswordService<User>>();
+
 builder.Services.AddDataDependencies(builder.Configuration);
 builder.Services.AddUserDependencies();
 builder.Services.AddRoleDependencies();
@@ -115,10 +127,18 @@ if (string.IsNullOrWhiteSpace(tokenOptions.Issuer) ||
     string.IsNullOrWhiteSpace(tokenOptions.SecurityKey) ||
     tokenOptions.AccessTokenExpiration <= 0 ||
     tokenOptions.RefreshTokenExpiration <= 0 ||
+    tokenOptions.RefreshTokenAbsoluteLifetimeDays <= 0 ||
     Encoding.UTF8.GetByteCount(tokenOptions.SecurityKey) < 64)
 {
   throw new InvalidOperationException(
     "TokenOptions is incomplete. Expirations must be positive and SecurityKey must contain at least 64 UTF-8 bytes for HMAC-SHA512."
+  );
+}
+
+if (tokenOptions.RefreshTokenAbsoluteLifetimeDays < tokenOptions.RefreshTokenExpiration)
+{
+  throw new InvalidOperationException(
+    "TokenOptions:RefreshTokenAbsoluteLifetimeDays must be greater than or equal to TokenOptions:RefreshTokenExpiration — otherwise every rotation would immediately exceed the family's absolute lifetime."
   );
 }
 
@@ -192,3 +212,7 @@ static bool IsUnsafeProductionSecurityKey(string securityKey)
 
   return unsafeMarkers.Any(marker => securityKey.Contains(marker, StringComparison.OrdinalIgnoreCase));
 }
+
+// Top-level statements generate an internal Program class by default; WebApplicationFactory<T>
+// in the integration test project needs it public to boot the app in-process.
+public partial class Program { }

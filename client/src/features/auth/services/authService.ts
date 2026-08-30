@@ -20,15 +20,15 @@ export const authService = {
       body: JSON.stringify(request),
     }),
 
-  refreshToken: async (refreshToken: string): Promise<ApiResponse<TokenResponseDto>> =>
+  refreshToken: async (): Promise<ApiResponse<TokenResponseDto>> =>
     await apiClient<TokenResponseDto>("/authentication/refresh-token", {
       method: "POST",
-      body: JSON.stringify(refreshToken),
     }),
 
-  revokeToken: async (refreshToken: string): Promise<ApiResponse<null>> =>
-    await apiClient<null>("/authentication/revoke-token", {
+  // The refresh token lives in an HttpOnly cookie the browser attaches automatically — there is
+  // nothing for the client to read or send explicitly.
+  logout: async (): Promise<ApiResponse<null>> =>
+    await apiClient<null>("/authentication/logout", {
       method: "POST",
-      body: JSON.stringify(refreshToken),
     })
 };

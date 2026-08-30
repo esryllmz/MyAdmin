@@ -124,14 +124,9 @@ const AccountSettingsTab = () => {
   };
 
   const handleRevokeCurrentSession = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      logout();
-      return;
-    }
     setIsRevoking(true);
     try {
-      await authService.revokeToken(refreshToken);
+      await authService.logout();
     } finally {
       logout();
     }

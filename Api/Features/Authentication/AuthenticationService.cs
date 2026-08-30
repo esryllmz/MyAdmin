@@ -1,4 +1,4 @@
-﻿using Api.Core.Exceptions;
+using Api.Core.Exceptions;
 using Api.Core.Repositories;
 using Api.Core.Responses;
 using Api.Core.Security;
@@ -11,7 +11,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Api.Features.Authentication;
@@ -21,6 +20,8 @@ public class AuthenticationService(
   IRoleRepository _roleRepository,
   UserBusinessRules _userBusinessRules,
   AuthenticationBusinessRules _authBusinessRules,
+  IRefreshTokenService _refreshTokenService,
+  IPasswordService<User> _passwordService,
   UserMapper _mapper,
   IUnitOfWork _unitOfWork,
   IValidator<RegisterUserRequest> _registerValidator,
@@ -30,8 +31,9 @@ public class AuthenticationService(
 {
   private readonly TokenOptions _options = _tokenOptions.Value;
 
-  public async Task<ReturnModel<TokenResponseDto>> LoginAsync(
+  public async Task<ReturnModel<AuthenticationResult>> LoginAsync(
     LoginRequest request,
+    string? ipAddress,
     CancellationToken cancellationToken)
   {
     _logger.LogInformation("Giriş denemesi başlatıldı. E-posta: {Email}", request.Email);
@@ -48,24 +50,41 @@ public class AuthenticationService(
     User? user = await _userRepository.GetAsync(
       predicate: u => u.Email == request.Email,
       include: query => query.Include(u => u.UserRoles).ThenInclude(ur => ur.Role),
+      enableTracking: true,
       cancellationToken: cancellationToken);
 
-    _authBusinessRules.UserCredentialsMustMatch(user, request.Password);
+    var outcome = user != null
+      ? _userBusinessRules.VerifyPassword(user, request.Password)
+      : PasswordVerificationOutcome.Failed;
+
+    _authBusinessRules.UserCredentialsMustMatch(user, outcome);
     _userBusinessRules.UserAccountMustBeActive(user!);
 
-    user!.RefreshToken = GenerateRefreshToken();
-    user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(_options.RefreshTokenExpiration);
+    // Application service decides whether the verified password needs to be persisted in the
+    // current scheme — the password service itself never mutates or persists anything.
+    if (outcome is PasswordVerificationOutcome.LegacyUpgradeNeeded or PasswordVerificationOutcome.SuccessRehashNeeded)
+    {
+      user!.PasswordHash = _passwordService.HashPassword(user, request.Password);
 
-    _userRepository.Update(user);
+      if (outcome == PasswordVerificationOutcome.LegacyUpgradeNeeded)
+      {
+        user.PasswordKey = null;
+      }
+
+      _userRepository.Update(user);
+    }
+
+    var (token, rawRefreshToken) = await _refreshTokenService.IssueAsync(user!.Id, ipAddress, cancellationToken);
+
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     _logger.LogInformation("Kullanıcı başarıyla giriş yaptı. ID: {UserId}", user.Id);
 
-    TokenResponseDto tokenResponse = CreateToken(user!, user.RefreshToken);
+    var response = CreateToken(user, rawRefreshToken, token.ExpiresAt);
 
-    return new ReturnModel<TokenResponseDto>()
+    return new ReturnModel<AuthenticationResult>()
     {
-      Data = tokenResponse,
+      Data = response,
       Success = true,
       StatusCode = 200,
       Message = "Giriş başarılı."
@@ -111,9 +130,7 @@ public class AuthenticationService(
       throw new BusinessException("Sistem yapılandırma hatası: Varsayılan rol bulunamadı.");
     }
 
-    HashingHelper.CreatePasswordHash(request.Password, out string hash, out string key);
-    createdUser.PasswordHash = hash;
-    createdUser.PasswordKey = key;
+    createdUser.PasswordHash = _passwordService.HashPassword(createdUser, request.Password);
 
     await _userRepository.AddAsync(createdUser, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -131,76 +148,51 @@ public class AuthenticationService(
     };
   }
 
-  public async Task<ReturnModel<TokenResponseDto>> RefreshTokenAsync(
-    string refreshToken,
+  public async Task<ReturnModel<AuthenticationResult>> RefreshTokenAsync(
+    string? refreshToken,
+    string? ipAddress,
     CancellationToken cancellationToken)
   {
     _logger.LogInformation("Oturum tazeleme işlemi(Refresh Token) başlatıldı.");
 
-    User? user = await _userRepository.GetAsync(
-      predicate: u => u.RefreshToken == refreshToken,
-      include: query => query.Include(u => u.UserRoles).ThenInclude(ur => ur.Role),
-      cancellationToken: cancellationToken);
+    var rotation = await _refreshTokenService.ValidateAndRotateAsync(refreshToken, ipAddress, cancellationToken);
 
-    _authBusinessRules.RefreshTokenMustBeValid(user, refreshToken);
+    _authBusinessRules.RefreshTokenMustBeValid(rotation);
 
-    string currentRefreshToken = user!.RefreshToken!;
+    // Defense in depth: RefreshTokenService already rejects inactive users before rotating, but
+    // an independent re-check here means a future change to that internal check can never, by
+    // itself, silently let a deactivated account keep refreshing.
+    _userBusinessRules.UserAccountMustBeActive(rotation.User!);
 
-    if (user!.RefreshTokenExpiration <= DateTime.UtcNow.AddDays(1))
+    var response = CreateToken(rotation.User!, rotation.RawToken!, rotation.ExpiresAt);
+
+    _logger.LogInformation("Oturum başarıyla tazelendi. Kullanıcı ID: {UserId}", rotation.User!.Id);
+
+    return new ReturnModel<AuthenticationResult>()
     {
-      _logger.LogInformation("Refresh token süresi dolmak üzere olduğu için yeni bir token üretiliyor. Kullanıcı: {UserId}", user.Id);
-
-      currentRefreshToken = GenerateRefreshToken();
-      user.RefreshToken = currentRefreshToken;
-      user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(_options.RefreshTokenExpiration);
-    }
-
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-    TokenResponseDto tokenResponse = CreateToken(user!, currentRefreshToken);
-
-    _logger.LogInformation("Oturum başarıyla tazelendi. Kullanıcı ID: {UserId}", user.Id);
-
-    return new ReturnModel<TokenResponseDto>()
-    {
-      Data = tokenResponse,
+      Data = response,
       Success = true,
       StatusCode = 200,
       Message = "Oturum tazelendi."
     };
   }
 
-  public async Task<ReturnModel<NoData>> RevokeRefreshTokenAsync(
-    string refreshToken,
+  public async Task LogoutAsync(
+    string? refreshToken,
+    string? ipAddress,
     CancellationToken cancellationToken)
   {
     _logger.LogInformation("Oturum kapatma isteği alındı.");
 
-    User? user = await _userRepository.GetAsync(
-      u => u.RefreshToken == refreshToken,
-      cancellationToken: cancellationToken);
+    await _refreshTokenService.RevokeAsync(refreshToken, ipAddress, cancellationToken);
 
-    _authBusinessRules.RefreshTokenUserMustExist(user);
-
-    user!.RefreshToken = null;
-    user.RefreshTokenExpiration = null;
-
-    _userRepository.Update(user);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-    _logger.LogInformation("Oturum başarıyla sonlandırıldı. Kullanıcı: {UserId}", user.Id);
-
-    return new ReturnModel<NoData>()
-    {
-      Success = true,
-      StatusCode = 200,
-      Message = "Oturum sonlandırıldı."
-    };
+    _logger.LogInformation("Oturum sonlandırma isteği işlendi (idempotent).");
   }
 
-  private TokenResponseDto CreateToken(
+  private AuthenticationResult CreateToken(
     User user,
-    string refreshToken)
+    string rawRefreshToken,
+    DateTime refreshTokenExpiresAt)
   {
     var claims = new List<Claim>()
     {
@@ -228,15 +220,13 @@ public class AuthenticationService(
       expires: expiration,
       signingCredentials: creds);
 
-    return new TokenResponseDto(
-      new JwtSecurityTokenHandler().WriteToken(token),
-      expiration,
-      refreshToken,
-      _mapper.EntityToResponseDto(user));
-  }
+    var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-  private string GenerateRefreshToken()
-  {
-    return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    var response = new TokenResponseDto(
+      accessToken,
+      expiration,
+      _mapper.EntityToResponseDto(user));
+
+    return new AuthenticationResult(response, rawRefreshToken, refreshTokenExpiresAt);
   }
 }

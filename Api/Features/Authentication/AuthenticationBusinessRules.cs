@@ -1,4 +1,4 @@
-﻿using Api.Core.Exceptions;
+using Api.Core.Exceptions;
 using Api.Core.Security;
 using Api.Features.Users;
 
@@ -6,14 +6,13 @@ namespace Api.Features.Authentication;
 
 public class AuthenticationBusinessRules(ILogger<AuthenticationBusinessRules> _logger)
 {
+  private const string GenericSessionInvalidMessage = "Oturum süresi dolmuş, lütfen tekrar giriş yapın.";
+
   public void UserCredentialsMustMatch(
     User? user,
-    string password)
+    PasswordVerificationOutcome outcome)
   {
-    if (user == null ||
-        string.IsNullOrWhiteSpace(user.PasswordHash) ||
-        string.IsNullOrWhiteSpace(user.PasswordKey) ||
-        !HashingHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordKey))
+    if (user == null || outcome == PasswordVerificationOutcome.Failed)
     {
       _logger.LogWarning("Hatalı giriş denemesi: {Email}", user?.Email);
 
@@ -21,40 +20,18 @@ public class AuthenticationBusinessRules(ILogger<AuthenticationBusinessRules> _l
     }
   }
 
-  public void RefreshTokenMustBeValid(
-    User? user,
-    string providedRefreshToken)
+  /// <summary>
+  /// Deliberately generic: whether the token was unknown, expired, revoked, replayed, or
+  /// belonged to a now-inactive user, the caller sees the exact same message. The distinguishing
+  /// reason lives only in server-side logs (see RefreshTokenService), never in the HTTP response.
+  /// </summary>
+  public void RefreshTokenMustBeValid(RefreshTokenRotationResult result)
   {
-    
-    if (user == null)
+    if (!result.IsValid)
     {
-      _logger.LogWarning("Geçersiz Refresh Token denemesi: Kullanıcı bulunamadı.");
+      _logger.LogWarning("Geçersiz veya tekrar kullanılmış bir refresh token denemesi reddedildi.");
 
-      throw new NotFoundException("Oturum bulunamadı.");
-    }
-
-    if (user.RefreshToken != providedRefreshToken)
-    {
-      _logger.LogWarning("Güvenlik Uyarısı: {UserId} idli kullanıcı için geçersiz Refresh Token kullanıldı.", user.Id);
-
-      throw new AuthorizationException("Geçersiz oturum anahtarı.");
-    }
-
-    if (user.RefreshTokenExpiration < DateTime.UtcNow)
-    {
-      _logger.LogWarning("Oturum süresi dolmuş token denemesi. Kullanıcı: {UserId}", user.Id);
-
-      throw new AuthorizationException("Oturum süresi dolmuş, lütfen tekrar giriş yapın.");
-    }
-  }
-
-  public void RefreshTokenUserMustExist(User? user)
-  {
-    if (user == null)
-    {
-      _logger.LogWarning("Oturum sonlandırma başarısız: Token sahibi kullanıcı bulunamadı.");
-
-      throw new NotFoundException("Token bulunamadı.");
+      throw new AuthorizationException(GenericSessionInvalidMessage);
     }
   }
 

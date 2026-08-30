@@ -4,21 +4,43 @@ import type { TokenResponseDto } from "@/features/auth/types/authTypes";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5029/api";
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: unknown) => void;
-}> = [];
+// Single-flight refresh coordinator: while a refresh is in flight, every concurrent caller
+// awaits this exact same Promise instead of starting its own HTTP request. This is what keeps
+// N simultaneous 401s from firing N refresh requests (and, on the backend, tripping refresh-token
+// replay detection against its own legitimate rotation). The refresh token itself never touches
+// this module — it lives in an HttpOnly cookie the browser attaches automatically.
+let refreshPromise: Promise<string> | null = null;
 
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token!);
+export const refreshAccessToken = (): Promise<string> => {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    const refreshResponse = await fetch(`${BASE_URL}/authentication/refresh-token`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!refreshResponse.ok) {
+      throw new Error("Oturum süresi doldu.");
     }
+
+    const refreshText = await refreshResponse.text();
+    const refreshResult: ApiResponse<TokenResponseDto> = refreshText ? JSON.parse(refreshText) : {};
+
+    if (!refreshResult.data) {
+      throw new Error("Oturum süresi doldu.");
+    }
+
+    localStorage.setItem("accessToken", refreshResult.data.accessToken);
+
+    return refreshResult.data.accessToken;
+  })().finally(() => {
+    refreshPromise = null;
   });
-  failedQueue = [];
+
+  return refreshPromise;
 };
 
 export const apiClient = async <T>(
@@ -49,71 +71,23 @@ export const apiClient = async <T>(
     // --- 401 & Refresh Token Yönetimi (Race Condition Korumalı) ---
     // Not: login/register uçları kimlik doğrulama denemesinin kendisidir — bunlarda dönen 401
     // (hatalı e-posta/şifre) bir "oturum süresi doldu" durumu değildir, bu yüzden sessiz
-    // refresh-token akışına asla girmemeli. Aksi halde gerçek hata mesajı kaybolur ve
-    // localStorage'daki (varsa) eski refreshToken ile alakasız bir yenileme denemesi başlar.
+    // refresh-token akışına asla girmemeli. Aksi halde gerçek hata mesajı kaybolur.
     const isAuthAttemptEndpoint =
       endpoint.includes("/authentication/refresh-token") ||
       endpoint.includes("/authentication/login") ||
       endpoint.includes("/authentication/register");
 
     if (response.status === 401 && !isDemoMode && !isAuthAttemptEndpoint) {
-      const refreshToken = localStorage.getItem("refreshToken");
-
-      if (isRefreshing) {
-        // Zaten token yenileniyorsa, kuyruğa al
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((newToken) => {
-          const newHeaders = {
-            ...config.headers,
-            "Authorization": `Bearer ${newToken}`,
-          };
-          return fetch(`${BASE_URL}${endpoint}`, { ...config, headers: newHeaders })
-            .then(async (res) => {
-              const text = await res.text();
-              return parseResponse<T>(text, res.status);
-            });
-        }).catch((err) => {
-          handleLogout();
-          throw err;
-        });
-      }
-
-      isRefreshing = true;
-
       try {
-        const refreshResponse = await fetch(`${BASE_URL}/authentication/refresh-token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(refreshToken),
-          credentials: "include",
-        });
+        const newAccessToken = await refreshAccessToken();
 
-        if (refreshResponse.ok) {
-          const refreshText = await refreshResponse.text();
-          const refreshResult: ApiResponse<TokenResponseDto> = refreshText ? JSON.parse(refreshText) : {};
+        const retryHeaders = new Headers(config.headers);
+        retryHeaders.set("Authorization", `Bearer ${newAccessToken}`);
 
-          if (refreshResult.data) {
-            localStorage.setItem("accessToken", refreshResult.data.accessToken);
-            localStorage.setItem("refreshToken", refreshResult.data.refreshToken);
-            
-            // Kuyruktaki tüm istekleri işle
-            processQueue(null, refreshResult.data.accessToken);
-
-            // Orijinal isteği yeni token ile tekrar yap
-            const newHeaders = {
-              ...config.headers,
-              "Authorization": `Bearer ${refreshResult.data.accessToken}`,
-            };
-            response = await fetch(`${BASE_URL}${endpoint}`, { ...config, headers: newHeaders });
-          }
-        } else {
-          processQueue(new Error("Oturum süresi doldu."), null);
-          handleLogout();
-          throw new Error("Oturum süresi doldu.");
-        }
-      } finally {
-        isRefreshing = false;
+        response = await fetch(`${BASE_URL}${endpoint}`, { ...config, headers: retryHeaders });
+      } catch (err) {
+        handleLogout();
+        throw err;
       }
     }
 
@@ -192,7 +166,6 @@ const parseResponse = <T>(
 
 const handleLogout = () => {
   localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
   localStorage.removeItem("demoMode");
   window.location.href = "/login";

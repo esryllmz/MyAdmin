@@ -14,7 +14,6 @@ export interface RegisterUserRequest {
 export interface TokenResponseDto {
   accessToken: string;
   expiration: string;
-  refreshToken: string;
   user: UserResponseDto;
 }
 

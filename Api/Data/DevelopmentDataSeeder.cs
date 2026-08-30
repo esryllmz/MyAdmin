@@ -3,6 +3,7 @@ using Api.Features.Roles;
 using Api.Features.UserRoles;
 using Api.Features.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Data;
 
@@ -68,18 +69,18 @@ public static class DevelopmentDataSeeder
 
     if (existingUser == null)
     {
-      HashingHelper.CreatePasswordHash(password, out var passwordHash, out var passwordKey);
-
+      var passwordService = provider.GetRequiredService<IPasswordService<User>>();
       var username = await ResolveAvailableUsernameAsync(context, DefaultAdminUsername, cancellationToken);
 
       var adminUser = new User
       {
         Username = username,
         Email = normalizedEmail,
-        PasswordHash = passwordHash,
-        PasswordKey = passwordKey,
+        PasswordHash = string.Empty,
         IsActive = true,
       };
+
+      adminUser.PasswordHash = passwordService.HashPassword(adminUser, password);
 
       // Koleksiyona eklemek, SaveChanges sırasında EF Core'un UserId FK'sini
       // otomatik olarak eşleştirmesini sağlar — ayrı bir insert gerekmez.

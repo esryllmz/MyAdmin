@@ -16,7 +16,6 @@ export const useAuth = () => {
 
       if (response.success && response.data) {
         localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
 
         dispatch(setCredentials(response.data.user));
 
@@ -37,9 +36,15 @@ export const useAuth = () => {
   });
 
   const logout = () => {
-    dispatch(logoutAction());
-
-    navigate("/login");
+    // Best-effort: the server-side session must actually be revoked, not just forgotten
+    // locally — but a failed network call must never block the user from getting logged out
+    // of this device.
+    authService.logout().catch(() => {
+      // Intentionally ignored — local logout proceeds regardless.
+    }).finally(() => {
+      dispatch(logoutAction());
+      navigate("/login");
+    });
   };
 
   return {

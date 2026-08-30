@@ -1,18 +1,16 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Api.Core.Security;
 
-public static class HashingHelper
+/// <summary>
+/// Verifies passwords hashed with the pre-P0 HMACSHA512 scheme. Verification-only, on purpose:
+/// no code path may create a new hash with this scheme. A successful legacy verification is the
+/// caller's signal to rehash the password with <see cref="IPasswordService{TUser}"/> and persist
+/// that instead — this class never persists anything itself.
+/// </summary>
+public static class LegacyPasswordHasher
 {
-  public static void CreatePasswordHash(string password, out string passwordHash, out string passwordKey)
-  {
-    using var hmac = new HMACSHA512();
-
-    passwordKey = Convert.ToBase64String(hmac.Key);
-    passwordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
-  }
-
   public static bool VerifyPasswordHash(string password, string passwordHash, string passwordKey)
   {
     if (string.IsNullOrWhiteSpace(password) ||

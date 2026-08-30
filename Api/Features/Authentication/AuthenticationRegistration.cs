@@ -1,4 +1,4 @@
-﻿namespace Api.Features.Authentication;
+namespace Api.Features.Authentication;
 
 public static class AuthenticationRegistration
 {
@@ -6,6 +6,8 @@ public static class AuthenticationRegistration
     {
       services.AddScoped<AuthenticationBusinessRules>();
       services.AddScoped<IAuthenticationService, AuthenticationService>();
+      services.AddScoped<IRefreshTokenRepository, EfRefreshTokenRepository>();
+      services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
       return services;
   }

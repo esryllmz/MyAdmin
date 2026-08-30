@@ -34,14 +34,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     builder.Property(u => u.PasswordHash)
       .IsRequired();
 
+    // Nullable during the P0 migration window: non-null means this row is still on the legacy
+    // HMACSHA512 scheme. See User.PasswordKey and PasswordVerificationOutcome.LegacyUpgradeNeeded.
     builder.Property(u => u.PasswordKey)
-      .IsRequired();
-
-    builder.Property(u => u.RefreshToken)
-      .HasMaxLength(500)
-      .IsRequired(false);
-
-    builder.Property(u => u.RefreshTokenExpiration)
       .IsRequired(false);
 
     builder.Property(u => u.ProfileImageUrl)
